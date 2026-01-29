@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { jobsApi } from "@/lib/api/jobs";
 import { studentsApi } from "@/lib/api/students";
 import { Job } from "@/types/job";
+import { JobCard } from "@/components/jobs/JobCard";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 
@@ -20,8 +21,11 @@ export default function JobDetailPage() {
   const jobId = params.id as string;
 
   const [job, setJob] = useState<Job | null>(null);
+  const [similarJobs, setSimilarJobs] = useState<Job[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingSimilar, setIsLoadingSimilar] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [savedJobs, setSavedJobs] = useState<Set<string>>(new Set());
   const viewStartTime = useRef<number>(Date.now());
   const hasTrackedView = useRef<boolean>(false);
 
@@ -30,6 +34,8 @@ export default function JobDetailPage() {
       loadJob();
       checkIfSaved();
       trackJobView();
+      loadSimilarJobs();
+      loadSavedJobs();
     }
 
     // Track view duration when component unmounts
@@ -64,17 +70,17 @@ export default function JobDetailPage() {
     }
   };
 
-  const checkIfSaved = () => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("savedJobs");
-      if (saved) {
-        try {
-          const savedJobs = JSON.parse(saved);
-          setIsSaved(savedJobs.includes(jobId));
-        } catch (e) {
-          console.error("Error checking saved jobs:", e);
-        }
-      }
+  const checkIfSaved = async () => {
+    const jobIdNum = parseInt(jobId, 10);
+    if (isNaN(jobIdNum)) return;
+
+    try {
+      const response = await studentsApi.checkIfSaved(jobIdNum);
+      setIsSaved(response.is_saved || false);
+    } catch (error: any) {
+      console.error("Error checking if job is saved:", error);
+      // Silently fail - default to not saved
+      setIsSaved(false);
     }
   };
 
@@ -97,31 +103,75 @@ export default function JobDetailPage() {
     }
   };
 
-  const handleSave = () => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("savedJobs");
-      const savedJobs = saved ? JSON.parse(saved) : [];
-      
-      if (isSaved) {
-        const updated = savedJobs.filter((id: string) => id !== jobId);
-        localStorage.setItem("savedJobs", JSON.stringify(updated));
-        setIsSaved(false);
-        toast.success("Job removed from saved");
-      } else {
-        savedJobs.push(jobId);
-        localStorage.setItem("savedJobs", JSON.stringify(savedJobs));
-        setIsSaved(true);
-        toast.success("Job saved");
+
+  const loadSimilarJobs = async () => {
+    const jobIdNum = parseInt(jobId, 10);
+    if (isNaN(jobIdNum)) return;
+
+    setIsLoadingSimilar(true);
+    try {
+      const response = await studentsApi.getSimilarJobs(jobIdNum);
+      if (response.jobs) {
+        setSimilarJobs(response.jobs);
       }
+    } catch (error: any) {
+      console.error("Error loading similar jobs:", error);
+      // Silently fail - similar jobs are optional
+    } finally {
+      setIsLoadingSimilar(false);
     }
   };
 
-  const handleApply = () => {
-    // Navigate to application page or open external link
-    if (job?.source_url) {
-      window.open(job.source_url, "_blank");
+  const loadSavedJobs = async () => {
+    try {
+      const response = await studentsApi.getSavedJobs();
+      const savedJobIds = new Set(response.saved_jobs.map((sj) => String(sj.job_id)));
+      setSavedJobs(savedJobIds);
+    } catch (error: any) {
+      console.error("Error loading saved jobs:", error);
+    }
+  };
+
+  const handleApply = (jobId?: string) => {
+    const targetJob = jobId ? similarJobs.find((j) => j.id === jobId) : job;
+    if (targetJob?.source_url) {
+      window.open(targetJob.source_url, "_blank");
     } else {
       toast.info("Application link not available");
+    }
+  };
+
+  const handleSave = async (targetJobId?: string) => {
+    const jobIdToSave = targetJobId || jobId;
+    const jobIdNum = parseInt(jobIdToSave, 10);
+    if (isNaN(jobIdNum)) return;
+
+    try {
+      const isCurrentlySaved = savedJobs.has(jobIdToSave);
+      
+      if (isCurrentlySaved) {
+        toast.info("To unsave, please use the saved jobs page");
+        return;
+      }
+
+      await studentsApi.saveJob({
+        job_id: jobIdNum,
+      });
+
+      setSavedJobs((prev) => {
+        const newSet = new Set(prev);
+        newSet.add(jobIdToSave);
+        return newSet;
+      });
+      
+      if (jobIdToSave === jobId) {
+        setIsSaved(true);
+      }
+      
+      toast.success("Job saved successfully");
+    } catch (error: any) {
+      console.error("Error saving job:", error);
+      toast.error(error.response?.data?.message || "Failed to save job");
     }
   };
 
@@ -226,7 +276,7 @@ export default function JobDetailPage() {
               <Button
                 variant="outline"
                 size="icon"
-                onClick={handleSave}
+                onClick={() => handleSave()}
                 className={isSaved ? "bg-cyan-500/10" : ""}
               >
                 <Bookmark className={`h-5 w-5 ${isSaved ? "fill-current" : ""}`} />
@@ -237,7 +287,7 @@ export default function JobDetailPage() {
           {/* Action Buttons */}
           <div className="flex gap-3">
             <Button
-              onClick={handleApply}
+              onClick={() => handleApply()}
               className="bg-cyan-600 hover:bg-cyan-700 dark:bg-cyan-500 dark:hover:bg-cyan-600 text-white"
               size="lg"
             >
@@ -348,6 +398,30 @@ export default function JobDetailPage() {
                   </div>
                 )}
               </div>
+            </div>
+          )}
+
+          {/* Similar Jobs */}
+          {similarJobs.length > 0 && (
+            <div className="bg-card border rounded-lg p-6">
+              <h2 className="text-xl font-semibold mb-4">Similar Jobs</h2>
+              {isLoadingSimilar ? (
+                <div className="text-center py-8">
+                  <div className="text-muted-foreground">Loading similar jobs...</div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {similarJobs.slice(0, 4).map((similarJob) => (
+                    <JobCard
+                      key={similarJob.id}
+                      job={similarJob}
+                      onApply={() => handleApply(similarJob.id)}
+                      onSave={() => handleSave(similarJob.id)}
+                      isSaved={savedJobs.has(similarJob.id)}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>

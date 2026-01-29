@@ -40,6 +40,8 @@ export default function StudentDashboard() {
   });
   const [searchQuery, setSearchQuery] = useState("");
   const [savedJobs, setSavedJobs] = useState<Set<string>>(new Set());
+  const [recommendedJobs, setRecommendedJobs] = useState<Job[]>([]);
+  const [isLoadingRecommended, setIsLoadingRecommended] = useState(false);
   const [totalJobs, setTotalJobs] = useState(0);
   const [newThisWeek, setNewThisWeek] = useState(0);
   const [savedJobsCount, setSavedJobsCount] = useState(0);
@@ -50,6 +52,8 @@ export default function StudentDashboard() {
   // Load dashboard data on mount
   useEffect(() => {
     loadDashboard();
+    loadSavedJobs();
+    loadRecommendedJobs();
   }, []);
 
   // Load jobs when filters change
@@ -80,7 +84,7 @@ export default function StudentDashboard() {
       setNotificationsUnread(dashboardData.notifications_unread || 0);
       setRecommendationsAvailable(dashboardData.recommendations_available || 0);
       
-      // Update saved jobs set from API count (we'll sync this with saved jobs API later)
+      // Update saved jobs set from API count
       if (dashboardData.student?.saved_jobs_count) {
         setSavedJobsCount(dashboardData.student.saved_jobs_count);
       }
@@ -89,6 +93,35 @@ export default function StudentDashboard() {
       // Don't show error toast for dashboard - it's not critical if it fails
     } finally {
       setIsDashboardLoading(false);
+    }
+  };
+
+  // Load saved jobs from API
+  const loadSavedJobs = async () => {
+    try {
+      const response = await studentsApi.getSavedJobs();
+      const savedJobIds = new Set(response.saved_jobs.map((sj) => String(sj.job_id)));
+      setSavedJobs(savedJobIds);
+      setSavedJobsCount(response.total);
+    } catch (error: any) {
+      console.error("Error loading saved jobs:", error);
+      // Silently fail - saved jobs can be loaded later
+    }
+  };
+
+  // Load recommended jobs from API
+  const loadRecommendedJobs = async () => {
+    setIsLoadingRecommended(true);
+    try {
+      const response = await studentsApi.getRecommendedJobs(10, 0);
+      const jobs = response.recommendations.map((rec) => rec.job);
+      setRecommendedJobs(jobs);
+      setRecommendationsAvailable(response.total);
+    } catch (error: any) {
+      console.error("Error loading recommended jobs:", error);
+      // Silently fail - recommendations are optional
+    } finally {
+      setIsLoadingRecommended(false);
     }
   };
 
@@ -150,38 +183,39 @@ export default function StudentDashboard() {
     router.push(`/student/jobs/${jobId}`);
   };
 
-  // Handle save job
-  const handleSave = (jobId: string) => {
-    setSavedJobs((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(jobId)) {
-        newSet.delete(jobId);
-        toast.success("Job removed from saved");
-      } else {
-        newSet.add(jobId);
-        toast.success("Job saved");
-      }
-      // Save to localStorage
-      if (typeof window !== "undefined") {
-        localStorage.setItem("savedJobs", JSON.stringify(Array.from(newSet)));
-      }
-      return newSet;
-    });
-  };
+  // Handle save job using API
+  const handleSave = async (jobId: string) => {
+    const jobIdNum = parseInt(jobId, 10);
+    if (isNaN(jobIdNum)) return;
 
-  // Load saved jobs from localStorage
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("savedJobs");
-      if (saved) {
-        try {
-          setSavedJobs(new Set(JSON.parse(saved)));
-        } catch (e) {
-          console.error("Error loading saved jobs:", e);
-        }
+    try {
+      const isCurrentlySaved = savedJobs.has(jobId);
+      
+      if (isCurrentlySaved) {
+        // Check if saved to get the saved job ID, then we'd need a delete endpoint
+        // For now, we'll just show a message that unsaving requires the delete endpoint
+        toast.info("To unsave, please use the saved jobs page");
+        return;
       }
+
+      // Save job via API
+      await studentsApi.saveJob({
+        job_id: jobIdNum,
+      });
+
+      // Update local state
+      setSavedJobs((prev) => {
+        const newSet = new Set(prev);
+        newSet.add(jobId);
+        return newSet;
+      });
+      setSavedJobsCount((prev) => prev + 1);
+      toast.success("Job saved successfully");
+    } catch (error: any) {
+      console.error("Error saving job:", error);
+      toast.error(error.response?.data?.message || "Failed to save job");
     }
-  }, []);
+  };
 
   // Filter jobs by search query (client-side for now)
   const filteredJobs = useMemo(() => {
@@ -298,6 +332,37 @@ export default function StudentDashboard() {
             }}
           />
         </div>
+
+        {/* Recommended Jobs Section */}
+        {recommendedJobs.length > 0 && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold">Recommended for You</h2>
+                <p className="text-sm text-muted-foreground">
+                  Jobs matched to your profile
+                </p>
+              </div>
+            </div>
+            {isLoadingRecommended ? (
+              <div className="text-center py-8">
+                <div className="text-muted-foreground">Loading recommendations...</div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {recommendedJobs.slice(0, 4).map((job) => (
+                  <JobCard
+                    key={job.id}
+                    job={job}
+                    onApply={handleApply}
+                    onSave={handleSave}
+                    isSaved={savedJobs.has(job.id)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Recent Jobs Section */}
         {recentJobs.length > 0 && (
