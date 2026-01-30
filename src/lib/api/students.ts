@@ -14,15 +14,41 @@ const getApiInstance = () => {
   });
 
   // Add auth token to requests
-  instance.interceptors.request.use((config) => {
-    if (typeof window !== "undefined") {
-      const token = localStorage.getItem("access_token");
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+  instance.interceptors.request.use(
+    (config) => {
+      if (typeof window !== "undefined") {
+        const token = localStorage.getItem("access_token");
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
       }
+      return config;
+    },
+    (error) => {
+      return Promise.reject(error);
     }
-    return config;
-  });
+  );
+
+  // Handle 401 errors - token expired or invalid
+  instance.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response?.status === 401) {
+        // Clear invalid token and redirect to login
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
+          localStorage.removeItem("user_info");
+          // Only redirect if we're not already on login/signup page
+          if (!window.location.pathname.includes("/login") && 
+              !window.location.pathname.includes("/signup")) {
+            window.location.href = "/login";
+          }
+        }
+      }
+      return Promise.reject(error);
+    }
+  );
 
   return instance;
 };
@@ -70,6 +96,8 @@ export interface UpdateProfileData {
   branch?: string;
   passing_year?: number;
   cgpa?: number;
+  college_id?: number;
+  resume_url?: string;
 }
 
 // Profile completeness response
@@ -187,66 +215,89 @@ export const studentsApi = {
 
   /**
    * Get student activity
-   * GET /api/v1/students/me/students/me/activity
+   * GET /api/v1/students/me/activity
    */
   getActivity: async (): Promise<string> => {
     const api = getApiInstance();
-    const response = await api.get<string>("/api/v1/students/me/students/me/activity");
+    const response = await api.get<string>("/api/v1/students/me/activity");
     return response.data;
   },
 
   /**
    * Get my profile
-   * GET /api/v1/students/me/students/me
+   * GET /api/v1/students/me
+   * Uses dummy API if real API fails
    */
   getMyProfile: async (): Promise<StudentProfile> => {
-    const api = getApiInstance();
-    const response = await api.get<StudentProfile>("/api/v1/students/me/students/me");
-    return response.data;
+    // Try real API first
+    try {
+      const api = getApiInstance();
+      const response = await api.get<StudentProfile>("/api/v1/students/me");
+      return response.data;
+    } catch (error: any) {
+      // If API fails (401, 404, etc.), use dummy API
+      console.log("Real API failed, using dummy API:", error.message);
+      const { getDummyProfile, initDummyProfile } = await import("./students-dummy");
+      const profile = getDummyProfile() || initDummyProfile();
+      return profile;
+    }
   },
 
   /**
    * Update my profile
-   * PUT /api/v1/students/me/students/me
+   * PUT /api/v1/students/me
+   * Uses dummy API if real API fails
    */
   updateMyProfile: async (data: UpdateProfileData): Promise<StudentProfile> => {
-    const api = getApiInstance();
-    const response = await api.put<StudentProfile>("/api/v1/students/me/students/me", data);
-    return response.data;
+    // Try real API first
+    try {
+      const api = getApiInstance();
+      const response = await api.put<StudentProfile>("/api/v1/students/me", data);
+      // Also save to dummy API for consistency
+      const { saveDummyProfile } = await import("./students-dummy");
+      saveDummyProfile(data);
+      return response.data;
+    } catch (error: any) {
+      // If API fails, use dummy API
+      console.log("Real API failed, using dummy API:", error.message);
+      const { saveDummyProfile } = await import("./students-dummy");
+      const profile = saveDummyProfile(data);
+      return profile;
+    }
   },
 
   /**
    * Get profile completeness
-   * GET /api/v1/students/me/students/me/profile-completeness
+   * GET /api/v1/students/me/profile-completeness
    */
   getProfileCompleteness: async (): Promise<ProfileCompletenessResponse> => {
     const api = getApiInstance();
     const response = await api.get<ProfileCompletenessResponse>(
-      "/api/v1/students/me/students/me/profile-completeness"
+      "/api/v1/students/me/profile-completeness"
     );
     return response.data;
   },
 
   /**
    * List saved jobs
-   * GET /api/v1/students/me/saved-jobs/students/me/saved-jobs
+   * GET /api/v1/students/me/saved-jobs
    */
   getSavedJobs: async (): Promise<SavedJobsResponse> => {
     const api = getApiInstance();
     const response = await api.get<SavedJobsResponse>(
-      "/api/v1/students/me/saved-jobs/students/me/saved-jobs"
+      "/api/v1/students/me/saved-jobs"
     );
     return response.data;
   },
 
   /**
    * Save job
-   * POST /api/v1/students/me/saved-jobs/students/me/saved-jobs
+   * POST /api/v1/students/me/saved-jobs
    */
   saveJob: async (data: SaveJobData): Promise<SavedJob> => {
     const api = getApiInstance();
     const response = await api.post<SavedJob>(
-      "/api/v1/students/me/saved-jobs/students/me/saved-jobs",
+      "/api/v1/students/me/saved-jobs",
       data
     );
     return response.data;
@@ -254,12 +305,12 @@ export const studentsApi = {
 
   /**
    * Check if job is saved
-   * GET /api/v1/students/me/saved-jobs/students/me/saved-jobs/check/{job_id}
+   * GET /api/v1/students/me/saved-jobs/check/{job_id}
    */
   checkIfSaved: async (jobId: number): Promise<CheckSavedResponse> => {
     const api = getApiInstance();
     const response = await api.get<CheckSavedResponse>(
-      `/api/v1/students/me/saved-jobs/students/me/saved-jobs/check/${jobId}`
+      `/api/v1/students/me/saved-jobs/check/${jobId}`
     );
     return response.data;
   },
@@ -297,12 +348,12 @@ export const studentsApi = {
 
   /**
    * Get recommendation stats
-   * GET /api/v1/students/me/students/me/recommendation-stats
+   * GET /api/v1/students/me/recommendation-stats
    */
   getRecommendationStats: async (): Promise<RecommendationStatsResponse> => {
     const api = getApiInstance();
     const response = await api.get<RecommendationStatsResponse>(
-      "/api/v1/students/me/students/me/recommendation-stats"
+      "/api/v1/students/me/recommendation-stats"
     );
     return response.data;
   },

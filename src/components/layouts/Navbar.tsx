@@ -4,10 +4,11 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Briefcase, LogOut, User } from "lucide-react";
+import { Briefcase, LogOut, User, Settings } from "lucide-react";
 import { isAuthenticated, getUserInfo, getUserRole, getDashboardRoute } from "@/lib/utils/auth";
 import { authApi } from "@/lib/api/auth";
 import { toast } from "sonner";
+import { ClientOnly } from "@/components/ui/ClientOnly";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -84,8 +85,8 @@ export function Navbar() {
               <Button variant="ghost" onClick={handleDashboardClick} className="hidden sm:flex">
                 Dashboard
               </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+              <ClientOnly
+                fallback={
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                     <Avatar className="h-8 w-8">
                       <AvatarFallback className="bg-cyan-600 text-white">
@@ -93,28 +94,54 @@ export function Navbar() {
                       </AvatarFallback>
                     </Avatar>
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">{userInfo.email}</p>
-                      <p className="text-xs leading-none text-muted-foreground capitalize">
-                        {userInfo.role}
-                      </p>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleDashboardClick}>
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Dashboard</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                }
+              >
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="bg-cyan-600 text-white">
+                          {userInfo.email.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">{userInfo.email}</p>
+                        <p className="text-xs leading-none text-muted-foreground capitalize">
+                          {userInfo.role}
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleDashboardClick}>
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Dashboard</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        if (userInfo?.role === "student") {
+                          router.push("/profile/wizard");
+                        } else if (userInfo?.role === "admin") {
+                          router.push("/admin/profile");
+                        } else {
+                          router.push("/placement/profile");
+                        }
+                      }}
+                    >
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Log out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </ClientOnly>
             </>
           ) : (
             <>

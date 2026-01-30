@@ -2,8 +2,21 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Briefcase, Bell, User, AlertCircle } from "lucide-react";
+import { Briefcase, Bell, User, AlertCircle, LogOut, Settings, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { getUserInfo, clearUserInfo } from "@/lib/utils/auth";
+import { authApi } from "@/lib/api/auth";
+import { toast } from "sonner";
+import { ClientOnly } from "@/components/ui/ClientOnly";
 import { JobStats } from "@/components/jobs/JobStats";
 import { JobSearch } from "@/components/jobs/JobSearch";
 import { JobFilters } from "@/components/jobs/JobFilters";
@@ -32,6 +45,7 @@ export default function StudentDashboard() {
   const [recentJobs, setRecentJobs] = useState<Job[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDashboardLoading, setIsDashboardLoading] = useState(true);
+  const [userInfo, setUserInfo] = useState<{ id: string; email: string; role: string } | null>(null);
   const [filters, setFilters] = useState<JobFiltersType>({
     page: 1,
     size: 20,
@@ -51,10 +65,28 @@ export default function StudentDashboard() {
 
   // Load dashboard data on mount
   useEffect(() => {
+    const user = getUserInfo();
+    setUserInfo(user);
     loadDashboard();
     loadSavedJobs();
     loadRecommendedJobs();
   }, []);
+
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+      setUserInfo(null);
+      clearUserInfo();
+      toast.success("Logged out successfully");
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast.error("Failed to logout");
+    }
+  };
+
+  const userName = userInfo?.email?.split("@")[0] || "Student";
+  const userInitials = userName.split(' ').map(n => n[0]).join('').toUpperCase() || "S";
 
   // Load jobs when filters change
   useEffect(() => {
@@ -180,7 +212,7 @@ export default function StudentDashboard() {
     }
     
     // Navigate to job detail or application page
-    router.push(`/student/jobs/${jobId}`);
+    router.push(`/jobs/${jobId}`);
   };
 
   // Handle save job using API
@@ -262,9 +294,61 @@ export default function StudentDashboard() {
                 <span className="absolute top-0 right-0 h-2 w-2 bg-cyan-600 rounded-full" />
               )}
             </Button>
-            <Button variant="ghost" size="icon">
-              <User className="h-5 w-5" />
-            </Button>
+            <ClientOnly
+              fallback={
+                <Button variant="ghost" className="flex items-center gap-2">
+                  <Avatar className="h-8 w-8 bg-cyan-600 text-white">
+                    <AvatarFallback>{userInitials}</AvatarFallback>
+                  </Avatar>
+                  <div className="hidden md:block text-left">
+                    <div className="text-sm font-medium">{userName}</div>
+                    <div className="text-xs text-muted-foreground capitalize">
+                      {userInfo?.role || "Student"}
+                    </div>
+                  </div>
+                </Button>
+              }
+            >
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center gap-2">
+                    <Avatar className="h-8 w-8 bg-cyan-600 text-white">
+                      <AvatarFallback>{userInitials}</AvatarFallback>
+                    </Avatar>
+                    <div className="hidden md:block text-left">
+                      <div className="text-sm font-medium">{userName}</div>
+                      <div className="text-xs text-muted-foreground capitalize">
+                        {userInfo?.role || "Student"}
+                      </div>
+                    </div>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end">
+                  <DropdownMenuLabel>
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">{userName}</p>
+                      <p className="text-xs leading-none text-muted-foreground capitalize">
+                        {userInfo?.role || "Student"}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => router.push("/profile/wizard")}>
+                    <UserCircle className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push("/student/settings")}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} className="text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </ClientOnly>
           </div>
         </div>
       </header>
@@ -287,16 +371,24 @@ export default function StudentDashboard() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <AlertCircle className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
-                  <CardTitle className="text-base">Complete Your Profile</CardTitle>
+                  <CardTitle className="text-base">Profile Strength</CardTitle>
                 </div>
                 <span className="text-sm font-medium">{profileCompleteness}%</span>
               </div>
               <CardDescription>
-                Complete your profile to get better job recommendations
+                {profileCompleteness >= 85
+                  ? "Your profile is looking great! Add skills to reach 100%"
+                  : "Complete your profile to get better job recommendations"}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Progress value={profileCompleteness} className="h-2" />
+              <Progress value={profileCompleteness} className="h-2 mb-4" />
+              <Button
+                onClick={() => router.push("/profile/wizard")}
+                className="w-full sm:w-auto bg-cyan-600 hover:bg-cyan-700 dark:bg-cyan-500 dark:hover:bg-cyan-600 text-white"
+              >
+                Complete Profile
+              </Button>
             </CardContent>
           </Card>
         )}

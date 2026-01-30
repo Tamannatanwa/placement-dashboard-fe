@@ -170,7 +170,7 @@ export default function StudentDashboard() {
                     <Button
                       size="sm"
                       className="bg-cyan-600 hover:bg-cyan-700 dark:bg-cyan-500 dark:hover:bg-cyan-600 text-white"
-                      onClick={() => router.push("/student/profile")}
+                      onClick={() => router.push("/profile/wizard")}
                     >
                       Complete Profile
                     </Button>
@@ -422,7 +422,7 @@ export default function StudentDashboard() {
               <Button
                 variant="outline"
                 className="w-full justify-start h-auto py-4 hover:bg-accent"
-                onClick={() => router.push("/student/profile?tab=resume")}
+                onClick={() => router.push("/profile/wizard")}
               >
                 <FileEdit className="mr-3 h-5 w-5" />
                 <div className="text-left">
@@ -433,7 +433,7 @@ export default function StudentDashboard() {
               <Button
                 variant="outline"
                 className="w-full justify-start h-auto py-4 hover:bg-accent"
-                onClick={() => router.push("/student/profile")}
+                onClick={() => router.push("/profile/wizard")}
               >
                 <User className="mr-3 h-5 w-5" />
                 <div className="text-left">

@@ -43,3 +43,4 @@ export function JobSearch({ onSearch, placeholder }: JobSearchProps) {
 
 
 
+

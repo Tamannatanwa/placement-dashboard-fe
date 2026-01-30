@@ -1,9 +1,9 @@
 "use client";
 
 import { ReactNode, useState, useEffect } from "react";
-import { Briefcase, Bell, UserCircle, LayoutDashboard, FileText, Settings } from "lucide-react";
+import { Briefcase, Bell, UserCircle, LayoutDashboard, FileText, Settings, LogOut } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -14,16 +14,33 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { getUserInfo } from "@/lib/utils/auth";
+import { getUserInfo, clearUserInfo } from "@/lib/utils/auth";
+import { authApi } from "@/lib/api/auth";
+import { toast } from "sonner";
+import { ClientOnly } from "@/components/ui/ClientOnly";
 
 export default function StudentLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [userInfo, setUserInfo] = useState<{ id: string; email: string; role: string } | null>(null);
 
   useEffect(() => {
     const user = getUserInfo();
     setUserInfo(user);
   }, []);
+
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+      setUserInfo(null);
+      clearUserInfo();
+      toast.success("Logged out successfully");
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast.error("Failed to logout");
+    }
+  };
 
   const userName = userInfo?.email?.split("@")[0] || "Student";
   const userInitials = userName.split(' ').map(n => n[0]).join('').toUpperCase() || "S";
@@ -32,7 +49,7 @@ export default function StudentLayout({ children }: { children: ReactNode }) {
     { href: "/student/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/student/jobs", label: "Jobs", icon: Briefcase },
     { href: "/student/applications", label: "Applications", icon: FileText },
-    { href: "/student/profile", label: "Profile", icon: UserCircle },
+    { href: "/profile/wizard", label: "Profile", icon: UserCircle },
   ];
 
   return (
@@ -73,8 +90,8 @@ export default function StudentLayout({ children }: { children: ReactNode }) {
                 3
               </span>
             </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+            <ClientOnly
+              fallback={
                 <Button variant="ghost" className="flex items-center gap-2">
                   <Avatar className="h-8 w-8 bg-cyan-600 text-white">
                     <AvatarFallback>{userInitials}</AvatarFallback>
@@ -86,31 +103,52 @@ export default function StudentLayout({ children }: { children: ReactNode }) {
                     </div>
                   </div>
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end">
-                <DropdownMenuLabel>
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{userName}</p>
-                    <p className="text-xs leading-none text-muted-foreground capitalize">
-                      {userInfo?.role || "Student"}
-                    </p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/student/profile">
-                    <UserCircle className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/student/settings">
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Settings</span>
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              }
+            >
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center gap-2">
+                    <Avatar className="h-8 w-8 bg-cyan-600 text-white">
+                      <AvatarFallback>{userInitials}</AvatarFallback>
+                    </Avatar>
+                    <div className="hidden md:block text-left">
+                      <div className="text-sm font-medium">{userName}</div>
+                      <div className="text-xs text-muted-foreground capitalize">
+                        {userInfo?.role || "Student"}
+                      </div>
+                    </div>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end">
+                  <DropdownMenuLabel>
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">{userName}</p>
+                      <p className="text-xs leading-none text-muted-foreground capitalize">
+                        {userInfo?.role || "Student"}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile/wizard">
+                      <UserCircle className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/student/settings">
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Settings</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} className="text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </ClientOnly>
           </div>
         </div>
       </nav>
