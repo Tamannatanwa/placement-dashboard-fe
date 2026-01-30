@@ -25,8 +25,11 @@ export const academicInfoSchema = z.object({
 
 // Additional Information Step Schema (optional fields)
 export const additionalInfoSchema = z.object({
-  resume_url: z.string().url("Invalid URL format").optional().or(z.literal("")),
-}).optional();
+  resume_url: z.string().refine(
+    (val) => val === "" || z.string().url().safeParse(val).success,
+    { message: "Invalid URL format" }
+  ),
+});
 
 // Complete Profile Schema (for final validation)
 export const completeProfileSchema = personalInfoSchema.merge(academicInfoSchema).merge(additionalInfoSchema);

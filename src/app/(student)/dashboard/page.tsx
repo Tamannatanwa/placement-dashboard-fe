@@ -15,7 +15,6 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getUserInfo, clearUserInfo } from "@/lib/utils/auth";
 import { authApi } from "@/lib/api/auth";
-import { toast } from "sonner";
 import { ClientOnly } from "@/components/ui/ClientOnly";
 import { JobStats } from "@/components/jobs/JobStats";
 import { JobSearch } from "@/components/jobs/JobSearch";

@@ -2,6 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useImperativeHandle, forwardRef } from "react";
 import { academicInfoSchema, AcademicInfoFormData } from "@/lib/validations/profile";
 import { ClientOnly } from "@/components/ui/ClientOnly";
 import {
@@ -53,23 +54,50 @@ const BRANCH_OPTIONS = [
   "Other",
 ];
 
-export function AcademicInfoStep({ formData, onUpdate, errors }: StepContentProps) {
-  const form = useForm<AcademicInfoFormData>({
-    resolver: zodResolver(academicInfoSchema),
-    defaultValues: {
-      degree: formData.degree || "",
-      branch: formData.branch || "",
-      passing_year: formData.passing_year || new Date().getFullYear(),
-      cgpa: formData.cgpa || 0,
-    },
-    mode: "onChange",
-  });
+export interface AcademicInfoStepHandle {
+  validate: () => Promise<boolean>;
+}
 
-  // Update parent when form changes
-  const handleChange = () => {
-    const values = form.getValues();
-    onUpdate(values);
-  };
+export const AcademicInfoStep = forwardRef<AcademicInfoStepHandle, StepContentProps>(
+  ({ formData, onUpdate, errors }, ref) => {
+    const form = useForm<AcademicInfoFormData>({
+      resolver: zodResolver(academicInfoSchema),
+      defaultValues: {
+        degree: formData.degree || "",
+        branch: formData.branch || "",
+        passing_year: formData.passing_year || new Date().getFullYear(),
+        cgpa: formData.cgpa || 0,
+      },
+      mode: "onChange",
+    });
+
+    // Sync form values when formData changes externally
+    useEffect(() => {
+      form.reset({
+        degree: formData.degree || "",
+        branch: formData.branch || "",
+        passing_year: formData.passing_year || new Date().getFullYear(),
+        cgpa: formData.cgpa || 0,
+      });
+    }, [formData.degree, formData.branch, formData.passing_year, formData.cgpa, form]);
+
+    // Expose validation method to parent
+    useImperativeHandle(ref, () => ({
+      validate: async () => {
+        const isValid = await form.trigger();
+        if (isValid) {
+          const values = form.getValues();
+          onUpdate(values);
+        }
+        return isValid;
+      },
+    }));
+
+    // Update parent when form changes
+    const handleChange = () => {
+      const values = form.getValues();
+      onUpdate(values);
+    };
 
   return (
     <Card className="border-cyan-500/20">
@@ -242,6 +270,9 @@ export function AcademicInfoStep({ formData, onUpdate, errors }: StepContentProp
         </Form>
       </CardContent>
     </Card>
-  );
-}
+    );
+  }
+);
+
+AcademicInfoStep.displayName = "AcademicInfoStep";
 

@@ -8,6 +8,7 @@ export interface ResumeReview {
   projects: string; // Review of projects mentioned
   structureScore: number; // Score out of 10 for structure
   projectsScore: number; // Score out of 10 for projects
+  difficulty: "easy" | "medium" | "hard"; // Project difficulty level
 }
 
 /**
@@ -214,6 +215,7 @@ export function performAutomatedReview(
     projects: projectsAnalysis.projects,
     structureScore: structureAnalysis.score,
     projectsScore: projectsAnalysis.score,
+    difficulty: projectsAnalysis.difficulty,
   };
 }
 

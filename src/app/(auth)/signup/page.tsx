@@ -64,7 +64,7 @@ export default function SignupPage() {
         role: data.role,
       });
 
-      if (response.token || response.user) {
+      if (response.access_token|| response.user) {
         toast.success("Account created successfully!");
         router.push("/login");
       } else {

@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { StepIndicator } from "./StepIndicator";
 import { StepNavigation } from "./StepNavigation";
-import { PersonalInfoStep } from "./steps/PersonalInfoStep";
-import { AcademicInfoStep } from "./steps/AcademicInfoStep";
-import { AdditionalInfoStep } from "./steps/AdditionalInfoStep";
+import { PersonalInfoStep, PersonalInfoStepHandle } from "./steps/PersonalInfoStep";
+import { AcademicInfoStep, AcademicInfoStepHandle } from "./steps/AcademicInfoStep";
+import { AdditionalInfoStep, AdditionalInfoStepHandle } from "./steps/AdditionalInfoStep";
 import { ReviewStep } from "./steps/ReviewStep";
 import {
   personalInfoSchema,
@@ -66,6 +66,11 @@ export function ProfileWizard({
   const [formData, setFormData] = useState<Partial<ProfileFormData>>(initialData);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Refs for step validation
+  const personalInfoRef = useRef<PersonalInfoStepHandle>(null);
+  const academicInfoRef = useRef<AcademicInfoStepHandle>(null);
+  const additionalInfoRef = useRef<AdditionalInfoStepHandle>(null);
 
   // Load existing profile data
   useEffect(() => {
@@ -79,7 +84,6 @@ export function ProfileWizard({
   const loadProfile = async () => {
     try {
       const profile = await studentsApi.getMyProfile();
-      console.log("Loaded profile:", profile);
       setFormData({
         first_name: profile.first_name || "",
         last_name: profile.last_name || "",
@@ -93,7 +97,6 @@ export function ProfileWizard({
         resume_url: profile.resume_url || "",
       });
     } catch (error: any) {
-      console.error("Error loading profile:", error);
       toast.error("Failed to load profile data");
     } finally {
       setIsLoading(false);
@@ -101,36 +104,17 @@ export function ProfileWizard({
   };
 
   const validateCurrentStep = async (): Promise<boolean> => {
-    const step = STEPS[currentStep];
-    if (!step) return false;
-
-    try {
-      // Get relevant data for current step
-      let dataToValidate: any = {};
-      
-      if (currentStep === 0) {
-        // Personal info step
-        dataToValidate = {
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-          phone: formData.phone,
-        };
-      } else if (currentStep === 1) {
-        // Academic info step
-        dataToValidate = {
-          degree: formData.degree,
-          branch: formData.branch,
-          passing_year: formData.passing_year,
-          cgpa: formData.cgpa,
-        };
-      } else if (currentStep === 2) {
-        // Additional info step (optional)
-        dataToValidate = {
-          resume_url: formData.resume_url || "",
-        };
-      } else if (currentStep === 3) {
-        // Review step - validate complete profile
-        dataToValidate = {
+    // Use React Hook Form validation for steps 0-2
+    if (currentStep === 0 && personalInfoRef.current) {
+      return await personalInfoRef.current.validate();
+    } else if (currentStep === 1 && academicInfoRef.current) {
+      return await academicInfoRef.current.validate();
+    } else if (currentStep === 2 && additionalInfoRef.current) {
+      return await additionalInfoRef.current.validate();
+    } else if (currentStep === 3) {
+      // Review step - validate complete profile
+      try {
+        const dataToValidate = {
           first_name: formData.first_name,
           last_name: formData.last_name,
           phone: formData.phone,
@@ -139,25 +123,27 @@ export function ProfileWizard({
           passing_year: formData.passing_year,
           cgpa: formData.cgpa,
         };
+        await completeProfileSchema.parseAsync(dataToValidate);
+        return true;
+      } catch (error: any) {
+        const errors = error.errors || [];
+        if (errors.length > 0) {
+          const errorMessages = errors.map((err: any) => {
+            const field = err.path?.join(".") || "field";
+            return `${field}: ${err.message || "Validation failed"}`;
+          });
+          toast.error(`Please fix the following errors:\n${errorMessages.join("\n")}`);
+        } else {
+          toast.error(error.message || "Validation failed");
+        }
+        return false;
       }
-
-      await step.validationSchema.parseAsync(dataToValidate);
-      return true;
-    } catch (error: any) {
-      const errors = error.errors || [];
-      if (errors.length > 0) {
-        errors.forEach((err: any) => {
-          toast.error(err.message || "Validation failed");
-        });
-      } else {
-        toast.error(error.message || "Validation failed");
-      }
-      return false;
     }
+    return false;
   };
 
   const handleNext = async () => {
-    // If on last step, submit directly without validation (validation happens in handleSubmit)
+    // If on last step, submit directly (validation happens in handleSubmit)
     if (currentStep === STEPS.length - 1) {
       await handleSubmit();
       return;
@@ -166,7 +152,12 @@ export function ProfileWizard({
     // For other steps, validate before proceeding
     const isValid = await validateCurrentStep();
     if (!isValid) {
-      console.log("Validation failed for step:", currentStep);
+      // Validation errors are now shown inline via FormMessage components
+      // Scroll to first error field if needed
+      const firstError = document.querySelector('[data-slot="form-message"]');
+      if (firstError) {
+        firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
       return;
     }
 
@@ -197,7 +188,6 @@ export function ProfileWizard({
   };
 
   const handleSubmit = async () => {
-    console.log("handleSubmit called with formData:", formData);
     setIsSubmitting(true);
     try {
       // Final validation with all required fields
@@ -211,9 +201,7 @@ export function ProfileWizard({
         cgpa: formData.cgpa,
       };
 
-      console.log("Validating data:", dataToValidate);
       await completeProfileSchema.parseAsync(dataToValidate);
-      console.log("Validation passed");
 
       if (userRole === "student") {
         // Update student profile via API (includes all fields)
@@ -229,8 +217,7 @@ export function ProfileWizard({
           resume_url: formData.resume_url,
         };
 
-        const updatedProfile = await studentsApi.updateMyProfile(updateData);
-        console.log("Profile updated successfully:", updatedProfile);
+        await studentsApi.updateMyProfile(updateData);
         toast.success("Profile updated successfully!");
       }
 
@@ -251,12 +238,12 @@ export function ProfileWizard({
         }
       }, 1500);
     } catch (error: any) {
-      console.error("Error submitting profile:", error);
       if (error.errors && Array.isArray(error.errors)) {
-        error.errors.forEach((err: any) => {
+        const errorMessages = error.errors.map((err: any) => {
           const field = err.path?.join(".") || "field";
-          toast.error(`${field}: ${err.message || "Validation failed"}`);
+          return `${field}: ${err.message || "Validation failed"}`;
         });
+        toast.error(`Please fix the following errors:\n${errorMessages.join("\n")}`);
       } else if (error.response?.data?.message) {
         toast.error(error.response.data.message);
       } else if (error.message) {
@@ -327,18 +314,21 @@ export function ProfileWizard({
         <div className="mb-6">
           {currentStep === 0 && (
             <PersonalInfoStep
+              ref={personalInfoRef}
               formData={formData}
               onUpdate={handleUpdate}
             />
           )}
           {currentStep === 1 && (
             <AcademicInfoStep
+              ref={academicInfoRef}
               formData={formData}
               onUpdate={handleUpdate}
             />
           )}
           {currentStep === 2 && (
             <AdditionalInfoStep
+              ref={additionalInfoRef}
               formData={formData}
               onUpdate={handleUpdate}
             />

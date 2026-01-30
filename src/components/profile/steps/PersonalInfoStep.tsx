@@ -2,6 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useImperativeHandle, forwardRef } from "react";
 import { personalInfoSchema, PersonalInfoFormData } from "@/lib/validations/profile";
 import {
   Form,
@@ -16,22 +17,48 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { StepContentProps } from "@/types/profile";
 import { User } from "lucide-react";
 
-export function PersonalInfoStep({ formData, onUpdate, errors }: StepContentProps) {
-  const form = useForm<PersonalInfoFormData>({
-    resolver: zodResolver(personalInfoSchema),
-    defaultValues: {
-      first_name: formData.first_name || "",
-      last_name: formData.last_name || "",
-      phone: formData.phone || "",
-    },
-    mode: "onChange",
-  });
+export interface PersonalInfoStepHandle {
+  validate: () => Promise<boolean>;
+}
 
-  // Update parent when form changes
-  const handleChange = () => {
-    const values = form.getValues();
-    onUpdate(values);
-  };
+export const PersonalInfoStep = forwardRef<PersonalInfoStepHandle, StepContentProps>(
+  ({ formData, onUpdate, errors }, ref) => {
+    const form = useForm<PersonalInfoFormData>({
+      resolver: zodResolver(personalInfoSchema),
+      defaultValues: {
+        first_name: formData.first_name || "",
+        last_name: formData.last_name || "",
+        phone: formData.phone || "",
+      },
+      mode: "onChange",
+    });
+
+    // Sync form values when formData changes externally
+    useEffect(() => {
+      form.reset({
+        first_name: formData.first_name || "",
+        last_name: formData.last_name || "",
+        phone: formData.phone || "",
+      });
+    }, [formData.first_name, formData.last_name, formData.phone, form]);
+
+    // Expose validation method to parent
+    useImperativeHandle(ref, () => ({
+      validate: async () => {
+        const isValid = await form.trigger();
+        if (isValid) {
+          const values = form.getValues();
+          onUpdate(values);
+        }
+        return isValid;
+      },
+    }));
+
+    // Update parent when form changes
+    const handleChange = () => {
+      const values = form.getValues();
+      onUpdate(values);
+    };
 
   return (
     <Card className="border-cyan-500/20">
@@ -125,7 +152,10 @@ export function PersonalInfoStep({ formData, onUpdate, errors }: StepContentProp
         </Form>
       </CardContent>
     </Card>
-  );
-}
+    );
+  }
+);
+
+PersonalInfoStep.displayName = "PersonalInfoStep";
 
 

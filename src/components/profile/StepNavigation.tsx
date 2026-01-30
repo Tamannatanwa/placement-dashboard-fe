@@ -16,7 +16,6 @@ export function StepNavigation({
   const isLastStep = currentStep === totalSteps - 1;
 
   const handleClick = () => {
-    console.log("Submit button clicked, isLastStep:", isLastStep, "isSubmitting:", isSubmitting);
     if (!isSubmitting) {
       onNext();
     }

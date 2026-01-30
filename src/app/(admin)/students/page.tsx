@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Student, StudentStatus } from "@/types/student";
 import { ExcelUpload } from "@/components/admin/ExcelUpload";
 import { StatusFilter } from "@/components/admin/StatusFilter";
@@ -26,6 +26,7 @@ export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [rawData, setRawData] = useState<any[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<StudentStatus | "all">("unplaced");
+  const [selectedSchool, setSelectedSchool] = useState<string | "all">("all");
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [currentSheetName, setCurrentSheetName] = useState("");
@@ -102,6 +103,46 @@ export default function StudentsPage() {
     }
   };
 
+  // Calculate status filter props from students data
+  const statusFilterProps = useMemo(() => {
+    if (students.length === 0) {
+      return {
+        availableStatuses: [],
+        statusCounts: new Map<StudentStatus, number>(),
+        totalCount: 0,
+      };
+    }
+
+    // Get unique statuses with their raw status values
+    const statusMap = new Map<StudentStatus, string>();
+    const statusCounts = new Map<StudentStatus, number>();
+
+    students.forEach((student) => {
+      const status = student.status as StudentStatus;
+      const rawStatus = student.rawStatus || "";
+      
+      // Store the first rawStatus we encounter for each normalized status
+      if (!statusMap.has(status)) {
+        statusMap.set(status, rawStatus);
+      }
+      
+      // Count students per status
+      statusCounts.set(status, (statusCounts.get(status) || 0) + 1);
+    });
+
+    // Convert to array format
+    const availableStatuses = Array.from(statusMap.entries()).map(([status, rawStatus]) => ({
+      status,
+      rawStatus,
+    }));
+
+    return {
+      availableStatuses,
+      statusCounts,
+      totalCount: students.length,
+    };
+  }, [students]);
+
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
       {/* Header */}
@@ -141,6 +182,9 @@ export default function StudentsPage() {
             <StatusFilter
               selectedStatus={selectedStatus}
               onStatusChange={setSelectedStatus}
+              availableStatuses={statusFilterProps.availableStatuses}
+              statusCounts={statusFilterProps.statusCounts}
+              totalCount={statusFilterProps.totalCount}
             />
           </div>
 
@@ -150,6 +194,7 @@ export default function StudentsPage() {
               data={rawData}
               onStudentSelect={handleStudentSelect}
               selectedStatus={selectedStatus}
+              selectedSchool={selectedSchool}
             />
           </div>
         </>

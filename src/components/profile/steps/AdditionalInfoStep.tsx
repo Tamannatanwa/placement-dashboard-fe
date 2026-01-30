@@ -2,6 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useImperativeHandle, forwardRef } from "react";
 import { additionalInfoSchema, AdditionalInfoFormData } from "@/lib/validations/profile";
 import {
   Form,
@@ -17,20 +18,44 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { StepContentProps } from "@/types/profile";
 import { FileText, Link as LinkIcon } from "lucide-react";
 
-export function AdditionalInfoStep({ formData, onUpdate, errors }: StepContentProps) {
-  const form = useForm<AdditionalInfoFormData>({
-    resolver: zodResolver(additionalInfoSchema),
-    defaultValues: {
-      resume_url: formData.resume_url || "",
-    },
-    mode: "onChange",
-  });
+export interface AdditionalInfoStepHandle {
+  validate: () => Promise<boolean>;
+}
 
-  // Update parent when form changes
-  const handleChange = () => {
-    const values = form.getValues();
-    onUpdate(values);
-  };
+export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepContentProps>(
+  ({ formData, onUpdate, errors }, ref) => {
+    const form = useForm<{ resume_url: string }>({
+      resolver: zodResolver(additionalInfoSchema),
+      defaultValues: {
+        resume_url: formData.resume_url || "",
+      },
+      mode: "onChange",
+    });
+
+    // Sync form values when formData changes externally
+    useEffect(() => {
+      form.reset({
+        resume_url: formData.resume_url || "",
+      });
+    }, [formData.resume_url, form]);
+
+    // Expose validation method to parent
+    useImperativeHandle(ref, () => ({
+      validate: async () => {
+        const isValid = await form.trigger();
+        if (isValid) {
+          const values = form.getValues();
+          onUpdate(values);
+        }
+        return isValid;
+      },
+    }));
+
+    // Update parent when form changes
+    const handleChange = () => {
+      const values = form.getValues();
+      onUpdate(values);
+    };
 
   return (
     <Card className="border-cyan-500/20">
@@ -78,7 +103,10 @@ export function AdditionalInfoStep({ formData, onUpdate, errors }: StepContentPr
         </Form>
       </CardContent>
     </Card>
-  );
-}
+    );
+  }
+);
+
+AdditionalInfoStep.displayName = "AdditionalInfoStep";
 
 
