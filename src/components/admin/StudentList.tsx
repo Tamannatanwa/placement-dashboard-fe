@@ -22,8 +22,13 @@ export function StudentList({ data, onStudentSelect, selectedStatus, selectedSch
   const students: Student[] = useMemo(() => {
     const normalized = data.map((row, index) => normalizeStudentData(row, index));
     
+    // Filter out students without names
+    let filtered = normalized.filter((student) => {
+      const name = (student.name || "").trim();
+      return name !== "" && name !== "N/A";
+    });
+    
     // Filter by status
-    let filtered = normalized;
     if (selectedStatus !== "all") {
       filtered = filtered.filter((student) => student.status === selectedStatus);
     }

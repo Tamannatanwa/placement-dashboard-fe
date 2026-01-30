@@ -38,8 +38,13 @@ export default function StudentsPage() {
     setRawData(data);
     setCurrentSheetName(sheetName);
     
-    // Normalize student data
-    const normalized = data.map((row, index) => normalizeStudentData(row, index));
+    // Normalize student data and filter out students without names
+    const normalized = data
+      .map((row, index) => normalizeStudentData(row, index))
+      .filter((student) => {
+        const name = (student.name || "").trim();
+        return name !== "" && name !== "N/A";
+      });
     setStudents(normalized);
     
     // Reset filters to "all" when new data is loaded
