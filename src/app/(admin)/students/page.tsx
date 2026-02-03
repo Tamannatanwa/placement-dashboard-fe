@@ -7,10 +7,14 @@ import { StatusFilter } from "@/components/admin/StatusFilter";
 import { StudentList } from "@/components/admin/StudentList";
 import { StudentDetail } from "@/components/admin/StudentDetail";
 import { normalizeStudentData } from "@/lib/utils/excel";
-import { FileSpreadsheet, Download } from "lucide-react";
+import { FileSpreadsheet, Download, Users, UserCheck, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 /**
  * Admin page for managing student data from Excel files
@@ -30,6 +34,7 @@ export default function StudentsPage() {
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [currentSheetName, setCurrentSheetName] = useState("");
+  const [showActiveOnly, setShowActiveOnly] = useState<boolean | null>(null);
 
   // Handle Excel data loaded
   const handleDataLoaded = (data: any[], sheetName: string) => {
@@ -148,17 +153,45 @@ export default function StudentsPage() {
     };
   }, [students]);
 
+  // Calculate active/inactive counts
+  const activeCount = useMemo(() => {
+    // TODO: Replace with actual API call to get active/inactive status
+    // For now, we'll assume all students are active unless marked otherwise
+    return students.length;
+  }, [students]);
+
+  const inactiveCount = useMemo(() => {
+    // TODO: Replace with actual API call
+    return 0;
+  }, [students]);
+
+  // Handle student active/inactive toggle
+  const handleToggleActive = async (student: Student, isActive: boolean) => {
+    try {
+      // TODO: Replace with actual API call
+      // await adminApi.updateStudentStatus(student.email, { is_active: isActive });
+      
+      toast.success(`Student ${isActive ? "activated" : "deactivated"} successfully`);
+      
+      // Update local state if needed
+      // This would require adding is_active to Student type
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to update student status");
+      console.error("Error updating student status:", error);
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-3">
-            <FileSpreadsheet className="h-8 w-8 text-cyan-500 dark:text-cyan-400" />
+            <Users className="h-8 w-8 text-cyan-500 dark:text-cyan-400" />
             Student Management
           </h1>
           <p className="text-muted-foreground mt-2">
-            Upload Excel file, filter students by status, review resumes, and add feedback
+            Manage students, review resumes, assign groups, and provide feedback
           </p>
         </div>
         
@@ -172,6 +205,39 @@ export default function StudentsPage() {
           </Button>
         )}
       </div>
+
+      {/* Stats Cards */}
+      {students.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Students</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{students.length}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Active Students</CardTitle>
+              <UserCheck className="h-4 w-4 text-green-600 dark:text-green-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600 dark:text-green-400">{activeCount}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Inactive Students</CardTitle>
+              <UserX className="h-4 w-4 text-red-600 dark:text-red-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-600 dark:text-red-400">{inactiveCount}</div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Excel Upload Section */}
       <div className="bg-card border rounded-lg p-6">

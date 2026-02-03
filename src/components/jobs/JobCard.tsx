@@ -142,3 +142,4 @@ export function JobCard({ job, onApply, onSave, isSaved = false }: JobCardProps)
 
 
 
+

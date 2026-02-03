@@ -72,3 +72,4 @@ export function JobStats({ availableJobs, newThisWeek, applied, saved }: JobStat
 
 
 
+

@@ -275,6 +275,9 @@ export default function StudentDashboard() {
             <a href="#jobs" className="text-sm font-medium hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">
               Jobs
             </a>
+            <a href="/student/jobs/saved" className="text-sm font-medium hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">
+              Saved Jobs
+            </a>
             <a href="/student/applications" className="text-sm font-medium hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">
               Applications
             </a>

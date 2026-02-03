@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { Student } from "@/types/student";
-import { X, Mail, Phone, FileText, Briefcase, Users, MessageSquare, MapPin, GraduationCap, Star } from "lucide-react";
+import { X, Mail, Phone, FileText, Briefcase, Users, MessageSquare, MapPin, GraduationCap, Star, UserCheck, UserX } from "lucide-react";
 import { AutoReviewButton } from "./AutoReviewButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -42,6 +43,7 @@ export function StudentDetail({ student, isOpen, onClose, onUpdate }: StudentDet
     student?.projectDifficulty || ""
   );
   const [projectReview, setProjectReview] = useState<string>(student?.projectReview || "");
+  const [isActive, setIsActive] = useState<boolean>((student as any)?.is_active !== false);
 
   // Update state when student changes
   useEffect(() => {
@@ -54,6 +56,7 @@ export function StudentDetail({ student, isOpen, onClose, onUpdate }: StudentDet
       setProjectScore(student.projectScore || 0);
       setProjectDifficulty(student.projectDifficulty || "");
       setProjectReview(student.projectReview || "");
+      setIsActive((student as any)?.is_active !== false);
     }
   }, [student]);
 
@@ -72,7 +75,8 @@ export function StudentDetail({ student, isOpen, onClose, onUpdate }: StudentDet
       projectScore,
       projectDifficulty: projectDifficulty || undefined,
       projectReview,
-    });
+      is_active: isActive,
+    } as Student);
     onClose();
   };
 
@@ -114,8 +118,48 @@ export function StudentDetail({ student, isOpen, onClose, onUpdate }: StudentDet
                 <Input value={student.name || ""} disabled />
               </div>
               <div>
-                <Label>Status</Label>
+                <Label>Placement Status</Label>
                 <Input value={student.rawStatus || student.status.charAt(0).toUpperCase() + student.status.slice(1).replace(/_/g, " ")} disabled />
+              </div>
+            </div>
+
+            {/* Active/Inactive Toggle */}
+            <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/50">
+              <div className="flex items-center gap-3">
+                {isActive ? (
+                  <UserCheck className="h-5 w-5 text-green-600 dark:text-green-400" />
+                ) : (
+                  <UserX className="h-5 w-5 text-red-600 dark:text-red-400" />
+                )}
+                <div>
+                  <Label className="text-base font-medium">Account Status</Label>
+                  <p className="text-sm text-muted-foreground">
+                    {isActive ? "Student account is active" : "Student account is inactive"}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Badge
+                  variant="outline"
+                  className={
+                    isActive
+                      ? "bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20"
+                      : "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20"
+                  }
+                >
+                  {isActive ? "Active" : "Inactive"}
+                </Badge>
+                <Button
+                  variant={isActive ? "destructive" : "default"}
+                  size="sm"
+                  onClick={() => {
+                    setIsActive(!isActive);
+                    // TODO: Call API to update student status
+                  }}
+                  className={!isActive ? "bg-cyan-600 hover:bg-cyan-700 dark:bg-cyan-500 dark:hover:bg-cyan-600 text-white" : ""}
+                >
+                  {isActive ? "Deactivate" : "Activate"}
+                </Button>
               </div>
             </div>
 

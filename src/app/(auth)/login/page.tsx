@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Briefcase, Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react";
+import { Briefcase, Eye, EyeOff, Mail, Lock, ArrowRight, User, Shield, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -17,15 +17,25 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { loginSchema, type LoginFormData } from "@/lib/validations/auth";
 import { authApi } from "@/lib/api/auth";
 import { toast } from "sonner";
 import { AuthSidePanel } from "@/components/auth/AuthSidePanel";
 import { isAuthenticated, getUserRole, getDashboardRoute } from "@/lib/utils/auth";
 
+type UserRole = "student" | "admin" | "placement_team";
+
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<UserRole>("student");
   const router = useRouter();
 
   // Redirect if already logged in
@@ -84,6 +94,67 @@ export default function LoginPage() {
           <div className="space-y-2">
             <h1 className="text-3xl md:text-4xl font-bold">Welcome back</h1>
             <p className="text-muted-foreground">Enter your credentials to access your account</p>
+          </div>
+
+          {/* Role Selection */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Login as</label>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => setSelectedRole("student")}
+                className={`p-3 rounded-lg border-2 transition-all ${
+                  selectedRole === "student"
+                    ? "border-cyan-600 dark:border-cyan-400 bg-cyan-50 dark:bg-cyan-950/20"
+                    : "border-border hover:border-cyan-300 dark:hover:border-cyan-700"
+                }`}
+              >
+                <User className={`h-5 w-5 mx-auto mb-1 ${
+                  selectedRole === "student" ? "text-cyan-600 dark:text-cyan-400" : "text-muted-foreground"
+                }`} />
+                <span className={`text-xs font-medium ${
+                  selectedRole === "student" ? "text-cyan-600 dark:text-cyan-400" : "text-muted-foreground"
+                }`}>
+                  Student
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedRole("placement_team")}
+                className={`p-3 rounded-lg border-2 transition-all ${
+                  selectedRole === "placement_team"
+                    ? "border-cyan-600 dark:border-cyan-400 bg-cyan-50 dark:bg-cyan-950/20"
+                    : "border-border hover:border-cyan-300 dark:hover:border-cyan-700"
+                }`}
+              >
+                <Users className={`h-5 w-5 mx-auto mb-1 ${
+                  selectedRole === "placement_team" ? "text-cyan-600 dark:text-cyan-400" : "text-muted-foreground"
+                }`} />
+                <span className={`text-xs font-medium ${
+                  selectedRole === "placement_team" ? "text-cyan-600 dark:text-cyan-400" : "text-muted-foreground"
+                }`}>
+                  Placement Team
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedRole("admin")}
+                className={`p-3 rounded-lg border-2 transition-all ${
+                  selectedRole === "admin"
+                    ? "border-cyan-600 dark:border-cyan-400 bg-cyan-50 dark:bg-cyan-950/20"
+                    : "border-border hover:border-cyan-300 dark:hover:border-cyan-700"
+                }`}
+              >
+                <Shield className={`h-5 w-5 mx-auto mb-1 ${
+                  selectedRole === "admin" ? "text-cyan-600 dark:text-cyan-400" : "text-muted-foreground"
+                }`} />
+                <span className={`text-xs font-medium ${
+                  selectedRole === "admin" ? "text-cyan-600 dark:text-cyan-400" : "text-muted-foreground"
+                }`}>
+                  Admin
+                </span>
+              </button>
+            </div>
           </div>
 
           {/* Form */}
