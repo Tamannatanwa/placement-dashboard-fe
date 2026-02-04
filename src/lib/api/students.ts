@@ -359,3 +359,54 @@ export const studentsApi = {
   },
 };
 
+/**
+ * Excel Student Import API
+ */
+export interface ExcelStudentImportData {
+  name: string;
+  email: string;
+  phone?: string;
+  campus?: string;
+  school?: string;
+  status?: string;
+  resume?: string;
+  projects?: string;
+  metadata?: Record<string, any>;
+}
+
+export interface BulkExcelImportRequest {
+  students: ExcelStudentImportData[];
+}
+
+export interface BulkExcelImportResponse {
+  success: number;
+  failed: number;
+  total: number;
+  created_users: number;
+  created_students: number;
+  skipped: number;
+  errors: Array<{
+    index?: number;
+    email?: string;
+    name?: string;
+    error: string;
+  }>;
+}
+
+export const excelImportApi = {
+  /**
+   * Import students from Excel data
+   * POST /api/v1/admin/students/import-excel
+   */
+  importStudents: async (
+    data: BulkExcelImportRequest
+  ): Promise<BulkExcelImportResponse> => {
+    const api = getApiInstance();
+    const response = await api.post<BulkExcelImportResponse>(
+      "/api/v1/admin/students/import-excel",
+      data
+    );
+    return response.data;
+  },
+};
+

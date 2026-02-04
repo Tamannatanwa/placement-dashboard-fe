@@ -21,6 +21,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { studentReviewApi, StudentReviewUpdateData } from "@/lib/api/student-review";
 
 interface StudentDetailProps {
   student: Student | null;
@@ -62,10 +64,11 @@ export function StudentDetail({ student, isOpen, onClose, onUpdate }: StudentDet
 
   if (!student) return null;
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!student) return;
-    
-    onUpdate({
+
+    // Optimistically update local state (Excel + UI)
+    const updatedStudent: Student = {
       ...student,
       group,
       feedback,
@@ -76,7 +79,38 @@ export function StudentDetail({ student, isOpen, onClose, onUpdate }: StudentDet
       projectDifficulty: projectDifficulty || undefined,
       projectReview,
       is_active: isActive,
-    } as Student);
+    } as Student;
+
+    onUpdate(updatedStudent);
+
+    // Prepare payload for backend review API
+    const payload: StudentReviewUpdateData = {
+      group,
+      feedback,
+      resume_score: typeof resumeScore === "number" ? resumeScore : undefined,
+      resume_structure: resumeStructure || undefined,
+      resume_projects: resumeProjects || undefined,
+      project_score: typeof projectScore === "number" ? projectScore : undefined,
+      project_difficulty: projectDifficulty || undefined,
+      project_review: projectReview || undefined,
+      status: student.status,
+    };
+
+    try {
+      // Prefer backend identifier if available; fall back to email, then local Excel id.
+      const identifier = student.email || student.id;
+      await studentReviewApi.updateReview(identifier, payload);
+      toast.success("Student review saved to server");
+    } catch (error: any) {
+      // Keep local update but surface API error
+      const message =
+        error?.response?.data?.error?.message ||
+        error?.response?.data?.detail ||
+        error?.message ||
+        "Failed to save review to server";
+      toast.error(message);
+    }
+
     onClose();
   };
 

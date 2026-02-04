@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import { performAutomatedReview } from "@/lib/utils/resumeReview";
+import { excelImportApi, ExcelStudentImportData } from "@/lib/api/students";
+import { studentReviewApi } from "@/lib/api/student-review";
 
 /**
  * Admin page for managing student data from Excel files
@@ -34,7 +36,7 @@ export default function StudentsPage() {
   const [currentSheetName, setCurrentSheetName] = useState("");
 
   // Handle Excel data loaded
-  const handleDataLoaded = (data: any[], sheetName: string) => {
+  const handleDataLoaded = async (data: any[], sheetName: string) => {
     setRawData(data);
     setCurrentSheetName(sheetName);
     
@@ -52,6 +54,57 @@ export default function StudentsPage() {
     setSelectedSchool("all");
     
     toast.success(`Loaded ${normalized.length} students from "${sheetName}"`);
+    
+    // Import students to backend database
+    try {
+      const importData: ExcelStudentImportData[] = normalized
+        .filter((student) => student.email) // Only import students with email
+        .map((student) => ({
+          name: student.name || "",
+          email: student.email || "",
+          phone: student.phone || undefined,
+          campus: student.campus || undefined,
+          school: student.school || undefined,
+          status: student.rawStatus || student.status || undefined,
+          resume: student.resume || undefined,
+          projects: student.projects || undefined,
+          metadata: {
+            // Store any additional Excel fields
+            ...Object.fromEntries(
+              Object.entries(student).filter(
+                ([key]) =>
+                  !["id", "name", "email", "phone", "campus", "school", "status", "resume", "projects"].includes(key)
+              )
+            ),
+          },
+        }));
+      
+      if (importData.length > 0) {
+        const result = await excelImportApi.importStudents({ students: importData });
+        
+        if (result.success > 0) {
+          toast.success(
+            `Imported ${result.success} students to database. ` +
+            `${result.created_users} new users created, ` +
+            `${result.created_students} student profiles created. ` +
+            `${result.skipped} already existed.`
+          );
+        }
+        
+        if (result.failed > 0) {
+          toast.warning(
+            `Failed to import ${result.failed} students. Check console for details.`
+          );
+          console.error("Import errors:", result.errors);
+        }
+      }
+    } catch (error: any) {
+      console.error("Failed to import students to database:", error);
+      toast.error(
+        `Failed to sync students to database: ${error.response?.data?.detail || error.message}`
+      );
+      // Don't block the UI - Excel data is still loaded and usable
+    }
   };
 
   // Handle student selection
