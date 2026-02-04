@@ -14,12 +14,17 @@ export interface RegisterData {
   fullName?: string;
   email: string;
   password: string;
-  role: "student" | "placement" | "admin";
+  role: "student" | "placement_team" | "admin";
 }
 
 export interface LoginData {
   email: string;
   password: string;
+}
+
+export interface GoogleAuthData {
+  idToken: string;
+  role?: "student" | "placement_team" | "admin";
 }
 
 // Auth response shape based on backend API
@@ -97,6 +102,24 @@ export const authApi = {
     // Store user info if available
     if (typeof window !== "undefined" && response.data.user) {
       setUserInfo(response.data.user);
+    }
+    return response.data;
+  },
+
+  googleLogin: async (data: GoogleAuthData): Promise<AuthResponse> => {
+    const response = await api.post<AuthResponse>("/api/v1/auth/google", data);
+    if (typeof window !== "undefined" && response.data.access_token) {
+      // Persist tokens for subsequent requests
+      localStorage.setItem("access_token", response.data.access_token);
+      if (response.data.refresh_token) {
+        localStorage.setItem("refresh_token", response.data.refresh_token);
+      }
+      // Store user info for quick access
+      if (response.data.user) {
+        setUserInfo(response.data.user);
+      }
+      // Set default auth header for axios instance
+      api.defaults.headers.common.Authorization = `Bearer ${response.data.access_token}`;
     }
     return response.data;
   },

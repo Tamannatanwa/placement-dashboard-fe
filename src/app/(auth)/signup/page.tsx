@@ -16,17 +16,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { registerSchema, type RegisterFormData } from "@/lib/validations/auth";
 import { authApi } from "@/lib/api/auth";
 import { toast } from "sonner";
 import { AuthSidePanel } from "@/components/auth/AuthSidePanel";
+import { GoogleLoginButton } from "@/components/auth/GoogleLoginButton";
 import { isAuthenticated, getUserRole, getDashboardRoute } from "@/lib/utils/auth";
 
 export default function SignupPage() {
@@ -136,12 +130,15 @@ export default function SignupPage() {
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                         <Input
                           type="email"
-                          placeholder="john@example.com"
+                          placeholder="john@navgurukul.org"
                           className="pl-10"
                           {...field}
                         />
                       </div>
                     </FormControl>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Only @navgurukul.org emails are allowed
+                    </p>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -183,29 +180,6 @@ export default function SignupPage() {
                 )}
               />
 
-              {/* <FormField
-                control={form.control}
-                name="role"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>I am a</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select your role" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="student">Student</SelectItem>
-                        <SelectItem value="placement">Placement Officer</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              /> */}
-
               <Button
                 type="submit"
                 className="w-full bg-cyan-600 hover:bg-cyan-700 dark:bg-cyan-500 dark:hover:bg-cyan-600 text-white h-11"
@@ -220,6 +194,9 @@ export default function SignupPage() {
               </Button>
             </form>
           </Form>
+
+          {/* Google Signup - Only shown when enabled */}
+          <GoogleLoginButton isSignup={true} />
 
           <p className="text-xs text-center text-muted-foreground">
             By creating an account, you agree to our{" "}
