@@ -28,31 +28,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatDistanceToNow } from "date-fns";
-
-interface ServiceStatus {
-  name: string;
-  status: "healthy" | "degraded" | "down";
-  uptime: number;
-  lastCheck: Date;
-  responseTime: number;
-  description: string;
-}
-
-interface CrawlerStatus {
-  name: string;
-  status: "running" | "idle" | "error";
-  lastRun: Date;
-  jobsFound: number;
-  errors: number;
-  nextRun: Date;
-}
-
-interface ClassifierStatus {
-  status: "active" | "idle" | "error";
-  accuracy: number;
-  totalClassified: number;
-  lastRun: Date;
-}
+import {
+  adminApi,
+  MonitoringServicesUi,
+  MonitoringCrawlerUi,
+  MonitoringClassifierUi,
+  MonitoringDowntimeUi,
+} from "@/lib/api/admin";
 
 interface BugReport {
   id: string;
@@ -63,139 +45,79 @@ interface BugReport {
   reportedBy: string;
 }
 
-interface DowntimeEvent {
-  id: string;
-  service: string;
-  startTime: Date;
-  endTime: Date | null;
-  duration: number;
-  reason: string;
-  status: "resolved" | "ongoing";
-}
-
 export default function MonitoringPage() {
-  const [services, setServices] = useState<ServiceStatus[]>([
-    {
-      name: "Frontend",
-      status: "healthy",
-      uptime: 99.9,
-      lastCheck: new Date(),
-      responseTime: 120,
-      description: "Next.js application",
-    },
-    {
-      name: "Backend API",
-      status: "healthy",
-      uptime: 99.8,
-      lastCheck: new Date(),
-      responseTime: 85,
-      description: "FastAPI backend service",
-    },
-    {
-      name: "Database",
-      status: "healthy",
-      uptime: 99.95,
-      lastCheck: new Date(),
-      responseTime: 45,
-      description: "PostgreSQL database",
-    },
-    {
-      name: "Job Crawler",
-      status: "degraded",
-      uptime: 98.5,
-      lastCheck: new Date(Date.now() - 300000),
-      responseTime: 250,
-      description: "Automated job scraping service",
-    },
-  ]);
+  const [services, setServices] = useState<MonitoringServicesUi[]>([]);
 
-  const [crawlers, setCrawlers] = useState<CrawlerStatus[]>([
-    {
-      name: "LinkedIn Crawler",
-      status: "running",
-      lastRun: new Date(Date.now() - 3600000),
-      jobsFound: 24,
-      errors: 0,
-      nextRun: new Date(Date.now() + 10800000),
-    },
-    {
-      name: "Indeed Crawler",
-      status: "running",
-      lastRun: new Date(Date.now() - 1800000),
-      jobsFound: 18,
-      errors: 2,
-      nextRun: new Date(Date.now() + 12600000),
-    },
-    {
-      name: "Naukri Crawler",
-      status: "idle",
-      lastRun: new Date(Date.now() - 7200000),
-      jobsFound: 0,
-      errors: 0,
-      nextRun: new Date(Date.now() + 3600000),
-    },
-  ]);
+  const [crawlers, setCrawlers] = useState<MonitoringCrawlerUi[]>([]);
 
-  const [classifier, setClassifier] = useState<ClassifierStatus>({
-    status: "active",
-    accuracy: 94.5,
-    totalClassified: 12456,
-    lastRun: new Date(Date.now() - 600000),
-  });
+  const [classifier, setClassifier] = useState<MonitoringClassifierUi | null>(null);
 
-  const [bugs, setBugs] = useState<BugReport[]>([
-    {
-      id: "BUG-001",
-      title: "Job search filter not working on mobile",
-      severity: "high",
-      status: "open",
-      reportedAt: new Date(Date.now() - 86400000),
-      reportedBy: "admin@example.com",
-    },
-    {
-      id: "BUG-002",
-      title: "Resume upload fails for files > 5MB",
-      severity: "medium",
-      status: "in-progress",
-      reportedAt: new Date(Date.now() - 172800000),
-      reportedBy: "student@example.com",
-    },
-    {
-      id: "BUG-003",
-      title: "Dashboard stats not updating in real-time",
-      severity: "low",
-      status: "resolved",
-      reportedAt: new Date(Date.now() - 259200000),
-      reportedBy: "admin@example.com",
-    },
-  ]);
+  const [bugs, setBugs] = useState<BugReport[]>([]);
 
-  const [downtimeHistory, setDowntimeHistory] = useState<DowntimeEvent[]>([
-    {
-      id: "DT-001",
-      service: "Job Crawler",
-      startTime: new Date(Date.now() - 172800000),
-      endTime: new Date(Date.now() - 172700000),
-      duration: 100000,
-      reason: "API rate limit exceeded",
-      status: "resolved",
-    },
-    {
-      id: "DT-002",
-      service: "Backend API",
-      startTime: new Date(Date.now() - 604800000),
-      endTime: new Date(Date.now() - 604700000),
-      duration: 100000,
-      reason: "Database connection pool exhausted",
-      status: "resolved",
-    },
-  ]);
+  const [downtimeHistory, setDowntimeHistory] = useState<MonitoringDowntimeUi[]>([]);
 
   const [lastRefresh, setLastRefresh] = useState(new Date());
 
+  useEffect(() => {
+    refreshData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const refreshData = () => {
     setLastRefresh(new Date());
-    // TODO: Fetch latest data from API
+    // Scraping & job stats drive the monitoring view
+    Promise.all([adminApi.getScrapingStats(), adminApi.getJobStats()])
+      .then(([scraping, jobs]) => {
+        // Map scraping stats into high-level services
+        const now = new Date();
+        const mappedServices: MonitoringServicesUi[] = [
+          {
+            name: "Backend API",
+            status: "healthy",
+            uptime: 99.0,
+            lastCheck: now,
+            responseTime: 100,
+            description: "FastAPI backend service",
+          },
+          {
+            name: "Telegram Scraper",
+            status: scraping.channels_scraped_today > 0 ? "healthy" : "degraded",
+            uptime: 98.0,
+            lastCheck: now,
+            responseTime: 200,
+            description: "Telegram scraping & ingestion pipeline",
+          },
+        ];
+        setServices(mappedServices);
+
+        // Map to simple crawler tiles using scraping stats
+        const mappedCrawlers: MonitoringCrawlerUi[] = [
+          {
+            name: "Telegram Crawler",
+            status: scraping.messages_today > 0 ? "running" : "idle",
+            lastRun: now,
+            jobsFound: jobs.jobs_today,
+            errors: 0,
+            nextRun: new Date(Date.now() + 60 * 60 * 1000),
+          },
+        ];
+        setCrawlers(mappedCrawlers);
+
+        // Classifier summary based on job stats
+        setClassifier({
+          status: "active",
+          accuracy: 0, // not provided yet
+          totalClassified: jobs.total_jobs,
+          lastRun: now,
+        });
+
+        // For now, keep bugs/downtime empty; can be wired to dedicated endpoints later
+        setBugs([]);
+        setDowntimeHistory([]);
+      })
+      .catch((error) => {
+        console.error("Failed to load monitoring data", error);
+      });
   };
 
   const getStatusBadge = (status: string) => {
@@ -346,30 +268,44 @@ export default function MonitoringPage() {
                   <CardTitle>Job Classifier Status</CardTitle>
                   <CardDescription>AI-powered job classification system</CardDescription>
                 </div>
-                <Badge {...getStatusBadge(classifier.status)}>{classifier.status}</Badge>
+                {classifier ? (
+                  <Badge {...getStatusBadge(classifier.status)}>{classifier.status}</Badge>
+                ) : (
+                  <Badge variant="outline" className="bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-500/20">
+                    loading
+                  </Badge>
+                )}
               </div>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <div className="text-sm text-muted-foreground mb-2">Accuracy</div>
-                  <div className="text-3xl font-bold">{classifier.accuracy}%</div>
-                  <div className="flex items-center gap-1 mt-2 text-green-600 dark:text-green-400">
-                    <TrendingUp className="h-4 w-4" />
-                    <span className="text-xs">+2.3% from last week</span>
+              {classifier ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-2">Accuracy</div>
+                    <div className="text-3xl font-bold">{classifier.accuracy}%</div>
+                    <div className="flex items-center gap-1 mt-2 text-green-600 dark:text-green-400">
+                      <TrendingUp className="h-4 w-4" />
+                      <span className="text-xs">+2.3% from last week</span>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-2">Total Classified</div>
+                    <div className="text-3xl font-bold">
+                      {classifier.totalClassified.toLocaleString()}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-2">Last Run</div>
+                    <div className="text-lg font-medium">
+                      {formatDistanceToNow(classifier.lastRun, { addSuffix: true })}
+                    </div>
                   </div>
                 </div>
-                <div>
-                  <div className="text-sm text-muted-foreground mb-2">Total Classified</div>
-                  <div className="text-3xl font-bold">{classifier.totalClassified.toLocaleString()}</div>
+              ) : (
+                <div className="text-sm text-muted-foreground">
+                  Loading classifier stats...
                 </div>
-                <div>
-                  <div className="text-sm text-muted-foreground mb-2">Last Run</div>
-                  <div className="text-lg font-medium">
-                    {formatDistanceToNow(classifier.lastRun, { addSuffix: true })}
-                  </div>
-                </div>
-              </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -492,5 +428,8 @@ export default function MonitoringPage() {
     </div>
   );
 }
+
+
+
 
 

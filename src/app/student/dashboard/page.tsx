@@ -2,79 +2,167 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import {
-  FileText,
-  Bookmark,
-  CheckCircle2,
-  TrendingUp,
-  MapPin,
-  Clock,
-  DollarSign,
-  Star,
-  Filter,
-  Search,
-  FileEdit,
-  User,
-  Settings,
-  ArrowRight,
-  ExternalLink,
-} from "lucide-react";
+import { Briefcase, Bell, User, AlertCircle, LogOut, Settings, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { getUserInfo, clearUserInfo } from "@/lib/utils/auth";
+import { authApi } from "@/lib/api/auth";
+import { ClientOnly } from "@/components/ui/ClientOnly";
+import { JobStats } from "@/components/jobs/JobStats";
+import { JobSearch } from "@/components/jobs/JobSearch";
+import { JobFilters } from "@/components/jobs/JobFilters";
+import { JobCard } from "@/components/jobs/JobCard";
 import { jobsApi } from "@/lib/api/jobs";
-import { Job } from "@/types/job";
+import { studentsApi } from "@/lib/api/students";
+import { Job, JobFilters as JobFiltersType } from "@/types/job";
 import { toast } from "sonner";
-import { getUserInfo } from "@/lib/utils/auth";
-import Link from "next/link";
-import { formatDistanceToNow } from "date-fns";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Progress } from "@/components/ui/progress";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 /**
  * Student Dashboard Page
- * Main dashboard with profile strength, stats, recommended jobs, and quick actions
+ * Shows job listings with search, filters, and statistics
  */
 export default function StudentDashboard() {
   const router = useRouter();
-  const [userInfo, setUserInfo] = useState<{ id: string; email: string; role: string } | null>(null);
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [recentJobs, setRecentJobs] = useState<Job[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDashboardLoading, setIsDashboardLoading] = useState(true);
+  const [userInfo, setUserInfo] = useState<{ id: string; email: string; role: string } | null>(null);
+  const [filters, setFilters] = useState<JobFiltersType>({
+    page: 1,
+    size: 20,
+    sort_by: "created_at",
+    sort_order: "desc",
+  });
   const [searchQuery, setSearchQuery] = useState("");
   const [savedJobs, setSavedJobs] = useState<Set<string>>(new Set());
+  const [recommendedJobs, setRecommendedJobs] = useState<Job[]>([]);
+  const [isLoadingRecommended, setIsLoadingRecommended] = useState(false);
+  const [totalJobs, setTotalJobs] = useState(0);
+  const [newThisWeek, setNewThisWeek] = useState(0);
+  const [savedJobsCount, setSavedJobsCount] = useState(0);
+  const [profileCompleteness, setProfileCompleteness] = useState(0);
+  const [notificationsUnread, setNotificationsUnread] = useState(0);
+  const [recommendationsAvailable, setRecommendationsAvailable] = useState(0);
 
-  // Mock data for dashboard stats
-  const [applications, setApplications] = useState(8);
-  const [savedJobsCount, setSavedJobsCount] = useState(12);
-  const [offers, setOffers] = useState(2);
-  const [profileViews, setProfileViews] = useState(24);
-  const [profileStrength, setProfileStrength] = useState(85);
-
-  // Recent applications mock data
-  const recentApplications = [
-    { id: "1", title: "Senior Frontend Developer", company: "Google", date: "2024-01-18", status: "In Review", statusColor: "bg-blue-500" },
-    { id: "2", title: "React Developer", company: "Meta", date: "2024-01-17", status: "Interview Scheduled", statusColor: "bg-purple-500" },
-    { id: "3", title: "Full Stack Engineer", company: "Amazon", date: "2024-01-15", status: "Rejected", statusColor: "bg-red-500" },
-  ];
-
+  // Load dashboard data on mount
   useEffect(() => {
     const user = getUserInfo();
     setUserInfo(user);
-    loadRecommendedJobs();
+    loadDashboard();
     loadSavedJobs();
+    loadRecommendedJobs();
   }, []);
 
-  // Load recommended jobs
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+      setUserInfo(null);
+      clearUserInfo();
+      toast.success("Logged out successfully");
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast.error("Failed to logout");
+    }
+  };
+
+  const userName = userInfo?.email?.split("@")[0] || "Student";
+  const userInitials = userName.split(' ').map(n => n[0]).join('').toUpperCase() || "S";
+
+  // Load jobs when filters change
+  useEffect(() => {
+    loadJobs();
+  }, [filters]);
+
+  // Calculate new jobs this week
+  useEffect(() => {
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const newJobs = jobs.filter(
+      (job) => new Date(job.created_at) >= weekAgo
+    ).length;
+    setNewThisWeek(newJobs);
+  }, [jobs]);
+
+  // Load dashboard data from API
+  const loadDashboard = async () => {
+    setIsDashboardLoading(true);
+    try {
+      const dashboardData = await studentsApi.getDashboard();
+      
+      // Set dashboard stats
+      setRecentJobs(dashboardData.recent_jobs || []);
+      setSavedJobsCount(dashboardData.saved_jobs_count || 0);
+      setProfileCompleteness(dashboardData.profile_completeness || 0);
+      setNotificationsUnread(dashboardData.notifications_unread || 0);
+      setRecommendationsAvailable(dashboardData.recommendations_available || 0);
+      
+      // Update saved jobs set from API count
+      if (dashboardData.student?.saved_jobs_count) {
+        setSavedJobsCount(dashboardData.student.saved_jobs_count);
+      }
+    } catch (error: any) {
+      console.error("Error loading dashboard:", error);
+      // Don't show error toast for dashboard - it's not critical if it fails
+    } finally {
+      setIsDashboardLoading(false);
+    }
+  };
+
+  // Load saved jobs from API
+  const loadSavedJobs = async () => {
+    try {
+      const response = await studentsApi.getSavedJobs();
+      const savedJobIds = new Set(response.saved_jobs.map((sj) => String(sj.job_id)));
+      setSavedJobs(savedJobIds);
+      setSavedJobsCount(response.total);
+    } catch (error: any) {
+      console.error("Error loading saved jobs:", error);
+      // Silently fail - saved jobs can be loaded later
+    }
+  };
+
+  // Load recommended jobs from API
   const loadRecommendedJobs = async () => {
+    setIsLoadingRecommended(true);
+    try {
+      const response = await studentsApi.getRecommendedJobs(10, 0);
+      const jobs = response.recommendations.map((rec) => rec.job);
+      setRecommendedJobs(jobs);
+      setRecommendationsAvailable(response.total);
+    } catch (error: any) {
+      console.error("Error loading recommended jobs:", error);
+      // Silently fail - recommendations are optional
+    } finally {
+      setIsLoadingRecommended(false);
+    }
+  };
+
+  // Load jobs from API
+  const loadJobs = async () => {
     setIsLoading(true);
     try {
-      const response = await jobsApi.getJobs({
-        page: 1,
-        size: 6,
-        sort_by: "created_at",
-        sort_order: "desc",
-        is_active: true,
-      });
+      const response = await jobsApi.getJobs(filters);
       setJobs(response.items);
+      setTotalJobs(response.total);
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to load jobs");
       console.error("Error loading jobs:", error);
@@ -83,43 +171,84 @@ export default function StudentDashboard() {
     }
   };
 
-  // Load saved jobs from localStorage
-  const loadSavedJobs = () => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("savedJobs");
-      if (saved) {
-        try {
-          const savedArray = JSON.parse(saved);
-          setSavedJobs(new Set(savedArray));
-          setSavedJobsCount(savedArray.length);
-        } catch (e) {
-          console.error("Error loading saved jobs:", e);
-        }
+  // Handle search - filter by skills or title
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    // If API supports search, we can add it to filters
+    // For now, we'll filter client-side
+    if (query.trim()) {
+      // Update filters with skills search if it looks like skills
+      const skills = query.split(",").map((s) => s.trim()).filter(Boolean);
+      if (skills.length > 0) {
+        setFilters({
+          ...filters,
+          skills: skills.join(","),
+          page: 1, // Reset to first page
+        });
       }
+    } else {
+      // Clear skills filter when search is cleared
+      const { skills, ...restFilters } = filters;
+      setFilters({ ...restFilters, page: 1 });
     }
   };
 
-  // Handle save job
-  const handleSave = (jobId: string) => {
-    setSavedJobs((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(jobId)) {
-        newSet.delete(jobId);
-        toast.success("Job removed from saved");
-      } else {
-        newSet.add(jobId);
-        toast.success("Job saved");
+  // Handle job application with view tracking
+  const handleApply = async (jobId: string) => {
+    try {
+      // Track job view before navigating
+      const jobIdNum = parseInt(jobId, 10);
+      if (!isNaN(jobIdNum)) {
+        await studentsApi.trackJobView(jobIdNum, {
+          job_id: jobIdNum,
+          duration_seconds: 0, // We'll track duration on the detail page
+          source: "dashboard",
+        });
       }
-      setSavedJobsCount(newSet.size);
-      // Save to localStorage
-      if (typeof window !== "undefined") {
-        localStorage.setItem("savedJobs", JSON.stringify(Array.from(newSet)));
-      }
-      return newSet;
-    });
+    } catch (error) {
+      // Silently fail - view tracking is not critical
+      console.error("Error tracking job view:", error);
+    }
+    
+    // Navigate to job detail or application page
+    router.push(`/jobs/${jobId}`);
   };
 
-  // Filter jobs by search query
+  // Handle save job using API
+  const handleSave = async (jobId: string) => {
+    const jobIdNum = parseInt(jobId, 10);
+    if (isNaN(jobIdNum)) return;
+
+    try {
+      const isCurrentlySaved = savedJobs.has(jobId);
+      
+      if (isCurrentlySaved) {
+        // Check if saved to get the saved job ID, then we'd need a delete endpoint
+        // For now, we'll just show a message that unsaving requires the delete endpoint
+        toast.info("To unsave, please use the saved jobs page");
+        return;
+      }
+
+      // Save job via API
+      await studentsApi.saveJob({
+        job_id: jobIdNum,
+      });
+
+      // Update local state
+      setSavedJobs((prev) => {
+        const newSet = new Set(prev);
+        newSet.add(jobId);
+        return newSet;
+      });
+      setSavedJobsCount((prev) => prev + 1);
+      toast.success("Job saved successfully");
+    } catch (error: any) {
+      console.error("Error saving job:", error);
+      toast.error(error.response?.data?.message || "Failed to save job");
+    }
+  };
+
+  // Filter jobs by search query (client-side for now)
   const filteredJobs = useMemo(() => {
     if (!searchQuery.trim()) return jobs;
     return jobs.filter(
@@ -132,330 +261,298 @@ export default function StudentDashboard() {
     );
   }, [jobs, searchQuery]);
 
-  const userName = userInfo?.email?.split("@")[0] || "Student";
-
   return (
     <div className="min-h-screen bg-background">
-      <main className="container mx-auto px-4 md:px-6 py-8 space-y-8">
+      {/* Header */}
+      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Briefcase className="h-6 w-6 text-cyan-500 dark:text-cyan-400" />
+            <span className="font-bold text-xl">PlaceHub</span>
+          </div>
+
+          <nav className="hidden md:flex items-center gap-6">
+            <a href="#jobs" className="text-sm font-medium hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">
+              Jobs
+            </a>
+            <a href="/student/jobs/saved" className="text-sm font-medium hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">
+              Saved Jobs
+            </a>
+            <a href="/student/applications" className="text-sm font-medium hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">
+              Applications
+            </a>
+            <a href="#companies" className="text-sm font-medium hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">
+              Companies
+            </a>
+            <a href="#resources" className="text-sm font-medium hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">
+              Resources
+            </a>
+          </nav>
+
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" className="relative">
+              <Bell className="h-5 w-5" />
+              {notificationsUnread > 0 && (
+                <span className="absolute top-0 right-0 h-2 w-2 bg-cyan-600 rounded-full" />
+              )}
+            </Button>
+            <ClientOnly
+              fallback={
+                <Button variant="ghost" className="flex items-center gap-2">
+                  <Avatar className="h-8 w-8 bg-cyan-600 text-white">
+                    <AvatarFallback>{userInitials}</AvatarFallback>
+                  </Avatar>
+                  <div className="hidden md:block text-left">
+                    <div className="text-sm font-medium">{userName}</div>
+                    <div className="text-xs text-muted-foreground capitalize">
+                      {userInfo?.role || "Student"}
+                    </div>
+                  </div>
+                </Button>
+              }
+            >
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center gap-2">
+                    <Avatar className="h-8 w-8 bg-cyan-600 text-white">
+                      <AvatarFallback>{userInitials}</AvatarFallback>
+                    </Avatar>
+                    <div className="hidden md:block text-left">
+                      <div className="text-sm font-medium">{userName}</div>
+                      <div className="text-xs text-muted-foreground capitalize">
+                        {userInfo?.role || "Student"}
+                      </div>
+                    </div>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end">
+                  <DropdownMenuLabel>
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">{userName}</p>
+                      <p className="text-xs leading-none text-muted-foreground capitalize">
+                        {userInfo?.role || "Student"}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => router.push("/profile/wizard")}>
+                    <UserCircle className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push("/student/settings")}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} className="text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </ClientOnly>
+          </div>
+        </div>
+      </header>
+
+      <main className="container mx-auto px-4 py-8 space-y-8">
         {/* Welcome Section */}
         <div className="space-y-2">
-          <h1 className="text-4xl md:text-5xl font-bold">
-            Welcome back, {userName}! 👋
+          <h1 className="text-3xl md:text-4xl font-bold">
+            Welcome back! 👋
           </h1>
-          <p className="text-lg text-muted-foreground">
-            Here&apos;s what&apos;s happening with your job search today
+          <p className="text-muted-foreground text-lg">
+            Discover your next career opportunity
           </p>
         </div>
 
-        {/* Profile Strength Section */}
-        <Card className="bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border-cyan-500/20">
-          <CardContent className="pt-6">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold mb-2">Profile Strength</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Your profile is looking great! Add skills to reach 100%
+        {/* Profile Completeness Alert */}
+        {profileCompleteness < 100 && (
+          <Card className="border-cyan-500/20 bg-cyan-500/5">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
+                  <CardTitle className="text-base">Profile Strength</CardTitle>
+                </div>
+                <span className="text-sm font-medium">{profileCompleteness}%</span>
+              </div>
+              <CardDescription>
+                {profileCompleteness >= 85
+                  ? "Your profile is looking great! Add skills to reach 100%"
+                  : "Complete your profile to get better job recommendations"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Progress value={profileCompleteness} className="h-2 mb-4" />
+              <Button
+                onClick={() => router.push("/profile/wizard")}
+                className="w-full sm:w-auto bg-cyan-600 hover:bg-cyan-700 dark:bg-cyan-500 dark:hover:bg-cyan-600 text-white"
+              >
+                Complete Profile
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Stats Cards */}
+        <JobStats
+          availableJobs={totalJobs}
+          newThisWeek={newThisWeek}
+          applied={0} // TODO: Get from applications API
+          saved={savedJobsCount}
+        />
+
+        {/* Search Bar */}
+        <div className="max-w-2xl">
+          <JobSearch
+            onSearch={handleSearch}
+            placeholder="Search jobs by title, company, or skills..."
+          />
+        </div>
+
+        {/* Filters */}
+        <div className="bg-card border rounded-lg p-6">
+          <JobFilters
+            filters={filters}
+            onFiltersChange={setFilters}
+            onClear={() => {
+              setFilters({
+                page: 1,
+                size: 20,
+                sort_by: "created_at",
+                sort_order: "desc",
+              });
+            }}
+          />
+        </div>
+
+        {/* Recommended Jobs Section */}
+        {recommendedJobs.length > 0 && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold">Recommended for You</h2>
+                <p className="text-sm text-muted-foreground">
+                  Jobs matched to your profile
                 </p>
-                <div className="space-y-2">
-                  <div className="relative h-3 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                    <div 
-                      className="absolute top-0 left-0 h-full bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full transition-all duration-500"
-                      style={{ width: `${profileStrength}%` }}
-                    />
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">
-                      {profileStrength}% Complete
-                    </span>
-                    <Button
-                      size="sm"
-                      className="bg-cyan-600 hover:bg-cyan-700 dark:bg-cyan-500 dark:hover:bg-cyan-600 text-white"
-                      onClick={() => router.push("/profile/wizard")}
-                    >
-                      Complete Profile
-                    </Button>
-                  </div>
-                </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
+            {isLoadingRecommended ? (
+              <div className="text-center py-8">
+                <div className="text-muted-foreground">Loading recommendations...</div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {recommendedJobs.slice(0, 4).map((job) => (
+                  <JobCard
+                    key={job.id}
+                    job={job}
+                    onApply={handleApply}
+                    onSave={handleSave}
+                    isSaved={savedJobs.has(job.id)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
-        {/* Key Metrics Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Applications Card */}
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-3 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
-                  <FileText className="h-6 w-6" />
-                </div>
+        {/* Recent Jobs Section */}
+        {recentJobs.length > 0 && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold">Recent Jobs</h2>
+                <p className="text-sm text-muted-foreground">
+                  Jobs you might be interested in
+                </p>
               </div>
-              <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">+2 this week</p>
-                <p className="text-3xl font-bold">{applications}</p>
-                <p className="text-sm text-muted-foreground">Applications</p>
-              </div>
-            </CardContent>
-          </Card>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {recentJobs.slice(0, 4).map((job) => (
+                <JobCard
+                  key={job.id}
+                  job={job}
+                  onApply={handleApply}
+                  onSave={handleSave}
+                  isSaved={savedJobs.has(job.id)}
+                />
+              ))}
+            </div>
+          </div>
+        )}
 
-          {/* Saved Jobs Card */}
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-3 rounded-lg bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">
-                  <Bookmark className="h-6 w-6" />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">3 new today</p>
-                <p className="text-3xl font-bold">{savedJobsCount}</p>
-                <p className="text-sm text-muted-foreground">Saved Jobs</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Offers Card */}
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-3 rounded-lg bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400">
-                  <CheckCircle2 className="h-6 w-6" />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">Pending</p>
-                <p className="text-3xl font-bold">{offers}</p>
-                <p className="text-sm text-muted-foreground">Offers</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Profile Views Card */}
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-3 rounded-lg bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400">
-                  <TrendingUp className="h-6 w-6" />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">+8 this week</p>
-                <p className="text-3xl font-bold">{profileViews}</p>
-                <p className="text-sm text-muted-foreground">Profile Views</p>
-              </div>
-            </CardContent>
-          </Card>
+        {/* All Jobs Section */}
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold">
+            {filteredJobs.length} Jobs Found
+          </h2>
+          <Select
+            value={filters.sort_by || "created_at"}
+            onValueChange={(value: "created_at" | "title" | "location" | "view_count") => {
+              setFilters({ ...filters, sort_by: value });
+            }}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="created_at">Latest</SelectItem>
+              <SelectItem value="title">Title</SelectItem>
+              <SelectItem value="location">Location</SelectItem>
+              <SelectItem value="view_count">Most Popular</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
-        {/* Recommended For You Section */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold">Recommended For You</h2>
-            <Button variant="ghost" asChild>
-              <Link href="/student/jobs">
-                View All <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+        {/* Job Listings */}
+        {isLoading ? (
+          <div className="text-center py-12">
+            <div className="text-muted-foreground">Loading jobs...</div>
           </div>
-
-          {/* Search Bar */}
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search jobs..."
-                className="pl-10"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+        ) : filteredJobs.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="text-muted-foreground">No jobs found. Try adjusting your filters.</div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {filteredJobs.map((job) => (
+              <JobCard
+                key={job.id}
+                job={job}
+                onApply={handleApply}
+                onSave={handleSave}
+                isSaved={savedJobs.has(job.id)}
               />
-            </div>
-            <Button variant="outline" size="icon">
-              <Filter className="h-5 w-5" />
+            ))}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalJobs > (filters.size || 20) && (
+          <div className="flex items-center justify-center gap-2">
+            <Button
+              variant="outline"
+              disabled={filters.page === 1}
+              onClick={() => setFilters({ ...filters, page: (filters.page || 1) - 1 })}
+            >
+              Previous
+            </Button>
+            <span className="text-sm text-muted-foreground">
+              Page {filters.page || 1} of {Math.ceil(totalJobs / (filters.size || 20))}
+            </span>
+            <Button
+              variant="outline"
+              disabled={(filters.page || 1) >= Math.ceil(totalJobs / (filters.size || 20))}
+              onClick={() => setFilters({ ...filters, page: (filters.page || 1) + 1 })}
+            >
+              Next
             </Button>
           </div>
-
-          {/* Job Listings */}
-          {isLoading ? (
-            <div className="text-center py-12">
-              <div className="text-muted-foreground">Loading jobs...</div>
-            </div>
-          ) : filteredJobs.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-muted-foreground">No jobs found. Try adjusting your search.</div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredJobs.slice(0, 6).map((job) => (
-                <Card key={job.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="text-lg mb-1">{job.title}</CardTitle>
-                        <p className="text-sm text-muted-foreground">{job.company_name}</p>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleSave(job.id)}
-                        className="h-8 w-8"
-                      >
-                        <Bookmark
-                          className={`h-4 w-4 ${
-                            savedJobs.has(job.id) ? "fill-cyan-600 text-cyan-600" : ""
-                          }`}
-                        />
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {/* Skills Tags */}
-                    {job.skills_required && job.skills_required.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {job.skills_required.slice(0, 3).map((skill, idx) => (
-                          <Badge
-                            key={idx}
-                            variant="secondary"
-                            className="bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20"
-                          >
-                            {skill}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Job Details */}
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <MapPin className="h-4 w-4" />
-                        <span>
-                          {job.work_type === "remote"
-                            ? "Remote"
-                            : job.work_type === "hybrid"
-                            ? "Hybrid"
-                            : job.location || "Not specified"}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Clock className="h-4 w-4" />
-                        <span>{job.employment_type || job.job_type || "Full-time"}</span>
-                      </div>
-                      {(job.salary_min || job.salary_max) && (
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <DollarSign className="h-4 w-4" />
-                          <span>
-                            {job.salary_min && job.salary_max
-                              ? `$${job.salary_min}k-$${job.salary_max}k`
-                              : job.salary_min
-                              ? `$${job.salary_min}k+`
-                              : `$${job.salary_max}k`}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Posted Time & Match */}
-                    <div className="flex items-center justify-between pt-2 border-t">
-                      <span className="text-xs text-muted-foreground">
-                        {job.created_at
-                          ? `Posted ${formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}`
-                          : "Recently posted"}
-                      </span>
-                      <div className="flex items-center gap-1">
-                        <Star className="h-4 w-4 fill-green-500 text-green-500" />
-                        <span className="text-xs font-medium text-green-600 dark:text-green-400">
-                          {Math.floor(Math.random() * 20 + 80)}%
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Apply Button */}
-                    <Button
-                      className="w-full bg-cyan-600 hover:bg-cyan-700 dark:bg-cyan-500 dark:hover:bg-cyan-600 text-white"
-                      onClick={() => router.push(`/student/jobs/${job.id}`)}
-                    >
-                      Apply Now
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Recent Applications & Quick Actions */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Recent Applications */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Applications</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {recentApplications.map((app) => (
-                <div
-                  key={app.id}
-                  className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
-                >
-                  <div className="flex-1">
-                    <h4 className="font-semibold">{app.title}</h4>
-                    <p className="text-sm text-muted-foreground">{app.company}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{app.date}</p>
-                  </div>
-                  <Badge className={`${app.statusColor} text-white`}>{app.status}</Badge>
-                </div>
-              ))}
-              <Button variant="ghost" className="w-full" asChild>
-                <Link href="/student/applications">
-                  View All Applications <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Quick Actions */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <Button
-                variant="outline"
-                className="w-full justify-start h-auto py-4 hover:bg-accent"
-                onClick={() => router.push("/profile/wizard")}
-              >
-                <FileEdit className="mr-3 h-5 w-5" />
-                <div className="text-left">
-                  <div className="font-medium">Update Resume</div>
-                  <div className="text-xs text-muted-foreground">Keep your resume current</div>
-                </div>
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full justify-start h-auto py-4 hover:bg-accent"
-                onClick={() => router.push("/profile/wizard")}
-              >
-                <User className="mr-3 h-5 w-5" />
-                <div className="text-left">
-                  <div className="font-medium">Edit Profile</div>
-                  <div className="text-xs text-muted-foreground">Update your information</div>
-                </div>
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full justify-start h-auto py-4 hover:bg-accent"
-                onClick={() => router.push("/student/settings")}
-              >
-                <Settings className="mr-3 h-5 w-5" />
-                <div className="text-left">
-                  <div className="font-medium">Preferences</div>
-                  <div className="text-xs text-muted-foreground">Manage your settings</div>
-                </div>
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+        )}
       </main>
     </div>
   );
 }
+

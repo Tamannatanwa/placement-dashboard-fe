@@ -81,7 +81,7 @@ export default function Home() {
                 Dashboard
               </Button>
               <Button size="lg" variant="outline" className="w-full sm:w-auto border-cyan-600 text-cyan-600 hover:bg-cyan-50 dark:hover:bg-cyan-950" asChild>
-                <Link href="/signup">
+                <Link href="/login">
                   Get Started Free
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
@@ -195,7 +195,7 @@ export default function Home() {
                 Dashboard
               </Button>
               <Button size="lg" variant="outline" className="w-full sm:w-auto border-cyan-600 text-cyan-600 hover:bg-cyan-50 dark:hover:bg-cyan-950" asChild>
-                <Link href="/signup">
+                <Link href="/login">
                   Create Free Account
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>

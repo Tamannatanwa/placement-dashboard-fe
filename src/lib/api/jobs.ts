@@ -1,30 +1,5 @@
-import axios from "axios";
+import { getApiInstance } from "./axios-instance";
 import { Job, JobsResponse, JobFilters } from "@/types/job";
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:8000";
-
-// Create axios instance with auth token
-const getApiInstance = () => {
-  const instance = axios.create({
-    baseURL: API_BASE_URL,
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  // Add auth token to requests
-  instance.interceptors.request.use((config) => {
-    if (typeof window !== "undefined") {
-      const token = localStorage.getItem("access_token");
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    }
-    return config;
-  });
-
-  return instance;
-};
 
 /**
  * Get paginated list of jobs with filters

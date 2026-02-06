@@ -144,14 +144,9 @@ export function Navbar() {
               </ClientOnly>
             </>
           ) : (
-            <>
-              <Button variant="ghost" asChild>
-                <Link href="/login">Log In</Link>
-              </Button>
-              <Button className="bg-cyan-600 hover:bg-cyan-700 dark:bg-cyan-500 dark:hover:bg-cyan-600 text-white" asChild>
-                <Link href="/signup">Get Started</Link>
-              </Button>
-            </>
+            <Button className="bg-cyan-600 hover:bg-cyan-700 dark:bg-cyan-500 dark:hover:bg-cyan-600 text-white" asChild>
+              <Link href="/login">Get Started</Link>
+            </Button>
           )}
         </div>
       </div>

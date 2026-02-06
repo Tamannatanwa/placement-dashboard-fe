@@ -1,14 +1,7 @@
-import axios from "axios";
+import { getApiInstance } from "./axios-instance";
 import { setUserInfo, clearUserInfo } from "@/lib/utils/auth";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:8000";
-
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+const api = getApiInstance();
 
 export interface RegisterData {
   fullName?: string;

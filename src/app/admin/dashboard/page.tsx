@@ -27,34 +27,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-
-interface DashboardStats {
-  total_jobs_today: number;
-  total_jobs_this_week: number;
-  total_channels: number;
-  total_companies: number;
-  total_cities: number;
-  total_students: number;
-  total_campuses: number;
-  active_students: number;
-  inactive_students: number;
-  jobs_trend: { date: string; count: number }[];
-}
+import { adminApi, AdminDashboardUiStats } from "@/lib/api/admin";
 
 export default function AdminDashboard() {
   const router = useRouter();
-  const [stats, setStats] = useState<DashboardStats>({
-    total_jobs_today: 0,
-    total_jobs_this_week: 0,
-    total_channels: 0,
-    total_companies: 0,
-    total_cities: 0,
-    total_students: 0,
-    total_campuses: 0,
-    active_students: 0,
-    inactive_students: 0,
-    jobs_trend: [],
-  });
+  const [stats, setStats] = useState<AdminDashboardUiStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [timeRange, setTimeRange] = useState<"today" | "week" | "month">("week");
 
@@ -65,31 +42,8 @@ export default function AdminDashboard() {
   const loadDashboardStats = async () => {
     setIsLoading(true);
     try {
-      // TODO: Replace with actual API call
-      // const response = await adminApi.getDashboardStats(timeRange);
-      // setStats(response);
-      
-      // Mock data for now
-      setStats({
-        total_jobs_today: 24,
-        total_jobs_this_week: 156,
-        total_channels: 12,
-        total_companies: 342,
-        total_cities: 28,
-        total_students: 1245,
-        total_campuses: 8,
-        active_students: 1180,
-        inactive_students: 65,
-        jobs_trend: [
-          { date: "Mon", count: 18 },
-          { date: "Tue", count: 24 },
-          { date: "Wed", count: 32 },
-          { date: "Thu", count: 28 },
-          { date: "Fri", count: 35 },
-          { date: "Sat", count: 12 },
-          { date: "Sun", count: 7 },
-        ],
-      });
+      const response = await adminApi.getDashboardStats();
+      setStats(response);
     } catch (error) {
       console.error("Error loading dashboard stats:", error);
     } finally {
@@ -100,7 +54,7 @@ export default function AdminDashboard() {
   const statCards = [
     {
       title: "Jobs Today",
-      value: stats.total_jobs_today,
+      value: stats?.total_jobs_today ?? 0,
       icon: Briefcase,
       color: "text-cyan-600 dark:text-cyan-400",
       bgColor: "bg-cyan-500/10",
@@ -108,7 +62,7 @@ export default function AdminDashboard() {
     },
     {
       title: "Jobs This Week",
-      value: stats.total_jobs_this_week,
+      value: stats?.total_jobs_this_week ?? 0,
       icon: TrendingUp,
       color: "text-blue-600 dark:text-blue-400",
       bgColor: "bg-blue-500/10",
@@ -116,7 +70,7 @@ export default function AdminDashboard() {
     },
     {
       title: "Total Channels",
-      value: stats.total_channels,
+      value: stats?.total_channels ?? 0,
       icon: Rss,
       color: "text-purple-600 dark:text-purple-400",
       bgColor: "bg-purple-500/10",
@@ -124,7 +78,7 @@ export default function AdminDashboard() {
     },
     {
       title: "Total Companies",
-      value: stats.total_companies,
+      value: stats?.total_companies ?? 0,
       icon: Building2,
       color: "text-green-600 dark:text-green-400",
       bgColor: "bg-green-500/10",
@@ -132,23 +86,25 @@ export default function AdminDashboard() {
     },
     {
       title: "Total Cities",
-      value: stats.total_cities,
+      value: stats?.total_cities ?? 0,
       icon: MapPin,
       color: "text-orange-600 dark:text-orange-400",
       bgColor: "bg-orange-500/10",
     },
     {
       title: "Total Students",
-      value: stats.total_students,
+      value: stats?.total_students ?? 0,
       icon: Users,
       color: "text-pink-600 dark:text-pink-400",
       bgColor: "bg-pink-500/10",
       link: "/admin/students",
-      subtitle: `${stats.active_students} active, ${stats.inactive_students} inactive`,
+      subtitle: stats
+        ? `${stats.active_students} active, ${stats.inactive_students} inactive`
+        : undefined,
     },
     {
       title: "Total Campuses",
-      value: stats.total_campuses,
+      value: stats?.total_campuses ?? 0,
       icon: Building2,
       color: "text-indigo-600 dark:text-indigo-400",
       bgColor: "bg-indigo-500/10",
@@ -257,25 +213,31 @@ export default function AdminDashboard() {
             <CardDescription>Job postings over the last 7 days</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-[200px] flex items-end justify-between gap-2">
-              {stats.jobs_trend.map((day, index) => {
-                const maxCount = Math.max(...stats.jobs_trend.map((d) => d.count));
-                const height = (day.count / maxCount) * 100;
-                return (
-                  <div key={index} className="flex-1 flex flex-col items-center gap-2">
-                    <div className="w-full flex flex-col items-center justify-end h-full">
-                      <div
-                        className="w-full bg-cyan-500 rounded-t transition-all hover:bg-cyan-600"
-                        style={{ height: `${height}%`, minHeight: "4px" }}
-                        title={`${day.count} jobs`}
-                      />
+            {stats && stats.jobs_trend.length > 0 ? (
+              <div className="h-[200px] flex items-end justify-between gap-2">
+                {stats.jobs_trend.map((day, index) => {
+                  const maxCount = Math.max(...stats.jobs_trend.map((d) => d.count));
+                  const height = maxCount > 0 ? (day.count / maxCount) * 100 : 0;
+                  return (
+                    <div key={index} className="flex-1 flex flex-col items-center gap-2">
+                      <div className="w-full flex flex-col items-center justify-end h-full">
+                        <div
+                          className="w-full bg-cyan-500 rounded-t transition-all hover:bg-cyan-600"
+                          style={{ height: `${height}%`, minHeight: "4px" }}
+                          title={`${day.count} jobs`}
+                        />
+                      </div>
+                      <span className="text-xs text-muted-foreground">{day.date}</span>
+                      <span className="text-sm font-medium">{day.count}</span>
                     </div>
-                    <span className="text-xs text-muted-foreground">{day.date}</span>
-                    <span className="text-sm font-medium">{day.count}</span>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="h-[200px] flex items-center justify-center text-sm text-muted-foreground">
+                {isLoading ? "Loading stats..." : "No trend data available"}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -324,5 +286,8 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
+
+
 
 
