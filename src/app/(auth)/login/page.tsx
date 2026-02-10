@@ -1,26 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Briefcase } from "lucide-react";
 import { AuthSidePanel } from "@/components/auth/AuthSidePanel";
 import { GoogleLoginButton } from "@/components/auth/GoogleLoginButton";
-import { isAuthenticated, getUserRole, getDashboardRoute } from "@/lib/utils/auth";
 
 export default function LoginPage() {
-  const router = useRouter();
-
-  // Redirect if already logged in (only once on mount)
-  useEffect(() => {
-    if (isAuthenticated()) {
-      const role = getUserRole();
-      if (role) {
-        router.push(getDashboardRoute(role));
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty deps - only run once on mount
 
   return (
     <div className="min-h-screen flex">

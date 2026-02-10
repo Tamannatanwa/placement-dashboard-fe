@@ -19,6 +19,9 @@ export function ReviewStep({ formData, onEditStep }: ReviewStepProps) {
         { label: "Last Name", value: formData.last_name },
         { label: "Phone", value: formData.phone },
         { label: "Email", value: formData.email },
+        { label: "Course", value: formData.course },
+        { label: "Current Module", value: formData.current_module },
+        { label: "Career Goal", value: formData.career_goal },
       ],
     },
     {
@@ -30,6 +33,9 @@ export function ReviewStep({ formData, onEditStep }: ReviewStepProps) {
         { label: "Passing Year", value: formData.passing_year?.toString() },
         { label: "CGPA", value: formData.cgpa?.toString() },
         { label: "College ID", value: formData.college_id?.toString() },
+        { label: "Educational Qualification", value: formData.educational_qualification },
+        { label: "Institute Name", value: formData.institute_name },
+        { label: "Status", value: formData.status },
       ],
     },
     {
@@ -37,6 +43,10 @@ export function ReviewStep({ formData, onEditStep }: ReviewStepProps) {
       stepIndex: 2,
       fields: [
         { label: "Resume URL", value: formData.resume_url },
+        { label: "Portfolio / GitHub Link", value: formData.portfolio_url },
+        { label: "Skills", value: formData.skills },
+        { label: "Preferred Work Mode", value: formData.preferred_work_mode },
+        { label: "Looking For", value: formData.looking_for },
       ],
     },
   ];

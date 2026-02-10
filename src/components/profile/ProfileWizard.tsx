@@ -89,12 +89,22 @@ export function ProfileWizard({
         last_name: profile.last_name || "",
         phone: profile.phone || "",
         email: profile.email || "",
+        course: (profile as any).course || "",
+        current_module: (profile as any).current_module || "",
+        career_goal: (profile as any).career_goal || "",
         degree: profile.degree || "",
         branch: profile.branch || "",
         passing_year: profile.passing_year || new Date().getFullYear(),
         cgpa: profile.cgpa || 0,
         college_id: profile.college_id || 0,
+        educational_qualification: (profile as any).educational_qualification || "",
+        institute_name: (profile as any).institute_name || "",
+        status: (profile as any).status,
         resume_url: profile.resume_url || "",
+        portfolio_url: (profile as any).portfolio_url || "",
+        skills: (profile as any).skills || "",
+        preferred_work_mode: (profile as any).preferred_work_mode || "",
+        looking_for: (profile as any).looking_for || "",
       });
     } catch (error: any) {
       toast.error("Failed to load profile data");
@@ -104,42 +114,65 @@ export function ProfileWizard({
   };
 
   const validateCurrentStep = async (): Promise<boolean> => {
-    // Use React Hook Form validation for steps 0-2
+    // Allow navigation without strict validation - just save current data
+    // Validate only if fields are filled (for format validation)
     if (currentStep === 0 && personalInfoRef.current) {
-      return await personalInfoRef.current.validate();
+      // Try to validate, but don't block if validation fails
+      const isValid = await personalInfoRef.current.validate();
+      // Always allow navigation, just save what's there
+      return true;
     } else if (currentStep === 1 && academicInfoRef.current) {
-      return await academicInfoRef.current.validate();
+      const isValid = await academicInfoRef.current.validate();
+      return true;
     } else if (currentStep === 2 && additionalInfoRef.current) {
-      return await additionalInfoRef.current.validate();
+      const isValid = await additionalInfoRef.current.validate();
+      return true;
     } else if (currentStep === 3) {
-      // Review step - validate complete profile
+      // Review step - allow submission with partial data
+      // Only validate format if fields are filled
       try {
         const dataToValidate = {
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-          phone: formData.phone,
-          degree: formData.degree,
-          branch: formData.branch,
-          passing_year: formData.passing_year,
-          cgpa: formData.cgpa,
+          first_name: formData.first_name || undefined,
+          last_name: formData.last_name || undefined,
+          phone: formData.phone || undefined,
+          course: formData.course || undefined,
+          current_module: formData.current_module || undefined,
+          career_goal: formData.career_goal || undefined,
+          degree: formData.degree || undefined,
+          branch: formData.branch || undefined,
+          passing_year: formData.passing_year || undefined,
+          cgpa: formData.cgpa || undefined,
+          educational_qualification: formData.educational_qualification || undefined,
+          institute_name: formData.institute_name || undefined,
+          status: formData.status || undefined,
+          resume_url: formData.resume_url || undefined,
+          portfolio_url: formData.portfolio_url || undefined,
+          skills: formData.skills || undefined,
+          preferred_work_mode: formData.preferred_work_mode || undefined,
+          looking_for: formData.looking_for || undefined,
         };
         await completeProfileSchema.parseAsync(dataToValidate);
         return true;
       } catch (error: any) {
+        // Only show errors for fields that have values (format validation)
         const errors = error.errors || [];
-        if (errors.length > 0) {
-          const errorMessages = errors.map((err: any) => {
+        const formatErrors = errors.filter((err: any) => {
+          const field = err.path?.[0];
+          return formData[field as keyof typeof formData];
+        });
+        if (formatErrors.length > 0) {
+          const errorMessages = formatErrors.map((err: any) => {
             const field = err.path?.join(".") || "field";
-            return `${field}: ${err.message || "Validation failed"}`;
+            return `${field}: ${err.message || "Invalid format"}`;
           });
-          toast.error(`Please fix the following errors:\n${errorMessages.join("\n")}`);
-        } else {
-          toast.error(error.message || "Validation failed");
+          toast.error(`Please fix format errors:\n${errorMessages.join("\n")}`);
+          return false;
         }
-        return false;
+        // No format errors, allow submission
+        return true;
       }
     }
-    return false;
+    return true;
   };
 
   const handleNext = async () => {
@@ -190,35 +223,57 @@ export function ProfileWizard({
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      // Final validation with all required fields
+      // Validate format only for fields that have values
       const dataToValidate = {
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        phone: formData.phone,
-        degree: formData.degree,
-        branch: formData.branch,
-        passing_year: formData.passing_year,
-        cgpa: formData.cgpa,
+        first_name: formData.first_name || undefined,
+        last_name: formData.last_name || undefined,
+        phone: formData.phone || undefined,
+        course: formData.course || undefined,
+        current_module: formData.current_module || undefined,
+        career_goal: formData.career_goal || undefined,
+        degree: formData.degree || undefined,
+        branch: formData.branch || undefined,
+        passing_year: formData.passing_year || undefined,
+        cgpa: formData.cgpa || undefined,
+        educational_qualification: formData.educational_qualification || undefined,
+        institute_name: formData.institute_name || undefined,
+        status: formData.status || undefined,
+        resume_url: formData.resume_url || undefined,
+        portfolio_url: formData.portfolio_url || undefined,
+        skills: formData.skills || undefined,
+        preferred_work_mode: formData.preferred_work_mode || undefined,
+        looking_for: formData.looking_for || undefined,
       };
 
+      // Validate format (not required fields)
       await completeProfileSchema.parseAsync(dataToValidate);
 
       if (userRole === "student") {
-        // Update student profile via API (includes all fields)
-        const updateData = {
-          first_name: formData.first_name!,
-          last_name: formData.last_name!,
-          phone: formData.phone!,
-          degree: formData.degree!,
-          branch: formData.branch!,
-          passing_year: formData.passing_year!,
-          cgpa: formData.cgpa!,
-          college_id: formData.college_id,
-          resume_url: formData.resume_url,
-        };
+        // Update student profile via API with whatever data is available
+        const updateData: any = {};
+        
+        if (formData.first_name) updateData.first_name = formData.first_name;
+        if (formData.last_name) updateData.last_name = formData.last_name;
+        if (formData.phone) updateData.phone = formData.phone;
+        if (formData.course) updateData.course = formData.course;
+        if (formData.current_module) updateData.current_module = formData.current_module;
+        if (formData.career_goal) updateData.career_goal = formData.career_goal;
+        if (formData.degree) updateData.degree = formData.degree;
+        if (formData.branch) updateData.branch = formData.branch;
+        if (formData.passing_year) updateData.passing_year = formData.passing_year;
+        if (formData.cgpa !== undefined) updateData.cgpa = formData.cgpa;
+        if (formData.college_id) updateData.college_id = formData.college_id;
+        if (formData.educational_qualification) updateData.educational_qualification = formData.educational_qualification;
+        if (formData.institute_name) updateData.institute_name = formData.institute_name;
+        if (formData.status) updateData.status = formData.status;
+        if (formData.resume_url) updateData.resume_url = formData.resume_url;
+        if (formData.portfolio_url) updateData.portfolio_url = formData.portfolio_url;
+        if (formData.skills) updateData.skills = formData.skills;
+        if (formData.preferred_work_mode) updateData.preferred_work_mode = formData.preferred_work_mode;
+        if (formData.looking_for) updateData.looking_for = formData.looking_for;
 
         await studentsApi.updateMyProfile(updateData);
-        toast.success("Profile updated successfully!");
+        toast.success("Profile saved successfully! You can complete it later.");
       }
 
       // Call completion callback if provided
@@ -249,7 +304,7 @@ export function ProfileWizard({
       } else if (error.message) {
         toast.error(error.message);
       } else {
-        toast.error("Failed to update profile. Please check all fields are filled correctly.");
+        toast.error("Failed to save profile. Please check the format of filled fields.");
       }
     } finally {
       setIsSubmitting(false);

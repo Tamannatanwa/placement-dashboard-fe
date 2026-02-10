@@ -8,6 +8,9 @@ export interface BaseProfileFormData {
   last_name: string;
   phone: string;
   email?: string; // Read-only for students
+  course?: string; // e.g., SoDA
+  current_module?: string; // e.g., Module 06
+  career_goal?: string; // e.g., Wants to be a data analyst
   
   // Academic Information
   degree: string;
@@ -15,9 +18,16 @@ export interface BaseProfileFormData {
   passing_year: number;
   cgpa: number;
   college_id?: number; // Read-only for students
+  educational_qualification?: string; // e.g., 12th pass
+  institute_name?: string; // e.g., NavGurukul
+  status?: "Completed" | "Pursuing"; // Course status
   
   // Additional Information
   resume_url?: string;
+  portfolio_url?: string; // GitHub/Portfolio link
+  skills?: string; // Comma-separated skills e.g., "Tableau,Python,PowerBI,SQL"
+  preferred_work_mode?: string; // Comma-separated e.g., "Remote,In office"
+  looking_for?: string; // Comma-separated e.g., "Internship,Full time"
   
   // Computed/Read-only fields (from API response)
   id?: number;

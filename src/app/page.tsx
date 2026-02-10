@@ -21,7 +21,7 @@ import { isAuthenticated, getUserRole, getDashboardRoute } from "@/lib/utils/aut
 export default function Home() {
   const router = useRouter();
 
-  // Handle dashboard button click - check auth and redirect accordingly
+  // Handle dashboard button click - redirect to appropriate dashboard
   const handleDashboardClick = () => {
     if (isAuthenticated()) {
       const role = getUserRole();
@@ -29,12 +29,12 @@ export default function Home() {
         // User is logged in, redirect to their dashboard
         router.push(getDashboardRoute(role));
       } else {
-        // Has token but no role, redirect to login
-        router.push("/login");
+        // No role, redirect to student dashboard by default
+        router.push("/student/dashboard");
       }
     } else {
-      // Not logged in, redirect to login page
-      router.push("/login");
+      // Not logged in, still allow access to student dashboard
+      router.push("/student/dashboard");
     }
   };
   return (

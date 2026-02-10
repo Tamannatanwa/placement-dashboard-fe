@@ -65,8 +65,11 @@ export const AcademicInfoStep = forwardRef<AcademicInfoStepHandle, StepContentPr
       defaultValues: {
         degree: formData.degree || "",
         branch: formData.branch || "",
-        passing_year: formData.passing_year || new Date().getFullYear(),
-        cgpa: formData.cgpa || 0,
+        passing_year: formData.passing_year,
+        cgpa: formData.cgpa,
+        educational_qualification: formData.educational_qualification || "",
+        institute_name: formData.institute_name || "",
+        status: formData.status,
       },
       mode: "onChange",
     });
@@ -76,20 +79,23 @@ export const AcademicInfoStep = forwardRef<AcademicInfoStepHandle, StepContentPr
       form.reset({
         degree: formData.degree || "",
         branch: formData.branch || "",
-        passing_year: formData.passing_year || new Date().getFullYear(),
-        cgpa: formData.cgpa || 0,
+        passing_year: formData.passing_year,
+        cgpa: formData.cgpa,
+        educational_qualification: formData.educational_qualification || "",
+        institute_name: formData.institute_name || "",
+        status: formData.status,
       });
-    }, [formData.degree, formData.branch, formData.passing_year, formData.cgpa, form]);
+    }, [formData.degree, formData.branch, formData.passing_year, formData.cgpa, formData.educational_qualification, formData.institute_name, formData.status, form]);
 
     // Expose validation method to parent
     useImperativeHandle(ref, () => ({
       validate: async () => {
+        // Always save current values, validate format only if fields have values
+        const values = form.getValues();
+        onUpdate(values);
+        // Validate format but don't block if empty
         const isValid = await form.trigger();
-        if (isValid) {
-          const values = form.getValues();
-          onUpdate(values);
-        }
-        return isValid;
+        return true; // Always allow navigation
       },
     }));
 
@@ -123,7 +129,7 @@ export const AcademicInfoStep = forwardRef<AcademicInfoStepHandle, StepContentPr
                 name="degree"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Degree *</FormLabel>
+                    <FormLabel>Degree</FormLabel>
                     <ClientOnly
                       fallback={
                         <div className="h-11 border border-input rounded-md bg-background px-3 py-2 text-sm">
@@ -162,7 +168,7 @@ export const AcademicInfoStep = forwardRef<AcademicInfoStepHandle, StepContentPr
                 name="branch"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Branch *</FormLabel>
+                    <FormLabel>Branch</FormLabel>
                     <ClientOnly
                       fallback={
                         <div className="h-11 border border-input rounded-md bg-background px-3 py-2 text-sm">
@@ -203,14 +209,14 @@ export const AcademicInfoStep = forwardRef<AcademicInfoStepHandle, StepContentPr
                 name="passing_year"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Passing Year *</FormLabel>
+                    <FormLabel>Passing Year</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
                         placeholder="2024"
                         {...field}
                         onChange={(e) => {
-                          const value = e.target.value ? parseInt(e.target.value, 10) : 0;
+                          const value = e.target.value ? parseInt(e.target.value, 10) : undefined;
                           field.onChange(value);
                           handleChange();
                         }}
@@ -227,7 +233,7 @@ export const AcademicInfoStep = forwardRef<AcademicInfoStepHandle, StepContentPr
                 name="cgpa"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>CGPA *</FormLabel>
+                    <FormLabel>CGPA</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -237,7 +243,7 @@ export const AcademicInfoStep = forwardRef<AcademicInfoStepHandle, StepContentPr
                         placeholder="8.5"
                         {...field}
                         onChange={(e) => {
-                          const value = e.target.value ? parseFloat(e.target.value) : 0;
+                          const value = e.target.value ? parseFloat(e.target.value) : undefined;
                           field.onChange(value);
                           handleChange();
                         }}
@@ -266,6 +272,80 @@ export const AcademicInfoStep = forwardRef<AcademicInfoStepHandle, StepContentPr
                 </p>
               </div>
             )}
+
+            <div className="pt-4 border-t space-y-6">
+              <FormField
+                control={form.control}
+                name="educational_qualification"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Educational Qualification</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="e.g., 12th pass, Graduation"
+                        {...field}
+                        className="h-11"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="institute_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Institute Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="e.g., NavGurukul"
+                        {...field}
+                        className="h-11"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Course Status</FormLabel>
+                    <ClientOnly
+                      fallback={
+                        <div className="h-11 border border-input rounded-md bg-background px-3 py-2 text-sm">
+                          Loading...
+                        </div>
+                      }
+                    >
+                      <Select
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          handleChange();
+                        }}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-11">
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Completed">Completed</SelectItem>
+                          <SelectItem value="Pursuing">Pursuing</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </ClientOnly>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </form>
         </Form>
       </CardContent>

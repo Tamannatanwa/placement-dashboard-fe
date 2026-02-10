@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { StepContentProps } from "@/types/profile";
 import { User } from "lucide-react";
 
@@ -29,6 +30,9 @@ export const PersonalInfoStep = forwardRef<PersonalInfoStepHandle, StepContentPr
         first_name: formData.first_name || "",
         last_name: formData.last_name || "",
         phone: formData.phone || "",
+        course: formData.course || "",
+        current_module: formData.current_module || "",
+        career_goal: formData.career_goal || "",
       },
       mode: "onChange",
     });
@@ -39,18 +43,21 @@ export const PersonalInfoStep = forwardRef<PersonalInfoStepHandle, StepContentPr
         first_name: formData.first_name || "",
         last_name: formData.last_name || "",
         phone: formData.phone || "",
+        course: formData.course || "",
+        current_module: formData.current_module || "",
+        career_goal: formData.career_goal || "",
       });
-    }, [formData.first_name, formData.last_name, formData.phone, form]);
+    }, [formData.first_name, formData.last_name, formData.phone, formData.course, formData.current_module, formData.career_goal, form]);
 
     // Expose validation method to parent
     useImperativeHandle(ref, () => ({
       validate: async () => {
+        // Always save current values, validate format only if fields have values
+        const values = form.getValues();
+        onUpdate(values);
+        // Validate format but don't block if empty
         const isValid = await form.trigger();
-        if (isValid) {
-          const values = form.getValues();
-          onUpdate(values);
-        }
-        return isValid;
+        return true; // Always allow navigation
       },
     }));
 
@@ -58,6 +65,19 @@ export const PersonalInfoStep = forwardRef<PersonalInfoStepHandle, StepContentPr
     const handleChange = () => {
       const values = form.getValues();
       onUpdate(values);
+    };
+
+    const COURSE_OPTIONS = ["SoP", "SoB", "SoDA"];
+    const CAREER_GOAL_OPTIONS = [
+      "Full Stack Developer",
+      "MERN Stack Developer",
+      "Software Engineer",
+      "Data Analyst",
+    ];
+
+    const setFieldValue = (name: keyof PersonalInfoFormData, value: string) => {
+      form.setValue(name, value, { shouldDirty: true, shouldTouch: true, shouldValidate: true });
+      handleChange();
     };
 
   return (
@@ -84,7 +104,7 @@ export const PersonalInfoStep = forwardRef<PersonalInfoStepHandle, StepContentPr
                 name="first_name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>First Name *</FormLabel>
+                    <FormLabel>First Name</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="John"
@@ -102,7 +122,7 @@ export const PersonalInfoStep = forwardRef<PersonalInfoStepHandle, StepContentPr
                 name="last_name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Last Name *</FormLabel>
+                    <FormLabel>Last Name</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Doe"
@@ -121,7 +141,7 @@ export const PersonalInfoStep = forwardRef<PersonalInfoStepHandle, StepContentPr
               name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Phone Number *</FormLabel>
+                  <FormLabel>Phone Number</FormLabel>
                   <FormControl>
                     <Input
                       type="tel"
@@ -148,6 +168,90 @@ export const PersonalInfoStep = forwardRef<PersonalInfoStepHandle, StepContentPr
                 </p>
               </div>
             )}
+
+            <div className="pt-4 border-t space-y-6">
+              <FormField
+                control={form.control}
+                name="course"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Course</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="e.g., SoDA, DSA, Full Stack"
+                        {...field}
+                        className="h-11"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {COURSE_OPTIONS.map((course) => (
+                        <Button
+                          key={course}
+                          type="button"
+                          variant="outline"
+                          size="xs"
+                          onClick={() => setFieldValue("course", course)}
+                          className="h-7 text-xs"
+                        >
+                          {course}
+                        </Button>
+                      ))}
+                    </div>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="current_module"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Current Module</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="e.g., Module 06"
+                        {...field}
+                        className="h-11"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="career_goal"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Career Goal</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="e.g., Wants to be a data analyst"
+                        {...field}
+                        className="h-11"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {CAREER_GOAL_OPTIONS.map((goal) => (
+                        <Button
+                          key={goal}
+                          type="button"
+                          variant="outline"
+                          size="xs"
+                          onClick={() => setFieldValue("career_goal", goal)}
+                          className="h-7 text-xs"
+                        >
+                          {goal}
+                        </Button>
+                      ))}
+                    </div>
+                  </FormItem>
+                )}
+              />
+            </div>
           </form>
         </Form>
       </CardContent>
