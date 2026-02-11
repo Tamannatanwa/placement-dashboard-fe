@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { JobSearch } from "@/components/jobs/JobSearch";
 import { JobFilters } from "@/components/jobs/JobFilters";
 import { JobCard } from "@/components/jobs/JobCard";
@@ -29,22 +28,45 @@ export default function JobsPage() {
   });
   const [searchQuery, setSearchQuery] = useState("");
   const [totalJobs, setTotalJobs] = useState(0);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   useEffect(() => {
     loadJobs();
   }, [filters]);
 
   const loadJobs = async () => {
-    setIsLoading(true);
+    const currentPage = filters.page || 1;
+    const isFirstPage = currentPage === 1;
+
+    if (isFirstPage) {
+      setIsLoading(true);
+    } else {
+      setIsLoadingMore(true);
+    }
+
     try {
       const response = await jobsApi.getJobs(filters);
-      setJobs(response.items);
+
+      setJobs((prevJobs) => {
+        if (isFirstPage) {
+          return response.items;
+        }
+
+        const existingIds = new Set(prevJobs.map((job) => job.id));
+        const newItems = response.items.filter((job) => !existingIds.has(job.id));
+        return [...prevJobs, ...newItems];
+      });
+
       setTotalJobs(response.total);
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to load jobs");
       console.error("Error loading jobs:", error);
     } finally {
-      setIsLoading(false);
+      if (isFirstPage) {
+        setIsLoading(false);
+      } else {
+        setIsLoadingMore(false);
+      }
     }
   };
 
@@ -83,6 +105,48 @@ export default function JobsPage() {
         )
     );
   }, [jobs, searchQuery]);
+
+  const hasMoreJobs = jobs.length < totalJobs;
+  const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
+
+  // Infinite scroll: load next page when the sentinel div becomes visible
+  useEffect(() => {
+    if (!hasMoreJobs) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const firstEntry = entries[0];
+        if (
+          firstEntry.isIntersecting &&
+          !isLoading &&
+          !isLoadingMore &&
+          (filters.page || 1) * (filters.size || 20) < totalJobs
+        ) {
+          setFilters((prev) => ({
+            ...prev,
+            page: (prev.page || 1) + 1,
+          }));
+        }
+      },
+      {
+        root: null,
+        rootMargin: "200px",
+        threshold: 0.1,
+      }
+    );
+
+    const current = loadMoreTriggerRef.current;
+    if (current) {
+      observer.observe(current);
+    }
+
+    return () => {
+      if (current) {
+        observer.unobserve(current);
+      }
+      observer.disconnect();
+    };
+  }, [hasMoreJobs, isLoading, isLoadingMore, filters.page, filters.size, totalJobs]);
 
   return (
     <div className="space-y-8">
@@ -143,8 +207,8 @@ export default function JobsPage() {
         </Select>
       </div>
 
-      {/* Job Listings */}
-      {isLoading ? (
+      {/* Job Listings with infinite scroll */}
+      {isLoading && (filters.page || 1) === 1 ? (
         <div className="text-center py-12">
           <div className="text-muted-foreground">Loading jobs...</div>
         </div>
@@ -155,48 +219,27 @@ export default function JobsPage() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {filteredJobs.map((job) => (
-            <JobCard
-              key={job.id}
-              job={job}
-              onApply={handleApply}
-              onSave={() => {}}
-              isSaved={false}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* Pagination */}
-      {totalJobs > (filters.size || 20) && (
-        <div className="flex items-center justify-center gap-2">
-          <Button
-            variant="outline"
-            disabled={filters.page === 1}
-            onClick={() =>
-              setFilters({ ...filters, page: (filters.page || 1) - 1 })
-            }
-          >
-            Previous
-          </Button>
-          <span className="text-sm text-muted-foreground">
-            Page {filters.page || 1} of{" "}
-            {Math.ceil(totalJobs / (filters.size || 20))}
-          </span>
-          <Button
-            variant="outline"
-            disabled={
-              (filters.page || 1) >=
-              Math.ceil(totalJobs / (filters.size || 20))
-            }
-            onClick={() =>
-              setFilters({ ...filters, page: (filters.page || 1) + 1 })
-            }
-          >
-            Next
-          </Button>
-        </div>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {filteredJobs.map((job) => (
+              <JobCard
+                key={job.id}
+                job={job}
+                onApply={handleApply}
+                onSave={() => {}}
+                isSaved={false}
+              />
+            ))}
+          </div>
+          {hasMoreJobs && (
+            <div
+              ref={loadMoreTriggerRef}
+              className="flex items-center justify-center py-6 text-sm text-muted-foreground"
+            >
+              {isLoadingMore ? "Loading more jobs..." : "Scroll to load more jobs"}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

@@ -208,10 +208,6 @@ export default function StudentLayout({
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => router.push("/profile/wizard")}>
-                    <UserCircle className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
-                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => router.push("/student/settings")}>
                     <Settings className="mr-2 h-4 w-4" />
                     <span>Settings</span>
@@ -265,6 +261,56 @@ export default function StudentLayout({
                   <span className="absolute top-0 right-0 h-2 w-2 bg-cyan-600 rounded-full" />
                 )}
               </Button>
+              <ClientOnly
+                fallback={
+                  <Avatar className="h-8 w-8 bg-cyan-600 text-white">
+                    <AvatarFallback>{userInitials}</AvatarFallback>
+                  </Avatar>
+                }
+              >
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="flex items-center gap-2">
+                      <Avatar className="h-8 w-8 bg-cyan-600 text-white">
+                        <AvatarFallback>{userInitials}</AvatarFallback>
+                      </Avatar>
+                      <div className="hidden md:block text-left">
+                        <div className="text-sm font-medium truncate">{userName}</div>
+                        <div className="text-xs text-muted-foreground capitalize">
+                          {userInfo?.role || "Student"}
+                        </div>
+                      </div>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="end">
+                    <DropdownMenuLabel>
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">{userName}</p>
+                        <p className="text-xs leading-none text-muted-foreground capitalize">
+                          {userInfo?.role || "Student"}
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => router.push("/profile/wizard")}>
+                      <UserCircle className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push("/student/settings")}>
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Settings</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={handleLogout}
+                      className="text-red-600 dark:text-red-400"
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Log out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </ClientOnly>
             </div>
           </div>
         </header>
