@@ -272,20 +272,29 @@ export default function StudentDashboard() {
           </div>
 
           <nav className="hidden md:flex items-center gap-6">
-            <a href="#jobs" className="text-sm font-medium hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">
+            <a
+              href="/student/dashboard"
+              className="text-sm font-medium hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
+            >
+              Dashboard
+            </a>
+            <a
+              href="/jobs"
+              className="text-sm font-medium hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
+            >
               Jobs
             </a>
-            <a href="/student/jobs/saved" className="text-sm font-medium hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">
+            <a
+              href="/jobs/saved"
+              className="text-sm font-medium hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
+            >
               Saved Jobs
             </a>
-            <a href="/student/applications" className="text-sm font-medium hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">
-              Applications
-            </a>
-            <a href="#companies" className="text-sm font-medium hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">
-              Companies
-            </a>
-            <a href="#resources" className="text-sm font-medium hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">
-              Resources
+            <a
+              href="/profile/wizard"
+              className="text-sm font-medium hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
+            >
+              Profile
             </a>
           </nav>
 

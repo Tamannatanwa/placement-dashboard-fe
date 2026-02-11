@@ -11,15 +11,14 @@ import { Job } from "@/types/job";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 
 interface SavedJob {
@@ -70,7 +69,7 @@ export default function SavedJobsPage() {
   };
 
   const handleApply = (jobId: string) => {
-    router.push(`/student/jobs/${jobId}`);
+    router.push(`/jobs/${jobId}`);
   };
 
   const formatSalary = (job: Job) => {
@@ -153,8 +152,8 @@ export default function SavedJobsPage() {
                           <p className="text-muted-foreground text-sm">{job.company_name}</p>
                         </div>
                       </div>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
+                      <Dialog>
+                        <DialogTrigger asChild>
                           <Button
                             variant="ghost"
                             size="icon"
@@ -163,25 +162,27 @@ export default function SavedJobsPage() {
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Remove saved job?</AlertDialogTitle>
-                            <AlertDialogDescription>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Remove saved job?</DialogTitle>
+                            <DialogDescription>
                               Are you sure you want to remove this job from your saved list? You can always save it again later.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
+                            </DialogDescription>
+                          </DialogHeader>
+                          <DialogFooter>
+                            <DialogClose asChild>
+                              <Button variant="outline">Cancel</Button>
+                            </DialogClose>
+                            <DialogClose
                               onClick={() => handleUnsave(savedJob.id, job.id)}
                               className="bg-red-600 hover:bg-red-700 text-white"
                             >
                               Remove
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                            </DialogClose>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
                     </div>
 
                     {/* Location & Salary */}

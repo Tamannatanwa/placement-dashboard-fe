@@ -80,6 +80,12 @@ export const PersonalInfoStep = forwardRef<PersonalInfoStepHandle, StepContentPr
       handleChange();
     };
 
+    const careerGoalValue = form.watch("career_goal") || "";
+    const filteredCareerGoalOptions = CAREER_GOAL_OPTIONS.filter((goal) => {
+      if (!careerGoalValue) return false;
+      return goal.toLowerCase().includes(careerGoalValue.toLowerCase());
+    });
+
   return (
     <Card className="border-cyan-500/20">
       <CardHeader>
@@ -234,20 +240,22 @@ export const PersonalInfoStep = forwardRef<PersonalInfoStepHandle, StepContentPr
                       />
                     </FormControl>
                     <FormMessage />
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {CAREER_GOAL_OPTIONS.map((goal) => (
-                        <Button
-                          key={goal}
-                          type="button"
-                          variant="outline"
-                          size="xs"
-                          onClick={() => setFieldValue("career_goal", goal)}
-                          className="h-7 text-xs"
-                        >
-                          {goal}
-                        </Button>
-                      ))}
-                    </div>
+                    {filteredCareerGoalOptions.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {filteredCareerGoalOptions.map((goal) => (
+                          <Button
+                            key={goal}
+                            type="button"
+                            variant="outline"
+                            size="xs"
+                            onClick={() => setFieldValue("career_goal", goal)}
+                            className="h-7 text-xs"
+                          >
+                            {goal}
+                          </Button>
+                        ))}
+                      </div>
+                    )}
                   </FormItem>
                 )}
               />

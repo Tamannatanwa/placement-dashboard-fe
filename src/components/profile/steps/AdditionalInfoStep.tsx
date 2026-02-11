@@ -113,9 +113,10 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
     const filteredSkillSuggestions = SKILL_SUGGESTIONS.filter((skill) => {
       const lower = skill.toLowerCase();
       if (selectedSkills.includes(lower)) return false;
-      if (!lastSkillToken) return true;
+      if (!lastSkillToken) return false;
       return lower.startsWith(lastSkillToken);
     });
+    const showSkillSuggestions = lastSkillToken.length > 0 && filteredSkillSuggestions.length > 0;
 
   return (
     <Card className="border-cyan-500/20">
@@ -202,7 +203,7 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
                     Enter your skills separated by commas
                   </FormDescription>
                   <FormMessage />
-                  {filteredSkillSuggestions.length > 0 && (
+                  {showSkillSuggestions && (
                     <div className="flex flex-wrap gap-2 mt-2">
                       {filteredSkillSuggestions.map((skill) => (
                         <Button
