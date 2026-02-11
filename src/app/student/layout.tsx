@@ -292,10 +292,10 @@ export default function StudentLayout({
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => router.push("/profile/wizard")}>
+                    {/* <DropdownMenuItem onClick={() => router.push("/profile/wizard")}>
                       <UserCircle className="mr-2 h-4 w-4" />
                       <span>Profile</span>
-                    </DropdownMenuItem>
+                    </DropdownMenuItem> */}
                     <DropdownMenuItem onClick={() => router.push("/student/settings")}>
                       <Settings className="mr-2 h-4 w-4" />
                       <span>Settings</span>
