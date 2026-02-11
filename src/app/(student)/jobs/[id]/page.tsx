@@ -177,7 +177,7 @@ export default function JobDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="flex items-center justify-center py-12">
         <div className="text-muted-foreground">Loading job details...</div>
       </div>
     );
@@ -185,7 +185,7 @@ export default function JobDetailPage() {
 
   if (!job) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="flex items-center justify-center py-12">
         <div className="text-center space-y-4">
           <div className="text-muted-foreground">Job not found</div>
           <Button onClick={() => router.back()}>Go Back</Button>
@@ -209,8 +209,7 @@ export default function JobDetailPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="max-w-4xl mx-auto space-y-6">
         {/* Back Button */}
         <Button
           variant="ghost"
@@ -425,7 +424,6 @@ export default function JobDetailPage() {
             </div>
           )}
         </div>
-      </div>
     </div>
   );
 }

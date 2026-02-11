@@ -1,20 +1,10 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Briefcase, Bell, User, AlertCircle, LogOut, Settings, UserCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { getUserInfo, clearUserInfo } from "@/lib/utils/auth";
-import { authApi } from "@/lib/api/auth";
+import { getUserInfo } from "@/lib/utils/auth";
 import { ClientOnly } from "@/components/ui/ClientOnly";
 import { JobStats } from "@/components/jobs/JobStats";
 import { JobSearch } from "@/components/jobs/JobSearch";
@@ -44,7 +34,6 @@ export default function StudentDashboard() {
   const [recentJobs, setRecentJobs] = useState<Job[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDashboardLoading, setIsDashboardLoading] = useState(true);
-  const [userInfo, setUserInfo] = useState<{ id: string; email: string; role: string } | null>(null);
   const [filters, setFilters] = useState<JobFiltersType>({
     page: 1,
     size: 20,
@@ -59,33 +48,16 @@ export default function StudentDashboard() {
   const [newThisWeek, setNewThisWeek] = useState(0);
   const [savedJobsCount, setSavedJobsCount] = useState(0);
   const [profileCompleteness, setProfileCompleteness] = useState(0);
-  const [notificationsUnread, setNotificationsUnread] = useState(0);
   const [recommendationsAvailable, setRecommendationsAvailable] = useState(0);
+  const [notificationsUnread, setNotificationsUnread] = useState(0);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   // Load dashboard data on mount
   useEffect(() => {
-    const user = getUserInfo();
-    setUserInfo(user);
     loadDashboard();
     loadSavedJobs();
     loadRecommendedJobs();
   }, []);
-
-  const handleLogout = async () => {
-    try {
-      await authApi.logout();
-      setUserInfo(null);
-      clearUserInfo();
-      toast.success("Logged out successfully");
-      router.push("/");
-    } catch (error) {
-      console.error("Logout error:", error);
-      toast.error("Failed to logout");
-    }
-  };
-
-  const userName = userInfo?.email?.split("@")[0] || "Student";
-  const userInitials = userName.split(' ').map(n => n[0]).join('').toUpperCase() || "S";
 
   // Load jobs when filters change
   useEffect(() => {
@@ -158,16 +130,38 @@ export default function StudentDashboard() {
 
   // Load jobs from API
   const loadJobs = async () => {
-    setIsLoading(true);
+    const currentPage = filters.page || 1;
+    const isFirstPage = currentPage === 1;
+
+    if (isFirstPage) {
+      setIsLoading(true);
+    } else {
+      setIsLoadingMore(true);
+    }
+
     try {
       const response = await jobsApi.getJobs(filters);
-      setJobs(response.items);
+
+      setJobs((prevJobs) => {
+        if (isFirstPage) {
+          return response.items;
+        }
+
+        const existingIds = new Set(prevJobs.map((job) => job.id));
+        const newItems = response.items.filter((job) => !existingIds.has(job.id));
+        return [...prevJobs, ...newItems];
+      });
+
       setTotalJobs(response.total);
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to load jobs");
       console.error("Error loading jobs:", error);
     } finally {
-      setIsLoading(false);
+      if (isFirstPage) {
+        setIsLoading(false);
+      } else {
+        setIsLoadingMore(false);
+      }
     }
   };
 
@@ -261,110 +255,51 @@ export default function StudentDashboard() {
     );
   }, [jobs, searchQuery]);
 
+  const hasMoreJobs = jobs.length < totalJobs;
+
+  const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
+
+  // Infinite scroll: load next page when the sentinel div becomes visible
+  useEffect(() => {
+    if (!hasMoreJobs) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const firstEntry = entries[0];
+        if (
+          firstEntry.isIntersecting &&
+          !isLoading &&
+          !isLoadingMore &&
+          (filters.page || 1) * (filters.size || 20) < totalJobs
+        ) {
+          setFilters((prev) => ({
+            ...prev,
+            page: (prev.page || 1) + 1,
+          }));
+        }
+      },
+      {
+        root: null,
+        rootMargin: "200px",
+        threshold: 0.1,
+      }
+    );
+
+    const current = loadMoreTriggerRef.current;
+    if (current) {
+      observer.observe(current);
+    }
+
+    return () => {
+      if (current) {
+        observer.unobserve(current);
+      }
+      observer.disconnect();
+    };
+  }, [hasMoreJobs, isLoading, isLoadingMore, filters.page, filters.size, totalJobs, setFilters]);
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Briefcase className="h-6 w-6 text-cyan-500 dark:text-cyan-400" />
-            <span className="font-bold text-xl">PlaceHub</span>
-          </div>
-
-          <nav className="hidden md:flex items-center gap-6">
-            <a
-              href="/student/dashboard"
-              className="text-sm font-medium hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
-            >
-              Dashboard
-            </a>
-            <a
-              href="/jobs"
-              className="text-sm font-medium hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
-            >
-              Jobs
-            </a>
-            <a
-              href="/jobs/saved"
-              className="text-sm font-medium hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
-            >
-              Saved Jobs
-            </a>
-            <a
-              href="/profile/wizard"
-              className="text-sm font-medium hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
-            >
-              Profile
-            </a>
-          </nav>
-
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-5 w-5" />
-              {notificationsUnread > 0 && (
-                <span className="absolute top-0 right-0 h-2 w-2 bg-cyan-600 rounded-full" />
-              )}
-            </Button>
-            <ClientOnly
-              fallback={
-                <Button variant="ghost" className="flex items-center gap-2">
-                  <Avatar className="h-8 w-8 bg-cyan-600 text-white">
-                    <AvatarFallback>{userInitials}</AvatarFallback>
-                  </Avatar>
-                  <div className="hidden md:block text-left">
-                    <div className="text-sm font-medium">{userName}</div>
-                    <div className="text-xs text-muted-foreground capitalize">
-                      {userInfo?.role || "Student"}
-                    </div>
-                  </div>
-                </Button>
-              }
-            >
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2">
-                    <Avatar className="h-8 w-8 bg-cyan-600 text-white">
-                      <AvatarFallback>{userInitials}</AvatarFallback>
-                    </Avatar>
-                    <div className="hidden md:block text-left">
-                      <div className="text-sm font-medium">{userName}</div>
-                      <div className="text-xs text-muted-foreground capitalize">
-                        {userInfo?.role || "Student"}
-                      </div>
-                    </div>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end">
-                  <DropdownMenuLabel>
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">{userName}</p>
-                      <p className="text-xs leading-none text-muted-foreground capitalize">
-                        {userInfo?.role || "Student"}
-                      </p>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => router.push("/profile/wizard")}>
-                    <UserCircle className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => router.push("/student/settings")}>
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Settings</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout} className="text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </ClientOnly>
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-8 space-y-8">
+    <div className="space-y-8">
         {/* Welcome Section */}
         <div className="space-y-2">
           <h1 className="text-3xl md:text-4xl font-bold">
@@ -515,8 +450,8 @@ export default function StudentDashboard() {
           </Select>
         </div>
 
-        {/* Job Listings */}
-        {isLoading ? (
+        {/* Job Listings with infinite scroll */}
+        {isLoading && filters.page === 1 ? (
           <div className="text-center py-12">
             <div className="text-muted-foreground">Loading jobs...</div>
           </div>
@@ -525,42 +460,28 @@ export default function StudentDashboard() {
             <div className="text-muted-foreground">No jobs found. Try adjusting your filters.</div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {filteredJobs.map((job) => (
-              <JobCard
-                key={job.id}
-                job={job}
-                onApply={handleApply}
-                onSave={handleSave}
-                isSaved={savedJobs.has(job.id)}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {filteredJobs.map((job) => (
+                <JobCard
+                  key={job.id}
+                  job={job}
+                  onApply={handleApply}
+                  onSave={handleSave}
+                  isSaved={savedJobs.has(job.id)}
+                />
+              ))}
+            </div>
+            {hasMoreJobs && (
+              <div
+                ref={loadMoreTriggerRef}
+                className="flex items-center justify-center py-6 text-sm text-muted-foreground"
+              >
+                {isLoadingMore ? "Loading more jobs..." : "Scroll to load more jobs"}
+              </div>
+            )}
+          </>
         )}
-
-        {/* Pagination */}
-        {totalJobs > (filters.size || 20) && (
-          <div className="flex items-center justify-center gap-2">
-            <Button
-              variant="outline"
-              disabled={filters.page === 1}
-              onClick={() => setFilters({ ...filters, page: (filters.page || 1) - 1 })}
-            >
-              Previous
-            </Button>
-            <span className="text-sm text-muted-foreground">
-              Page {filters.page || 1} of {Math.ceil(totalJobs / (filters.size || 20))}
-            </span>
-            <Button
-              variant="outline"
-              disabled={(filters.page || 1) >= Math.ceil(totalJobs / (filters.size || 20))}
-              onClick={() => setFilters({ ...filters, page: (filters.page || 1) + 1 })}
-            >
-              Next
-            </Button>
-          </div>
-        )}
-      </main>
     </div>
   );
 }

@@ -83,36 +83,23 @@ export default function SavedJobsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center py-12">
-            <div className="text-muted-foreground">Loading saved jobs...</div>
-          </div>
-        </div>
+      <div className="text-center py-12">
+        <div className="text-muted-foreground">Loading saved jobs...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 space-y-8">
+    <div className="space-y-8">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-3">
-              <Bookmark className="h-8 w-8 text-cyan-500 dark:text-cyan-400" />
-              Saved Jobs
-            </h1>
-            <p className="text-muted-foreground mt-2">
-              {savedJobs.length} {savedJobs.length === 1 ? "job" : "jobs"} saved
-            </p>
-          </div>
-          <Button
-            variant="outline"
-            onClick={() => router.push("/student/dashboard")}
-          >
-            Back to Dashboard
-          </Button>
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold flex items-center gap-3">
+            <Bookmark className="h-8 w-8 text-cyan-500 dark:text-cyan-400" />
+            Saved Jobs
+          </h1>
+          <p className="text-muted-foreground">
+            {savedJobs.length} {savedJobs.length === 1 ? "job" : "jobs"} saved
+          </p>
         </div>
 
         {/* Saved Jobs List */}
@@ -252,7 +239,6 @@ export default function SavedJobsPage() {
             })}
           </div>
         )}
-      </div>
     </div>
   );
 }
