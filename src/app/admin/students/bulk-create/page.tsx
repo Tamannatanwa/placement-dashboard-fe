@@ -37,7 +37,7 @@ export default function BulkCreateStudentsPage() {
   const handleDataLoaded = async (data: any[], sheetName: string) => {
     setIsUploading(true);
     setUploadProgress(0);
-    
+
     try {
       // Normalize data from Excel
       const normalized: StudentData[] = data
@@ -76,13 +76,13 @@ export default function BulkCreateStudentsPage() {
     try {
       // TODO: Replace with actual API call
       // const response = await adminApi.bulkCreateStudents(students);
-      
+
       // Simulate API call
       for (let i = 0; i < students.length; i++) {
         await new Promise((resolve) => setTimeout(resolve, 100));
         setCreatedCount(i + 1);
         setUploadProgress(((i + 1) / students.length) * 100);
-        
+
         // Simulate some errors
         if (Math.random() < 0.1) {
           newErrors.push(`Failed to create ${students[i].name}: Email already exists`);
@@ -90,7 +90,7 @@ export default function BulkCreateStudentsPage() {
       }
 
       setErrors(newErrors);
-      
+
       if (newErrors.length === 0) {
         toast.success(`Successfully created ${students.length} students`);
         setStudents([]);
@@ -264,8 +264,8 @@ export default function BulkCreateStudentsPage() {
   );
 }
 
+"use client";
 
-
-
+export { default } from "@/app/(admin)/students/bulk-create/page";
 
 

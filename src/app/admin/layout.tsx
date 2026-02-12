@@ -33,7 +33,7 @@ import { ClientOnly } from "@/components/ui/ClientOnly";
 
 const navigation = [
   { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-  { name: "Students", href: "/admin/students", icon: Users },
+  { name: "Resume Review", href: "/admin/resume-review", icon: Users },
   { name: "Bulk Create", href: "/admin/students/bulk-create", icon: FileSpreadsheet },
   { name: "Jobs", href: "/admin/jobs", icon: Briefcase },
   { name: "Companies", href: "/admin/companies", icon: Building2 },

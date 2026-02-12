@@ -97,7 +97,7 @@ export default function AdminDashboard() {
       icon: Users,
       color: "text-pink-600 dark:text-pink-400",
       bgColor: "bg-pink-500/10",
-      link: "/admin/students",
+      link: "/admin/resume-review",
       subtitle: stats
         ? `${stats.active_students} active, ${stats.inactive_students} inactive`
         : undefined,
@@ -188,9 +188,9 @@ export default function AdminDashboard() {
               className="w-full justify-start"
               variant="outline"
             >
-              <Link href="/admin/students">
+              <Link href="/admin/resume-review">
                 <Users className="mr-2 h-4 w-4" />
-                Manage Students
+                Resume Review
               </Link>
             </Button>
             <Button

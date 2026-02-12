@@ -63,7 +63,7 @@ export function clearUserInfo(): void {
 export function getDashboardRoute(role: string): string {
   switch (role) {
     case "admin":
-      return "/admin/students";
+      return "/admin/resume-review";
     case "placement":
       return "/placement/dashboard";
     case "student":

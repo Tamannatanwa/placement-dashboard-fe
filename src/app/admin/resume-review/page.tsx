@@ -12,21 +12,9 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
+import { UserCircle2 } from "lucide-react";
 
-/**
- * Admin page for managing student data from Excel files
- * Features:
- * - Upload Excel file and select sheet
- * - Filter students by status (placed, unplaced, internship, long leave)
- * - View student details (contact, resume, projects)
- * - Assign students to groups
- * - Add feedback for each student
- * - Export updated data back to Excel
- */
-export default function StudentsPage() {
+export default function ResumeReviewPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [rawData, setRawData] = useState<any[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<StudentStatus | "all">("unplaced");
@@ -40,7 +28,7 @@ export default function StudentsPage() {
   const handleDataLoaded = (data: any[], sheetName: string) => {
     setRawData(data);
     setCurrentSheetName(sheetName);
-    
+
     // Normalize student data and filter out students without names
     const normalized = data
       .map((row, index) => normalizeStudentData(row, index))
@@ -49,7 +37,7 @@ export default function StudentsPage() {
         return name !== "" && name !== "N/A";
       });
     setStudents(normalized);
-    
+
     toast.success(`Loaded ${normalized.length} students from "${sheetName}"`);
   };
 
@@ -64,7 +52,7 @@ export default function StudentsPage() {
     setStudents((prev) =>
       prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s))
     );
-    
+
     // Update raw data as well
     setRawData((prev) =>
       prev.map((row, index) => {
@@ -80,7 +68,7 @@ export default function StudentsPage() {
         return row;
       })
     );
-    
+
     toast.success("Student updated successfully");
   };
 
@@ -94,19 +82,19 @@ export default function StudentsPage() {
     try {
       // Create a new workbook
       const workbook = XLSX.utils.book_new();
-      
+
       // Convert updated data to worksheet
       const worksheet = XLSX.utils.json_to_sheet(rawData);
-      
+
       // Add worksheet to workbook
       XLSX.utils.book_append_sheet(workbook, worksheet, currentSheetName || "Students");
-      
+
       // Generate filename with timestamp
       const filename = `students_${currentSheetName}_${new Date().toISOString().split("T")[0]}.xlsx`;
-      
+
       // Write file
       XLSX.writeFile(workbook, filename);
-      
+
       toast.success("Excel file exported successfully");
     } catch (error: any) {
       toast.error(error.message || "Failed to export Excel file");
@@ -130,12 +118,12 @@ export default function StudentsPage() {
     students.forEach((student) => {
       const status = student.status as StudentStatus;
       const rawStatus = student.rawStatus || "";
-      
+
       // Store the first rawStatus we encounter for each normalized status
       if (!statusMap.has(status)) {
         statusMap.set(status, rawStatus);
       }
-      
+
       // Count students per status
       statusCounts.set(status, (statusCounts.get(status) || 0) + 1);
     });
@@ -170,9 +158,9 @@ export default function StudentsPage() {
     try {
       // TODO: Replace with actual API call
       // await adminApi.updateStudentStatus(student.email, { is_active: isActive });
-      
+
       toast.success(`Student ${isActive ? "activated" : "deactivated"} successfully`);
-      
+
       // Update local state if needed
       // This would require adding is_active to Student type
     } catch (error: any) {
@@ -187,14 +175,14 @@ export default function StudentsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-3">
-            <Users className="h-8 w-8 text-cyan-500 dark:text-cyan-400" />
-            Student Management
+            <UserCircle2 className="h-8 w-8 text-cyan-500 dark:text-cyan-400" />
+            Resume Review
           </h1>
           <p className="text-muted-foreground mt-2">
-            Manage students, review resumes, assign groups, and provide feedback
+            Review student resumes, manage status, assign groups, and provide feedback
           </p>
         </div>
-        
+
         {students.length > 0 && (
           <Button
             onClick={handleExportExcel}
@@ -281,8 +269,3 @@ export default function StudentsPage() {
     </div>
   );
 }
-
-
-
-
-
