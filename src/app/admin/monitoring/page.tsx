@@ -429,8 +429,6 @@ export default function MonitoringPage() {
   );
 }
 
-"use client";
 
-export { default } from "@/app/(admin)/monitoring/page";
 
 

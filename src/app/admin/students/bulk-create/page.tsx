@@ -263,9 +263,3 @@ export default function BulkCreateStudentsPage() {
     </div>
   );
 }
-
-"use client";
-
-export { default } from "@/app/(admin)/students/bulk-create/page";
-
-
