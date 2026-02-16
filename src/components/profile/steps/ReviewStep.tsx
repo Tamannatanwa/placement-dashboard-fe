@@ -10,20 +10,6 @@ interface ReviewStepProps extends StepContentProps {
 }
 
 export function ReviewStep({ formData, onEditStep }: ReviewStepProps) {
-  // Format array fields for display
-  const jobTypeDisplay = formData.job_type && formData.job_type.length > 0 
-    ? formData.job_type.join(", ") 
-    : undefined;
-  const workModeDisplay = formData.work_mode && formData.work_mode.length > 0 
-    ? formData.work_mode.join(", ") 
-    : undefined;
-  const preferredJobRoleDisplay = formData.preferred_job_role && formData.preferred_job_role.length > 0 
-    ? formData.preferred_job_role.join(", ") 
-    : undefined;
-  const preferredLocationDisplay = formData.preferred_location && formData.preferred_location.length > 0 
-    ? formData.preferred_location.join(", ") 
-    : undefined;
-
   const reviewSections = [
     {
       title: "Personal Information",
@@ -33,86 +19,34 @@ export function ReviewStep({ formData, onEditStep }: ReviewStepProps) {
         { label: "Last Name", value: formData.last_name },
         { label: "Phone", value: formData.phone },
         { label: "Email", value: formData.email },
-        { label: "Date of Birth", value: formData.date_of_birth },
-        { label: "Gender", value: formData.gender },
-        { label: "Current Address", value: formData.current_address },
+        { label: "Course", value: formData.course },
+        { label: "Current Module", value: formData.current_module },
+        { label: "Career Goal", value: formData.career_goal },
       ],
     },
     {
       title: "Academic Information",
       stepIndex: 1,
       fields: [
-        { label: "Highest Qualification", value: formData.highest_qualification && formData.highest_qualification.trim() ? formData.highest_qualification.trim() : undefined },
-        { label: "College / University Name", value: formData.college_name },
-        { label: "Course", value: formData.course },
+        { label: "Degree", value: formData.degree },
         { label: "Branch", value: formData.branch },
         { label: "Passing Year", value: formData.passing_year?.toString() },
-        { label: "Percentage", value: formData.percentage?.toString() },
         { label: "CGPA", value: formData.cgpa?.toString() },
+        { label: "College ID", value: formData.college_id?.toString() },
+        { label: "Educational Qualification", value: formData.educational_qualification },
+        { label: "Institute Name", value: formData.institute_name },
+        { label: "Status", value: formData.status },
       ],
     },
     {
       title: "Additional Information",
       stepIndex: 2,
       fields: [
-        {
-          label: "Technical Skills",
-          value:
-            formData.technical_skills && formData.technical_skills.length > 0
-              ? formData.technical_skills.join(", ")
-              : undefined,
-        },
-        {
-          label: "Soft Skills",
-          value:
-            formData.soft_skills && formData.soft_skills.length > 0
-              ? formData.soft_skills.join(", ")
-              : undefined,
-        },
-        { label: "Experience Type", value: formData.experience_type },
-        {
-          label: "Internship Details",
-          value:
-            formData.internship_details && formData.internship_details.length > 0
-              ? formData.internship_details
-                  .map((internship) => {
-                    const parts = [];
-                    if (internship.company_name) parts.push(internship.company_name);
-                    if (internship.duration) parts.push(internship.duration);
-                    if (internship.role) parts.push(internship.role);
-                    return parts.join(" - ");
-                  })
-                  .join(" | ")
-              : undefined,
-        },
-        {
-          label: "Projects",
-          value:
-            formData.projects && formData.projects.length > 0
-              ? formData.projects
-                  .map((project) => {
-                    const parts = [];
-                    if (project.title) parts.push(project.title);
-                    if (project.description) parts.push(project.description);
-                    return parts.join(" - ");
-                  })
-                  .join(" | ")
-              : undefined,
-        },
-        { label: "Job Type", value: jobTypeDisplay },
-        { label: "Work Mode", value: workModeDisplay },
-        { label: "Preferred Job Role", value: preferredJobRoleDisplay },
-        { label: "Preferred Location", value: preferredLocationDisplay },
-        {
-          label: "Expected Salary",
-          value: formData.expected_salary
-            ? `₹${formData.expected_salary.toLocaleString()}`
-            : undefined,
-        },
-        { label: "GitHub Profile", value: formData.github_profile },
-        { label: "LinkedIn Profile", value: formData.linkedin_profile },
-        { label: "Portfolio / Personal Website", value: formData.portfolio_url },
         { label: "Resume URL", value: formData.resume_url },
+        { label: "Portfolio / GitHub Link", value: formData.portfolio_url },
+        { label: "Skills", value: formData.skills },
+        { label: "Preferred Work Mode", value: formData.preferred_work_mode },
+        { label: "Looking For", value: formData.looking_for },
       ],
     },
   ];

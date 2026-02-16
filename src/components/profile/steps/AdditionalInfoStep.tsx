@@ -46,8 +46,6 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
     const [resumeFileName, setResumeFileName] = useState<string | null>(null);
     const [techSkillInput, setTechSkillInput] = useState("");
     const [softSkillInput, setSoftSkillInput] = useState("");
-    const [jobRoleInput, setJobRoleInput] = useState("");
-    const [locationInput, setLocationInput] = useState("");
 
     const form = useForm<AdditionalInfoFormData>({
       resolver: zodResolver(additionalInfoSchema),
@@ -239,22 +237,22 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
     };
 
     const addJobRole = () => {
-      if (jobRoleInput.trim()) {
+      const input = prompt("Enter preferred job role:");
+      if (input?.trim()) {
         const current = form.getValues("preferred_job_role") || [];
-        if (!current.includes(jobRoleInput.trim())) {
-          form.setValue("preferred_job_role", [...current, jobRoleInput.trim()]);
-          setJobRoleInput("");
+        if (!current.includes(input.trim())) {
+          form.setValue("preferred_job_role", [...current, input.trim()]);
           handleChange();
         }
       }
     };
 
     const addLocation = () => {
-      if (locationInput.trim()) {
+      const input = prompt("Enter preferred location:");
+      if (input?.trim()) {
         const current = form.getValues("preferred_location") || [];
-        if (!current.includes(locationInput.trim())) {
-          form.setValue("preferred_location", [...current, locationInput.trim()]);
-          setLocationInput("");
+        if (!current.includes(input.trim())) {
+          form.setValue("preferred_location", [...current, input.trim()]);
           handleChange();
         }
       }
@@ -712,8 +710,6 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
                       <div className="flex gap-2">
                         <Input
                           placeholder="Add preferred job role"
-                          value={jobRoleInput}
-                          onChange={(e) => setJobRoleInput(e.target.value)}
                           onKeyPress={(e) => {
                             if (e.key === 'Enter') {
                               e.preventDefault();
@@ -756,8 +752,6 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
                       <div className="flex gap-2">
                         <Input
                           placeholder="Add preferred location"
-                          value={locationInput}
-                          onChange={(e) => setLocationInput(e.target.value)}
                           onKeyPress={(e) => {
                             if (e.key === 'Enter') {
                               e.preventDefault();

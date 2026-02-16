@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getUserInfo } from "@/lib/utils/auth";
 import { ClientOnly } from "@/components/ui/ClientOnly";
@@ -47,7 +47,7 @@ export default function StudentDashboard() {
   const [totalJobs, setTotalJobs] = useState(0);
   const [newThisWeek, setNewThisWeek] = useState(0);
   const [savedJobsCount, setSavedJobsCount] = useState(0);
-  const [profileCompleteness, setProfileCompleteness] = useState<number | undefined>(undefined);
+  const [profileCompleteness, setProfileCompleteness] = useState(0);
   const [recommendationsAvailable, setRecommendationsAvailable] = useState(0);
   const [notificationsUnread, setNotificationsUnread] = useState(0);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -83,14 +83,7 @@ export default function StudentDashboard() {
       // Set dashboard stats
       setRecentJobs(dashboardData.recent_jobs || []);
       setSavedJobsCount(dashboardData.saved_jobs_count || 0);
-      
-      // Get profile completeness from dashboard or student profile, with fallback
-      const completeness = 
-        dashboardData.profile_completeness ?? 
-        dashboardData.student?.profile_completeness ?? 
-        undefined;
-      setProfileCompleteness(completeness);
-      
+      setProfileCompleteness(dashboardData.profile_completeness || 0);
       setNotificationsUnread(dashboardData.notifications_unread || 0);
       setRecommendationsAvailable(dashboardData.recommendations_available || 0);
       
@@ -100,15 +93,6 @@ export default function StudentDashboard() {
       }
     } catch (error: any) {
       console.error("Error loading dashboard:", error);
-      // Try to load profile completeness from profile API as fallback
-      try {
-        const profile = await studentsApi.getMyProfile();
-        if (profile.profile_completeness !== undefined) {
-          setProfileCompleteness(profile.profile_completeness);
-        }
-      } catch (profileError) {
-        console.error("Error loading profile completeness:", profileError);
-      }
       // Don't show error toast for dashboard - it's not critical if it fails
     } finally {
       setIsDashboardLoading(false);
@@ -327,24 +311,18 @@ export default function StudentDashboard() {
         </div>
 
         {/* Profile Completeness Alert */}
-        {!isDashboardLoading && profileCompleteness !== undefined && (
-          <Card className={profileCompleteness === 100 ? "border-green-500/20 bg-green-500/5" : "border-cyan-500/20 bg-cyan-500/5"}>
+        {profileCompleteness < 100 && (
+          <Card className="border-cyan-500/20 bg-cyan-500/5">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  {profileCompleteness === 100 ? (
-                    <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
-                  ) : (
-                    <AlertCircle className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
-                  )}
+                  <AlertCircle className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
                   <CardTitle className="text-base">Profile Strength</CardTitle>
                 </div>
                 <span className="text-sm font-medium">{profileCompleteness}%</span>
               </div>
               <CardDescription>
-                {profileCompleteness === 100
-                  ? "Congratulations! Your profile is complete."
-                  : profileCompleteness >= 85
+                {profileCompleteness >= 85
                   ? "Your profile is looking great! Add skills to reach 100%"
                   : "Complete your profile to get better job recommendations"}
               </CardDescription>
@@ -353,12 +331,9 @@ export default function StudentDashboard() {
               <Progress value={profileCompleteness} className="h-2 mb-4" />
               <Button
                 onClick={() => router.push("/profile/wizard")}
-                className={profileCompleteness === 100 
-                  ? "w-full sm:w-auto bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white"
-                  : "w-full sm:w-auto bg-cyan-600 hover:bg-cyan-700 dark:bg-cyan-500 dark:hover:bg-cyan-600 text-white"
-                }
+                className="w-full sm:w-auto bg-cyan-600 hover:bg-cyan-700 dark:bg-cyan-500 dark:hover:bg-cyan-600 text-white"
               >
-                {profileCompleteness === 100 ? "Update Profile" : "Complete Profile"}
+                Complete Profile
               </Button>
             </CardContent>
           </Card>

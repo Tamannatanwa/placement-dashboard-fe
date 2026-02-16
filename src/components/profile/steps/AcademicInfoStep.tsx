@@ -27,21 +27,6 @@ import { GraduationCap } from "lucide-react";
 
 const QUALIFICATION_OPTIONS = ["10th", "12th", "Diploma", "Graduation", "Post-Graduation", "PhD"];
 
-// Helper function to normalize qualification value from backend to frontend format
-const normalizeQualification = (value: string | undefined): string => {
-  if (!value) return "";
-  const qual = value.toLowerCase();
-  const qualMap: { [key: string]: string } = {
-    '10th': '10th',
-    '12th': '12th',
-    'diploma': 'Diploma',
-    'graduation': 'Graduation',
-    'post-graduation': 'Post-Graduation',
-    'phd': 'PhD'
-  };
-  return qualMap[qual] || value;
-};
-
 export interface AcademicInfoStepHandle {
   validate: () => Promise<boolean>;
 }
@@ -51,7 +36,7 @@ export const AcademicInfoStep = forwardRef<AcademicInfoStepHandle, StepContentPr
     const form = useForm<AcademicInfoFormData>({
       resolver: zodResolver(academicInfoSchema),
       defaultValues: {
-        highest_qualification: normalizeQualification(formData.highest_qualification),
+        highest_qualification: formData.highest_qualification || "",
         college_name: formData.college_name || "",
         course: formData.course || "",
         branch: formData.branch || "",
@@ -65,7 +50,7 @@ export const AcademicInfoStep = forwardRef<AcademicInfoStepHandle, StepContentPr
     // Sync form values when formData changes externally
     useEffect(() => {
       form.reset({
-        highest_qualification: normalizeQualification(formData.highest_qualification),
+        highest_qualification: formData.highest_qualification || "",
         college_name: formData.college_name || "",
         course: formData.course || "",
         branch: formData.branch || "",
@@ -88,12 +73,7 @@ export const AcademicInfoStep = forwardRef<AcademicInfoStepHandle, StepContentPr
     useImperativeHandle(ref, () => ({
       validate: async () => {
         const values = form.getValues();
-        // Ensure highest_qualification is properly included and not empty string
-        const updatedValues = {
-          ...values,
-          highest_qualification: values.highest_qualification && values.highest_qualification.trim() ? values.highest_qualification.trim() : undefined,
-        };
-        onUpdate(updatedValues);
+        onUpdate(values);
         await form.trigger();
         return true;
       },
@@ -102,11 +82,7 @@ export const AcademicInfoStep = forwardRef<AcademicInfoStepHandle, StepContentPr
     // Update parent when form changes
     const handleChange = () => {
       const values = form.getValues();
-      // Ensure highest_qualification is properly included
-      onUpdate({
-        ...values,
-        highest_qualification: values.highest_qualification || undefined,
-      });
+      onUpdate(values);
     };
 
     return (
@@ -135,12 +111,9 @@ export const AcademicInfoStep = forwardRef<AcademicInfoStepHandle, StepContentPr
                     <Select
                       onValueChange={(value) => {
                         field.onChange(value);
-                        // Immediately update parent - get all form values after onChange
-                        setTimeout(() => {
-                          handleChange();
-                        }, 0);
+                        handleChange();
                       }}
-                      value={field.value || undefined}
+                      defaultValue={field.value}
                     >
                       <FormControl>
                         <SelectTrigger className="h-11">
