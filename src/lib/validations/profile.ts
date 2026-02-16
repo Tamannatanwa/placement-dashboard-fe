@@ -2,25 +2,45 @@ import { z } from "zod";
 
 // Internship Detail Schema
 const internshipDetailSchema = z.object({
-  company_name: z.string().min(1, "Company name is required"),
-  duration: z.string().min(1, "Duration is required"),
+  company_name: z.string().optional(),
+  duration: z.string().optional(),
   role: z.string().optional(),
   description: z.string().optional(),
 });
 
+// Helper function for optional URL validation (allows empty string, undefined, or valid URL)
+const optionalUrlSchema = z
+  .string()
+  .optional()
+  .refine(
+    (val) => {
+      if (val === undefined || val === "" || val === null) return true;
+      try {
+        new URL(val);
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    { message: "Must be a valid URL" }
+  );
+
 // Project Detail Schema
 const projectDetailSchema = z.object({
-  title: z.string().min(1, "Project title is required"),
-  description: z.string().min(1, "Project description is required"),
+  title: z.string().optional(),
+  description: z.string().optional(),
   technologies: z.array(z.string()).optional(),
-  github_url: z.string().url().optional().or(z.literal("")),
-  live_url: z.string().url().optional().or(z.literal("")),
+  github_url: optionalUrlSchema,
+  live_url: optionalUrlSchema,
 });
 
 // Language Proficiency Schema
 const languageProficiencySchema = z.object({
-  language: z.string().min(1, "Language is required"),
-  proficiency_level: z.enum(["beginner", "proficient", "fluent", "native"]),
+  language: z.string().optional(),
+  proficiency_level: z.preprocess(
+    (val) => (val === "" || val === null ? undefined : val),
+    z.enum(["beginner", "proficient", "fluent", "native"]).optional()
+  ),
 });
 
 // Personal Information Step Schema
@@ -67,7 +87,10 @@ export const academicInfoSchema = z.object({
 export const additionalInfoSchema = z.object({
   technical_skills: z.array(z.string()).optional(),
   soft_skills: z.array(z.string()).optional(),
-  experience_type: z.enum(["fresher", "experienced"]).optional(),
+  experience_type: z.preprocess(
+    (val) => (val === "" || val === null ? undefined : val),
+    z.enum(["fresher", "experienced"]).optional()
+  ),
   internship_details: z.array(internshipDetailSchema).optional(),
   projects: z.array(projectDetailSchema).optional(),
   languages: z.array(languageProficiencySchema).optional(),
@@ -78,10 +101,10 @@ export const additionalInfoSchema = z.object({
   expected_salary: z.number()
     .optional()
     .refine((val) => val === undefined || val >= 0, "Expected salary cannot be negative"),
-  github_profile: z.string().url().optional().or(z.literal("")),
-  linkedin_profile: z.string().url().optional().or(z.literal("")),
-  portfolio_url: z.string().url().optional().or(z.literal("")),
-  coding_platforms: z.record(z.string()).optional(),
+  github_profile: optionalUrlSchema,
+  linkedin_profile: optionalUrlSchema,
+  portfolio_url: optionalUrlSchema,
+  coding_platforms: z.record(z.string(), z.string()).optional(),
   resume_url: z.string().optional(),
 });
 
