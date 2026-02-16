@@ -123,21 +123,49 @@ export function ProfileWizard({
         cgpa: profile.cgpa,
         technical_skills: profile.technical_skills || [],
         soft_skills: profile.soft_skills || [],
-        experience_type: profile.experience_type || "",
+        experience_type: profile.experience_type || undefined,
         internship_details: profile.internship_details || [],
         projects: profile.projects || [],
         languages: profile.languages || [],
-        job_type: profile.job_type || [],
-        work_mode: profile.work_mode || [],
-        preferred_job_role: profile.preferred_job_role || [],
-        preferred_location: profile.preferred_location || [],
-        expected_salary: profile.expected_salary,
+        // Handle nested preference object or flat fields (backward compatibility)
+        // Ensure arrays are always arrays (not null/undefined)
+        job_type: Array.isArray(profile.preference?.job_type) 
+          ? profile.preference.job_type 
+          : Array.isArray(profile.job_type) 
+            ? profile.job_type 
+            : [],
+        work_mode: Array.isArray(profile.preference?.work_mode) 
+          ? profile.preference.work_mode 
+          : Array.isArray(profile.work_mode) 
+            ? profile.work_mode 
+            : [],
+        preferred_job_role: Array.isArray(profile.preference?.preferred_job_role) 
+          ? profile.preference.preferred_job_role 
+          : Array.isArray(profile.preferred_job_role) 
+            ? profile.preferred_job_role 
+            : [],
+        preferred_location: Array.isArray(profile.preference?.preferred_location) 
+          ? profile.preference.preferred_location 
+          : Array.isArray(profile.preferred_location) 
+            ? profile.preferred_location 
+            : [],
+        expected_salary: profile.preference?.expected_salary ?? profile.expected_salary,
         github_profile: profile.github_profile || "",
         linkedin_profile: profile.linkedin_profile || "",
         portfolio_url: profile.portfolio_url || "",
         coding_platforms: profile.coding_platforms || {},
         resume_url: profile.resume_url || "",
       });
+      
+      // Debug: Log preference data to verify it's loaded correctly
+      console.log("Profile loaded - Preferences:", {
+        preference: profile.preference,
+        job_type: Array.isArray(profile.preference?.job_type) ? profile.preference.job_type : Array.isArray(profile.job_type) ? profile.job_type : [],
+        work_mode: Array.isArray(profile.preference?.work_mode) ? profile.preference.work_mode : Array.isArray(profile.work_mode) ? profile.work_mode : [],
+        preferred_job_role: Array.isArray(profile.preference?.preferred_job_role) ? profile.preference.preferred_job_role : Array.isArray(profile.preferred_job_role) ? profile.preferred_job_role : [],
+        preferred_location: Array.isArray(profile.preference?.preferred_location) ? profile.preference.preferred_location : Array.isArray(profile.preferred_location) ? profile.preferred_location : [],
+      });
+      
       setProfileLoaded(true);
     } catch (error: any) {
       console.error("Failed to load profile:", error);

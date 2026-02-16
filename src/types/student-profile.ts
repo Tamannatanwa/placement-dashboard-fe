@@ -46,6 +46,7 @@ export interface StudentProfile {
   // Skills
   technical_skills?: string[];
   soft_skills?: string[];
+  skill_required?: string[];
   
   // Experience
   experience_type?: "fresher" | "experienced";
@@ -55,7 +56,17 @@ export interface StudentProfile {
   // Languages
   languages?: LanguageProficiency[];
   
-  // Job Preferences
+  // Job Preferences (nested object - preferred)
+  preference?: {
+    job_type?: string[];
+    work_mode?: string[];
+    preferred_job_role?: string[];
+    preferred_location?: string[];
+    expected_salary?: number;
+  };
+  
+  // Job Preferences (flat fields - deprecated, use preference object instead)
+  // Kept for backward compatibility and internal form state
   job_type?: string[];
   work_mode?: string[];
   preferred_job_role?: string[];
