@@ -54,7 +54,7 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
       defaultValues: {
         technical_skills: formData.technical_skills || [],
         soft_skills: formData.soft_skills || [],
-        experience_type: formData.experience_type || "",
+        experience_type: formData.experience_type || undefined,
         internship_details: formData.internship_details || [],
         projects: formData.projects || [],
         languages: formData.languages || [],
@@ -113,10 +113,22 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
       }
     }, [formData, form]);
 
+    // Helper function to normalize form values (convert empty strings to undefined)
+    const normalizeFormValues = (values: any) => {
+      return {
+        ...values,
+        experience_type: values.experience_type === "" ? undefined : values.experience_type,
+        languages: values.languages?.map((lang: any) => ({
+          ...lang,
+          proficiency_level: lang.proficiency_level === "" ? undefined : lang.proficiency_level,
+        })),
+      };
+    };
+
     useImperativeHandle(ref, () => ({
       validate: async () => {
         const values = form.getValues();
-        onUpdate(values);
+        onUpdate(normalizeFormValues(values));
         await form.trigger();
         return true;
       },
@@ -124,7 +136,7 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
 
     const handleChange = () => {
       const values = form.getValues();
-      onUpdate(values);
+      onUpdate(normalizeFormValues(values));
     };
 
     // Skills handlers
@@ -182,7 +194,7 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
         const response = await studentsApi.uploadResume(file);
         form.setValue("resume_url", response.resume_url);
         setResumeFileName(file.name);
-        onUpdate({ ...form.getValues(), resume_url: response.resume_url });
+        onUpdate(normalizeFormValues({ ...form.getValues(), resume_url: response.resume_url }));
         toast.success("Resume uploaded successfully!");
       } catch (error: any) {
         toast.error(error.message || "Failed to upload resume");
@@ -199,7 +211,7 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
         await studentsApi.deleteResume();
         form.setValue("resume_url", "");
         setResumeFileName(null);
-        onUpdate({ ...form.getValues(), resume_url: "" });
+        onUpdate(normalizeFormValues({ ...form.getValues(), resume_url: "" }));
         toast.success("Resume deleted successfully!");
       } catch (error: any) {
         toast.error(error.message || "Failed to delete resume");
@@ -593,7 +605,7 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
                         value={lang.proficiency_level || "beginner"}
                         onValueChange={(value) => {
                           const current = form.getValues("languages") || [];
-                          current[index].proficiency_level = value;
+                          current[index].proficiency_level = value as "" | "beginner" | "proficient" | "fluent" | "native" | undefined;
                           form.setValue("languages", current);
                           handleChange();
                         }}
@@ -654,7 +666,7 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
                               <X
                                 className="h-3 w-3 cursor-pointer"
                                 onClick={() => {
-                                  field.onChange(field.value.filter((_, i) => i !== idx));
+                                  field.onChange((field.value || []).filter((_, i) => i !== idx));
                                   handleChange();
                                 }}
                               />
@@ -703,7 +715,7 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
                               <X
                                 className="h-3 w-3 cursor-pointer"
                                 onClick={() => {
-                                  field.onChange(field.value.filter((_, i) => i !== idx));
+                                  field.onChange((field.value || []).filter((_, i) => i !== idx));
                                   handleChange();
                                 }}
                               />
@@ -747,7 +759,7 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
                               <X
                                 className="h-3 w-3 cursor-pointer"
                                 onClick={() => {
-                                  field.onChange(field.value.filter((_, i) => i !== idx));
+                                  field.onChange((field.value || []).filter((_, i) => i !== idx));
                                   handleChange();
                                 }}
                               />
@@ -791,7 +803,7 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
                               <X
                                 className="h-3 w-3 cursor-pointer"
                                 onClick={() => {
-                                  field.onChange(field.value.filter((_, i) => i !== idx));
+                                  field.onChange((field.value || []).filter((_, i) => i !== idx));
                                   handleChange();
                                 }}
                               />

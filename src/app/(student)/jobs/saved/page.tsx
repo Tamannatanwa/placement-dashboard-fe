@@ -6,7 +6,7 @@ import { Bookmark, Briefcase, MapPin, Clock, Users, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { studentsApi } from "@/lib/api/students";
+import { studentsApi, SavedJob } from "@/lib/api/students";
 import { Job } from "@/types/job";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -21,18 +21,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-interface SavedJob {
-  id: string;
-  job_id: number;
-  saved_at: string;
-  job: Job;
-}
-
 export default function SavedJobsPage() {
   const router = useRouter();
   const [savedJobs, setSavedJobs] = useState<SavedJob[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   useEffect(() => {
     loadSavedJobs();
@@ -51,7 +44,7 @@ export default function SavedJobsPage() {
     }
   };
 
-  const handleUnsave = async (savedJobId: string, jobId: string) => {
+  const handleUnsave = async (savedJobId: number, jobId: string) => {
     setDeletingId(savedJobId);
     try {
       // TODO: Replace with actual API call

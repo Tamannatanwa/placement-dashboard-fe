@@ -29,14 +29,14 @@ export interface BaseProfileFormData {
   // Experience
   experience_type?: "fresher" | "experienced";
   internship_details?: Array<{
-    company_name: string;
-    duration: string;
+    company_name?: string;
+    duration?: string;
     role?: string;
     description?: string;
   }>;
   projects?: Array<{
-    title: string;
-    description: string;
+    title?: string;
+    description?: string;
     technologies?: string[];
     github_url?: string;
     live_url?: string;
@@ -44,8 +44,8 @@ export interface BaseProfileFormData {
   
   // Languages
   languages?: Array<{
-    language: string;
-    proficiency_level: "beginner" | "proficient" | "fluent" | "native";
+    language?: string;
+    proficiency_level?: "beginner" | "proficient" | "fluent" | "native";
   }>;
   
   // Job Preferences

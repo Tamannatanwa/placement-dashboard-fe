@@ -37,10 +37,10 @@ const projectDetailSchema = z.object({
 // Language Proficiency Schema
 const languageProficiencySchema = z.object({
   language: z.string().optional(),
-  proficiency_level: z.preprocess(
-    (val) => (val === "" || val === null ? undefined : val),
-    z.enum(["beginner", "proficient", "fluent", "native"]).optional()
-  ),
+  proficiency_level: z
+    .union([z.enum(["beginner", "proficient", "fluent", "native"]), z.literal("")])
+    .optional()
+    .or(z.undefined()),
 });
 
 // Personal Information Step Schema
@@ -87,10 +87,9 @@ export const academicInfoSchema = z.object({
 export const additionalInfoSchema = z.object({
   technical_skills: z.array(z.string()).optional(),
   soft_skills: z.array(z.string()).optional(),
-  experience_type: z.preprocess(
-    (val) => (val === "" || val === null ? undefined : val),
-    z.enum(["fresher", "experienced"]).optional()
-  ),
+  experience_type: z
+    .union([z.enum(["fresher", "experienced"]), z.literal("")])
+    .optional(),
   internship_details: z.array(internshipDetailSchema).optional(),
   projects: z.array(projectDetailSchema).optional(),
   languages: z.array(languageProficiencySchema).optional(),

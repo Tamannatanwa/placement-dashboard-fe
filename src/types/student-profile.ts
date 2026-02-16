@@ -35,6 +35,11 @@ export interface StudentProfile {
   
   // Education Details
   highest_qualification?: string; // 10th, 12th, Diploma, Graduation, Post-Graduation
+  /**
+   * Optional degree field for backward compatibility with older views.
+   * Backend may still use course/highest_qualification; this is a friendly alias.
+   */
+  degree?: string;
   college_name?: string;
   college_id?: number;
   course?: string;
@@ -88,6 +93,10 @@ export interface StudentProfile {
   created_at?: string;
   updated_at?: string;
   profile_completeness?: number;
+  /**
+   * Optional count of saved jobs, populated on dashboard/profile responses.
+   */
+  saved_jobs_count?: number;
 }
 
 export type StudentProfileUpdate = Partial<StudentProfile>;
