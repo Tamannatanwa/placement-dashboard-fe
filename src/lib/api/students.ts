@@ -1,6 +1,6 @@
 import { getApiInstance } from "./axios-instance";
 import { Job } from "@/types/job";
-import { StudentProfile } from "@/types/student";
+import { StudentProfile } from "@/types/student-profile";
 
 // Dashboard stats structure (can be extended based on actual API response)
 export interface DashboardStats {
@@ -36,17 +36,64 @@ export interface TrackJobViewResponse {
   success?: boolean;
 }
 
-// Update profile request
+// Update profile request - Matches backend StudentProfileUpdate schema
 export interface UpdateProfileData {
-  first_name?: string;
-  last_name?: string;
-  phone?: string;
-  degree?: string;
-  branch?: string;
-  passing_year?: number;
-  cgpa?: number;
-  college_id?: number;
-  resume_url?: string;
+  // Personal Details
+  first_name?: string | null;
+  last_name?: string | null;
+  phone?: string | null;
+  date_of_birth?: string | null;
+  gender?: string | null;
+  current_address?: string | null;
+  
+  // Education Details
+  highest_qualification?: string | null;
+  college_name?: string | null;
+  college_id?: number | null;
+  course?: string | null;
+  branch?: string | null;
+  passing_year?: number | null;
+  percentage?: number | null;
+  cgpa?: number | null;
+  
+  // Skills
+  technical_skills?: string[];
+  soft_skills?: string[];
+  
+  // Experience
+  experience_type?: string | null;
+  internship_details?: Array<{
+    company_name: string;
+    duration: string;
+    role?: string;
+    description?: string;
+  }>;
+  projects?: Array<{
+    title: string;
+    description: string;
+    technologies?: string[];
+    github_url?: string;
+    live_url?: string;
+  }>;
+  
+  // Languages
+  languages?: Array<{
+    language: string;
+    proficiency_level: "beginner" | "proficient" | "fluent" | "native";
+  }>;
+  
+  // Job Preferences
+  job_type?: string[];
+  work_mode?: string[];
+  preferred_job_role?: string[];
+  preferred_location?: string[];
+  expected_salary?: number | null;
+  
+  // Technical Profile Links
+  github_profile?: string | null;
+  linkedin_profile?: string | null;
+  portfolio_url?: string | null;
+  coding_platforms?: { [key: string]: string };
 }
 
 // Profile completeness response
@@ -174,45 +221,22 @@ export const studentsApi = {
 
   /**
    * Get my profile
-   * GET /api/v1/students/me
-   * Uses dummy API if real API fails
+   * GET /api/v1/students/me/profile
    */
   getMyProfile: async (): Promise<StudentProfile> => {
-    // Try real API first
-    try {
-      const api = getApiInstance();
-      const response = await api.get<StudentProfile>("/api/v1/students/me");
-      return response.data;
-    } catch (error: any) {
-      // If API fails (401, 404, etc.), use dummy API
-      console.log("Real API failed, using dummy API:", error.message);
-      const { getDummyProfile, initDummyProfile } = await import("./students-dummy");
-      const profile = getDummyProfile() || initDummyProfile();
-      return profile;
-    }
+    const api = getApiInstance();
+    const response = await api.get<StudentProfile>("/api/v1/students/me/profile");
+    return response.data;
   },
 
   /**
    * Update my profile
-   * PUT /api/v1/students/me
-   * Uses dummy API if real API fails
+   * PUT /api/v1/students/me/profile
    */
   updateMyProfile: async (data: UpdateProfileData): Promise<StudentProfile> => {
-    // Try real API first
-    try {
-      const api = getApiInstance();
-      const response = await api.put<StudentProfile>("/api/v1/students/me", data);
-      // Also save to dummy API for consistency
-      const { saveDummyProfile } = await import("./students-dummy");
-      saveDummyProfile(data);
-      return response.data;
-    } catch (error: any) {
-      // If API fails, use dummy API
-      console.log("Real API failed, using dummy API:", error.message);
-      const { saveDummyProfile } = await import("./students-dummy");
-      const profile = saveDummyProfile(data);
-      return profile;
-    }
+    const api = getApiInstance();
+    const response = await api.put<StudentProfile>("/api/v1/students/me/profile", data);
+    return response.data;
   },
 
   /**
@@ -303,6 +327,49 @@ export const studentsApi = {
     const api = getApiInstance();
     const response = await api.get<RecommendationStatsResponse>(
       "/api/v1/students/me/recommendation-stats"
+    );
+    return response.data;
+  },
+
+  /**
+   * Upload resume (PDF only, max 5MB)
+   * POST /api/v1/students/me/resume
+   */
+  uploadResume: async (file: File): Promise<{ message: string; resume_url: string }> => {
+    // Validate file type
+    if (!file.name.toLowerCase().endsWith('.pdf')) {
+      throw new Error("Only PDF files are allowed");
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      throw new Error("File size must be less than 5MB");
+    }
+
+    const api = getApiInstance();
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await api.post<{ message: string; resume_url: string }>(
+      "/api/v1/students/me/resume",
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    return response.data;
+  },
+
+  /**
+   * Delete resume
+   * DELETE /api/v1/students/me/resume
+   */
+  deleteResume: async (): Promise<{ message: string }> => {
+    const api = getApiInstance();
+    const response = await api.delete<{ message: string }>(
+      "/api/v1/students/me/resume"
     );
     return response.data;
   },

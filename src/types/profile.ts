@@ -1,36 +1,71 @@
 import { z } from "zod";
-import { StudentProfile } from "./student";
+import { StudentProfile } from "./student-profile";
 
-// Base profile form data structure
+// Base profile form data structure - Matches new schema
 export interface BaseProfileFormData {
   // Personal Information
-  first_name: string;
-  last_name: string;
-  phone: string;
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
   email?: string; // Read-only for students
-  course?: string; // e.g., SoDA
-  current_module?: string; // e.g., Module 06
-  career_goal?: string; // e.g., Wants to be a data analyst
+  date_of_birth?: string;
+  gender?: string;
+  current_address?: string;
   
-  // Academic Information
-  degree: string;
-  branch: string;
-  passing_year: number;
-  cgpa: number;
-  college_id?: number; // Read-only for students
-  educational_qualification?: string; // e.g., 12th pass
-  institute_name?: string; // e.g., NavGurukul
-  status?: "Completed" | "Pursuing"; // Course status
+  // Education Details
+  highest_qualification?: string; // 10th, 12th, Diploma, Graduation, Post-Graduation
+  college_name?: string;
+  college_id?: number;
+  course?: string;
+  branch?: string;
+  passing_year?: number;
+  percentage?: number;
+  cgpa?: number;
   
-  // Additional Information
+  // Skills
+  technical_skills?: string[];
+  soft_skills?: string[];
+  
+  // Experience
+  experience_type?: "fresher" | "experienced";
+  internship_details?: Array<{
+    company_name: string;
+    duration: string;
+    role?: string;
+    description?: string;
+  }>;
+  projects?: Array<{
+    title: string;
+    description: string;
+    technologies?: string[];
+    github_url?: string;
+    live_url?: string;
+  }>;
+  
+  // Languages
+  languages?: Array<{
+    language: string;
+    proficiency_level: "beginner" | "proficient" | "fluent" | "native";
+  }>;
+  
+  // Job Preferences
+  job_type?: string[];
+  work_mode?: string[];
+  preferred_job_role?: string[];
+  preferred_location?: string[];
+  expected_salary?: number;
+  
+  // Technical Profile Links
+  github_profile?: string;
+  linkedin_profile?: string;
+  portfolio_url?: string;
+  coding_platforms?: { [key: string]: string };
+  
+  // Resume
   resume_url?: string;
-  portfolio_url?: string; // GitHub/Portfolio link
-  skills?: string; // Comma-separated skills e.g., "Tableau,Python,PowerBI,SQL"
-  preferred_work_mode?: string; // Comma-separated e.g., "Remote,In office"
-  looking_for?: string; // Comma-separated e.g., "Internship,Full time"
   
   // Computed/Read-only fields (from API response)
-  id?: number;
+  id?: string;
   full_name?: string;
   is_active?: boolean;
   created_at?: string;

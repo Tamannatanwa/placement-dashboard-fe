@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useImperativeHandle, forwardRef } from "react";
 import { academicInfoSchema, AcademicInfoFormData } from "@/lib/validations/profile";
-import { ClientOnly } from "@/components/ui/ClientOnly";
 import {
   Form,
   FormControl,
@@ -26,33 +25,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { StepContentProps } from "@/types/profile";
 import { GraduationCap } from "lucide-react";
 
-const DEGREE_OPTIONS = [
-  "B.Tech",
-  "M.Tech",
-  "B.E",
-  "M.E",
-  "B.Sc",
-  "M.Sc",
-  "BBA",
-  "MBA",
-  "BCA",
-  "MCA",
-  "Other",
-];
-
-const BRANCH_OPTIONS = [
-  "Computer Science",
-  "Information Technology",
-  "Electronics & Communication",
-  "Electrical Engineering",
-  "Mechanical Engineering",
-  "Civil Engineering",
-  "Chemical Engineering",
-  "Aerospace Engineering",
-  "Data Science",
-  "Artificial Intelligence",
-  "Other",
-];
+const QUALIFICATION_OPTIONS = ["10th", "12th", "Diploma", "Graduation", "Post-Graduation", "PhD"];
 
 export interface AcademicInfoStepHandle {
   validate: () => Promise<boolean>;
@@ -63,13 +36,13 @@ export const AcademicInfoStep = forwardRef<AcademicInfoStepHandle, StepContentPr
     const form = useForm<AcademicInfoFormData>({
       resolver: zodResolver(academicInfoSchema),
       defaultValues: {
-        degree: formData.degree || "",
+        highest_qualification: formData.highest_qualification || "",
+        college_name: formData.college_name || "",
+        course: formData.course || "",
         branch: formData.branch || "",
         passing_year: formData.passing_year,
+        percentage: formData.percentage,
         cgpa: formData.cgpa,
-        educational_qualification: formData.educational_qualification || "",
-        institute_name: formData.institute_name || "",
-        status: formData.status,
       },
       mode: "onChange",
     });
@@ -77,25 +50,32 @@ export const AcademicInfoStep = forwardRef<AcademicInfoStepHandle, StepContentPr
     // Sync form values when formData changes externally
     useEffect(() => {
       form.reset({
-        degree: formData.degree || "",
+        highest_qualification: formData.highest_qualification || "",
+        college_name: formData.college_name || "",
+        course: formData.course || "",
         branch: formData.branch || "",
         passing_year: formData.passing_year,
+        percentage: formData.percentage,
         cgpa: formData.cgpa,
-        educational_qualification: formData.educational_qualification || "",
-        institute_name: formData.institute_name || "",
-        status: formData.status,
       });
-    }, [formData.degree, formData.branch, formData.passing_year, formData.cgpa, formData.educational_qualification, formData.institute_name, formData.status, form]);
+    }, [
+      formData.highest_qualification,
+      formData.college_name,
+      formData.course,
+      formData.branch,
+      formData.passing_year,
+      formData.percentage,
+      formData.cgpa,
+      form,
+    ]);
 
     // Expose validation method to parent
     useImperativeHandle(ref, () => ({
       validate: async () => {
-        // Always save current values, validate format only if fields have values
         const values = form.getValues();
         onUpdate(values);
-        // Validate format but don't block if empty
-        const isValid = await form.trigger();
-        return true; // Always allow navigation
+        await form.trigger();
+        return true;
       },
     }));
 
@@ -105,111 +85,119 @@ export const AcademicInfoStep = forwardRef<AcademicInfoStepHandle, StepContentPr
       onUpdate(values);
     };
 
-  return (
-    <Card className="border-cyan-500/20">
-      <CardHeader>
-        <div className="flex items-center gap-2">
-          <div className="p-2 rounded-lg bg-cyan-100 dark:bg-cyan-950">
-            <GraduationCap className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
-          </div>
-          <div>
-            <CardTitle>Academic Information</CardTitle>
-            <CardDescription>
-              Provide your academic details and achievements
-            </CardDescription>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onChange={handleChange} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="degree"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Degree</FormLabel>
-                    <ClientOnly
-                      fallback={
-                        <div className="h-11 border border-input rounded-md bg-background px-3 py-2 text-sm">
-                          Loading...
-                        </div>
-                      }
-                    >
-                      <Select
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          handleChange();
-                        }}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="h-11">
-                            <SelectValue placeholder="Select degree" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {DEGREE_OPTIONS.map((degree) => (
-                            <SelectItem key={degree} value={degree}>
-                              {degree}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </ClientOnly>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="branch"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Branch</FormLabel>
-                    <ClientOnly
-                      fallback={
-                        <div className="h-11 border border-input rounded-md bg-background px-3 py-2 text-sm">
-                          Loading...
-                        </div>
-                      }
-                    >
-                      <Select
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          handleChange();
-                        }}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="h-11">
-                            <SelectValue placeholder="Select branch" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {BRANCH_OPTIONS.map((branch) => (
-                            <SelectItem key={branch} value={branch}>
-                              {branch}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </ClientOnly>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+    return (
+      <Card className="border-cyan-500/20">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-lg bg-cyan-100 dark:bg-cyan-950">
+              <GraduationCap className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
             </div>
+            <div>
+              <CardTitle>Education Details</CardTitle>
+              <CardDescription>Provide your academic information</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onChange={handleChange} className="space-y-6">
+              {/* Highest Qualification */}
+              <FormField
+                control={form.control}
+                name="highest_qualification"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Highest Qualification</FormLabel>
+                    <Select
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        handleChange();
+                      }}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="h-11">
+                          <SelectValue placeholder="Select qualification (10th / 12th / Diploma / Graduation)" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {QUALIFICATION_OPTIONS.map((qual) => (
+                          <SelectItem key={qual} value={qual}>
+                            {qual}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* College / University Name */}
+              <FormField
+                control={form.control}
+                name="college_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>College / University Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="e.g., ABC Engineering College"
+                        {...field}
+                        className="h-11"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Course / Branch */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="course"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Course</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g., Bachelor of Technology"
+                          {...field}
+                          className="h-11"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="branch"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Branch</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g., Computer Science and Engineering"
+                          {...field}
+                          className="h-11"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Year of Passing */}
               <FormField
                 control={form.control}
                 name="passing_year"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Passing Year</FormLabel>
+                    <FormLabel>Year of Passing</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -228,131 +216,70 @@ export const AcademicInfoStep = forwardRef<AcademicInfoStepHandle, StepContentPr
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="cgpa"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>CGPA</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        max="10"
-                        placeholder="8.5"
-                        {...field}
-                        onChange={(e) => {
-                          const value = e.target.value ? parseFloat(e.target.value) : undefined;
-                          field.onChange(value);
-                          handleChange();
-                        }}
-                        className="h-11"
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      CGPA out of 10
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            {formData.college_id && (
-              <div className="pt-4 border-t">
-                <FormLabel>College ID</FormLabel>
-                <Input
-                  value={formData.college_id}
-                  disabled
-                  className="mt-1.5 h-11 bg-muted"
+              {/* Percentage / CGPA */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="percentage"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Percentage (optional)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          max="100"
+                          placeholder="85.5"
+                          {...field}
+                          onChange={(e) => {
+                            const value = e.target.value ? parseFloat(e.target.value) : undefined;
+                            field.onChange(value);
+                            handleChange();
+                          }}
+                          className="h-11"
+                        />
+                      </FormControl>
+                      <FormDescription>Percentage out of 100</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-                <p className="text-sm text-muted-foreground mt-1.5">
-                  College ID cannot be changed
-                </p>
+
+                <FormField
+                  control={form.control}
+                  name="cgpa"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>CGPA (optional)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          max="10"
+                          placeholder="8.5"
+                          {...field}
+                          onChange={(e) => {
+                            const value = e.target.value ? parseFloat(e.target.value) : undefined;
+                            field.onChange(value);
+                            handleChange();
+                          }}
+                          className="h-11"
+                        />
+                      </FormControl>
+                      <FormDescription>CGPA out of 10</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
-            )}
-
-            <div className="pt-4 border-t space-y-6">
-              <FormField
-                control={form.control}
-                name="educational_qualification"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Educational Qualification</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="e.g., 12th pass, Graduation"
-                        {...field}
-                        className="h-11"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="institute_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Institute Name</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="e.g., NavGurukul"
-                        {...field}
-                        className="h-11"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Course Status</FormLabel>
-                    <ClientOnly
-                      fallback={
-                        <div className="h-11 border border-input rounded-md bg-background px-3 py-2 text-sm">
-                          Loading...
-                        </div>
-                      }
-                    >
-                      <Select
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          handleChange();
-                        }}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="h-11">
-                            <SelectValue placeholder="Select status" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Completed">Completed</SelectItem>
-                          <SelectItem value="Pursuing">Pursuing</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </ClientOnly>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
     );
   }
 );
 
 AcademicInfoStep.displayName = "AcademicInfoStep";
-

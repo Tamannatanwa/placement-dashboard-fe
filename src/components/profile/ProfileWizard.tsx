@@ -65,23 +65,30 @@ export function ProfileWizard({
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [formData, setFormData] = useState<Partial<ProfileFormData>>(initialData);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [profileLoaded, setProfileLoaded] = useState(false);
   
   // Refs for step validation
   const personalInfoRef = useRef<PersonalInfoStepHandle>(null);
   const academicInfoRef = useRef<AcademicInfoStepHandle>(null);
   const additionalInfoRef = useRef<AdditionalInfoStepHandle>(null);
 
-  // Load existing profile data
+  // Load existing profile data only when component mounts (when user clicks profile tab)
   useEffect(() => {
-    if (userRole === "student") {
+    // Only load profile if user is student and profile hasn't been loaded yet
+    if (userRole === "student" && !profileLoaded && !isLoading) {
       loadProfile();
-    } else {
-      setIsLoading(false);
     }
-  }, [userRole]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userRole]); // Only depend on userRole, loadProfile will handle its own state
 
   const loadProfile = async () => {
+    // Prevent multiple simultaneous loads
+    if (isLoading || profileLoaded) {
+      return;
+    }
+
+    setIsLoading(true);
     try {
       const profile = await studentsApi.getMyProfile();
       setFormData({
@@ -89,25 +96,41 @@ export function ProfileWizard({
         last_name: profile.last_name || "",
         phone: profile.phone || "",
         email: profile.email || "",
-        course: (profile as any).course || "",
-        current_module: (profile as any).current_module || "",
-        career_goal: (profile as any).career_goal || "",
-        degree: profile.degree || "",
+        date_of_birth: profile.date_of_birth || "",
+        gender: profile.gender || "",
+        current_address: profile.current_address || "",
+        highest_qualification: profile.highest_qualification || "",
+        college_name: profile.college_name || "",
+        college_id: profile.college_id || 0,
+        course: profile.course || "",
         branch: profile.branch || "",
         passing_year: profile.passing_year || new Date().getFullYear(),
-        cgpa: profile.cgpa || 0,
-        college_id: profile.college_id || 0,
-        educational_qualification: (profile as any).educational_qualification || "",
-        institute_name: (profile as any).institute_name || "",
-        status: (profile as any).status,
+        percentage: profile.percentage,
+        cgpa: profile.cgpa,
+        technical_skills: profile.technical_skills || [],
+        soft_skills: profile.soft_skills || [],
+        experience_type: profile.experience_type || "",
+        internship_details: profile.internship_details || [],
+        projects: profile.projects || [],
+        languages: profile.languages || [],
+        job_type: profile.job_type || [],
+        work_mode: profile.work_mode || [],
+        preferred_job_role: profile.preferred_job_role || [],
+        preferred_location: profile.preferred_location || [],
+        expected_salary: profile.expected_salary,
+        github_profile: profile.github_profile || "",
+        linkedin_profile: profile.linkedin_profile || "",
+        portfolio_url: profile.portfolio_url || "",
+        coding_platforms: profile.coding_platforms || {},
         resume_url: profile.resume_url || "",
-        portfolio_url: (profile as any).portfolio_url || "",
-        skills: (profile as any).skills || "",
-        preferred_work_mode: (profile as any).preferred_work_mode || "",
-        looking_for: (profile as any).looking_for || "",
       });
+      setProfileLoaded(true);
     } catch (error: any) {
-      toast.error("Failed to load profile data");
+      console.error("Failed to load profile:", error);
+      // Don't show error toast if profile doesn't exist (404) - user can create new profile
+      if (error.response?.status !== 404) {
+        toast.error("Failed to load profile data");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -228,70 +251,115 @@ export function ProfileWizard({
         first_name: formData.first_name || undefined,
         last_name: formData.last_name || undefined,
         phone: formData.phone || undefined,
+        date_of_birth: formData.date_of_birth || undefined,
+        gender: formData.gender || undefined,
+        current_address: formData.current_address || undefined,
+        highest_qualification: formData.highest_qualification || undefined,
+        college_name: formData.college_name || undefined,
         course: formData.course || undefined,
-        current_module: formData.current_module || undefined,
-        career_goal: formData.career_goal || undefined,
-        degree: formData.degree || undefined,
         branch: formData.branch || undefined,
         passing_year: formData.passing_year || undefined,
+        percentage: formData.percentage || undefined,
         cgpa: formData.cgpa || undefined,
-        educational_qualification: formData.educational_qualification || undefined,
-        institute_name: formData.institute_name || undefined,
-        status: formData.status || undefined,
-        resume_url: formData.resume_url || undefined,
+        technical_skills: formData.technical_skills || undefined,
+        soft_skills: formData.soft_skills || undefined,
+        experience_type: formData.experience_type || undefined,
+        internship_details: formData.internship_details || undefined,
+        projects: formData.projects || undefined,
+        languages: formData.languages || undefined,
+        job_type: formData.job_type || undefined,
+        work_mode: formData.work_mode || undefined,
+        preferred_job_role: formData.preferred_job_role || undefined,
+        preferred_location: formData.preferred_location || undefined,
+        expected_salary: formData.expected_salary || undefined,
+        github_profile: formData.github_profile || undefined,
+        linkedin_profile: formData.linkedin_profile || undefined,
         portfolio_url: formData.portfolio_url || undefined,
-        skills: formData.skills || undefined,
-        preferred_work_mode: formData.preferred_work_mode || undefined,
-        looking_for: formData.looking_for || undefined,
+        coding_platforms: formData.coding_platforms || undefined,
+        resume_url: formData.resume_url || undefined,
       };
 
       // Validate format (not required fields)
       await completeProfileSchema.parseAsync(dataToValidate);
 
       if (userRole === "student") {
-        // Update student profile via API with whatever data is available
+        // Update student profile via API - Build update data from formData
         const updateData: any = {};
         
-        if (formData.first_name) updateData.first_name = formData.first_name;
-        if (formData.last_name) updateData.last_name = formData.last_name;
-        if (formData.phone) updateData.phone = formData.phone;
-        if (formData.course) updateData.course = formData.course;
-        if (formData.current_module) updateData.current_module = formData.current_module;
-        if (formData.career_goal) updateData.career_goal = formData.career_goal;
-        if (formData.degree) updateData.degree = formData.degree;
-        if (formData.branch) updateData.branch = formData.branch;
-        if (formData.passing_year) updateData.passing_year = formData.passing_year;
-        if (formData.cgpa !== undefined) updateData.cgpa = formData.cgpa;
-        if (formData.college_id) updateData.college_id = formData.college_id;
-        if (formData.educational_qualification) updateData.educational_qualification = formData.educational_qualification;
-        if (formData.institute_name) updateData.institute_name = formData.institute_name;
-        if (formData.status) updateData.status = formData.status;
-        if (formData.resume_url) updateData.resume_url = formData.resume_url;
-        if (formData.portfolio_url) updateData.portfolio_url = formData.portfolio_url;
-        if (formData.skills) updateData.skills = formData.skills;
-        if (formData.preferred_work_mode) updateData.preferred_work_mode = formData.preferred_work_mode;
-        if (formData.looking_for) updateData.looking_for = formData.looking_for;
+        // Personal Details - Only include if field exists in formData
+        if ('first_name' in formData) updateData.first_name = formData.first_name || null;
+        if ('last_name' in formData) updateData.last_name = formData.last_name || null;
+        if ('phone' in formData) updateData.phone = formData.phone || null;
+        if ('date_of_birth' in formData) updateData.date_of_birth = formData.date_of_birth || null;
+        if ('gender' in formData) updateData.gender = formData.gender || null;
+        if ('current_address' in formData) updateData.current_address = formData.current_address || null;
+        
+        // Education Details
+        if ('highest_qualification' in formData) updateData.highest_qualification = formData.highest_qualification || null;
+        if ('college_name' in formData) updateData.college_name = formData.college_name || null;
+        if ('college_id' in formData) updateData.college_id = formData.college_id || null;
+        if ('course' in formData) updateData.course = formData.course || null;
+        if ('branch' in formData) updateData.branch = formData.branch || null;
+        if ('passing_year' in formData) updateData.passing_year = formData.passing_year || null;
+        if ('percentage' in formData) updateData.percentage = formData.percentage ?? null;
+        if ('cgpa' in formData) updateData.cgpa = formData.cgpa ?? null;
+        
+        // Skills - Include empty arrays if field exists
+        if ('technical_skills' in formData) updateData.technical_skills = formData.technical_skills || [];
+        if ('soft_skills' in formData) updateData.soft_skills = formData.soft_skills || [];
+        
+        // Experience
+        if ('experience_type' in formData) updateData.experience_type = formData.experience_type || null;
+        if ('internship_details' in formData) updateData.internship_details = formData.internship_details || [];
+        if ('projects' in formData) updateData.projects = formData.projects || [];
+        
+        // Languages
+        if ('languages' in formData) updateData.languages = formData.languages || [];
+        
+        // Job Preferences
+        if ('job_type' in formData) updateData.job_type = formData.job_type || [];
+        if ('work_mode' in formData) updateData.work_mode = formData.work_mode || [];
+        if ('preferred_job_role' in formData) updateData.preferred_job_role = formData.preferred_job_role || [];
+        if ('preferred_location' in formData) updateData.preferred_location = formData.preferred_location || [];
+        if ('expected_salary' in formData) updateData.expected_salary = formData.expected_salary ?? null;
+        
+        // Technical Profile Links
+        if ('github_profile' in formData) updateData.github_profile = formData.github_profile || null;
+        if ('linkedin_profile' in formData) updateData.linkedin_profile = formData.linkedin_profile || null;
+        if ('portfolio_url' in formData) updateData.portfolio_url = formData.portfolio_url || null;
+        if ('coding_platforms' in formData) updateData.coding_platforms = formData.coding_platforms || {};
 
-        await studentsApi.updateMyProfile(updateData);
-        toast.success("Profile saved successfully! You can complete it later.");
-      }
+        try {
+          await studentsApi.updateMyProfile(updateData);
+          toast.success("Profile saved successfully! You can complete it later.");
+          
+          // Call completion callback if provided
+          if (onComplete) {
+            onComplete(formData as ProfileFormData);
+          }
 
-      // Call completion callback if provided
-      if (onComplete) {
-        onComplete(formData as ProfileFormData);
-      }
-
-      // Redirect or show success
-      setTimeout(() => {
-        const role = userRole || "student";
-        if (role === "student") {
-          router.push("/dashboard");
-        } else if (role === "admin") {
-          router.push("/admin/dashboard");
-        } else {
-          router.push("/placement/dashboard");
+          // Redirect only on success
+          setTimeout(() => {
+            const role = userRole || "student";
+            if (role === "student") {
+              router.push("/student/dashboard");
+            } else if (role === "admin") {
+              router.push("/admin/dashboard");
+            } else {
+              router.push("/placement/dashboard");
+            }
+          }, 1500);
+        } catch (apiError: any) {
+          // Don't redirect on API failure - re-throw to be caught by outer catch
+          console.error("API Error:", apiError);
+          throw apiError;
         }
-      }, 1500);
+      } else {
+        // For non-student roles, just call callback
+        if (onComplete) {
+          onComplete(formData as ProfileFormData);
+        }
+      }
     } catch (error: any) {
       if (error.errors && Array.isArray(error.errors)) {
         const errorMessages = error.errors.map((err: any) => {

@@ -9,9 +9,9 @@ export default function StudentProfilePage() {
   const router = useRouter();
   const userRole = getUserRole() as "student" | "admin" | "placement" | null;
 
-  // Redirect to wizard for better UX
+  // Redirect to view page by default, wizard is at /profile/wizard
   useEffect(() => {
-    router.replace("/profile/wizard");
+    router.replace("/profile/view");
   }, [router]);
 
   // Show wizard while redirecting
