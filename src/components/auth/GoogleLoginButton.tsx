@@ -12,14 +12,21 @@ export function GoogleLoginButton() {
   const handleSuccess = async (credentialResponse: any) => {
     try {
       const response = await authApi.googleLogin({
-        idToken: credentialResponse.credential,
-        role: "student",
+        id_token: credentialResponse.credential,
       });
 
       if (response.access_token) {
         toast.success("Login successful!");
         const userRole = response.user?.role || "student";
-        router.push(getDashboardRoute(userRole));
+        
+        // Check if there's a redirect destination stored
+        const redirectPath = sessionStorage.getItem("redirectAfterLogin");
+        if (redirectPath) {
+          sessionStorage.removeItem("redirectAfterLogin");
+          router.push(redirectPath);
+        } else {
+          router.push(getDashboardRoute(userRole));
+        }
       } else {
         toast.error(response.message || "Authentication failed");
       }

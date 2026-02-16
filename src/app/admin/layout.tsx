@@ -30,6 +30,7 @@ import { getUserInfo, clearUserInfo } from "@/lib/utils/auth";
 import { authApi } from "@/lib/api/auth";
 import { toast } from "sonner";
 import { ClientOnly } from "@/components/ui/ClientOnly";
+import { PrivateRoute } from "@/components/auth/PrivateRoute";
 
 const navigation = [
   { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
@@ -73,21 +74,22 @@ export default function AdminLayout({
   const userInitials = userName.split(' ').map(n => n[0]).join('').toUpperCase() || "A";
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Mobile sidebar backdrop */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+    <PrivateRoute allowedRoles={["admin"]}>
+      <div className="min-h-screen bg-background">
+        {/* Mobile sidebar backdrop */}
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
 
-      {/* Sidebar */}
-      <aside
-        className={`fixed top-0 left-0 z-50 h-full w-64 bg-card border-r transition-transform duration-300 lg:translate-x-0 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
+        {/* Sidebar */}
+        <aside
+          className={`fixed top-0 left-0 z-50 h-full w-64 bg-card border-r transition-transform duration-300 lg:translate-x-0 ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="flex items-center justify-between p-6 border-b">
@@ -195,6 +197,7 @@ export default function AdminLayout({
         {/* Page content */}
         <main className="p-4 lg:p-8">{children}</main>
       </div>
-    </div>
+        </div>
+    </PrivateRoute>
   );
 }

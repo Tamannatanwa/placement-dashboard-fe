@@ -16,8 +16,7 @@ export interface LoginData {
 }
 
 export interface GoogleAuthData {
-  idToken: string;
-  role?: "student" | "placement_team" | "admin";
+  id_token: string;
 }
 
 // Auth response shape based on backend API
@@ -25,7 +24,14 @@ export interface GoogleAuthData {
 //   "access_token": "...",
 //   "refresh_token": "...",
 //   "token_type": "bearer",
-//   "user": { "id": "...", "email": "...", "role": "admin" }
+//   "user": { 
+//     "id": "uuid",
+//     "email": "user@example.com",
+//     "username": "username",
+//     "role": "student",
+//     "is_active": true,
+//     "created_at": "2024-01-01T00:00:00"
+//   }
 // }
 export interface AuthResponse {
   access_token?: string;
@@ -34,7 +40,10 @@ export interface AuthResponse {
   user?: {
     id: string;
     email: string;
+    username?: string;
     role: string;
+    is_active?: boolean;
+    created_at?: string;
   };
   message?: string;
 }
@@ -100,7 +109,7 @@ export const authApi = {
   },
 
   googleLogin: async (data: GoogleAuthData): Promise<AuthResponse> => {
-    const response = await api.post<AuthResponse>("/api/v1/auth/google", data);
+    const response = await api.post<AuthResponse>("/api/v1/auth/login/google", data);
     if (typeof window !== "undefined" && response.data.access_token) {
       // Persist tokens for subsequent requests
       localStorage.setItem("access_token", response.data.access_token);

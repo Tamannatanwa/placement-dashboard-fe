@@ -30,6 +30,7 @@ import { getUserInfo, clearUserInfo } from "@/lib/utils/auth";
 import { authApi } from "@/lib/api/auth";
 import { toast } from "sonner";
 import { ClientOnly } from "@/components/ui/ClientOnly";
+import { PrivateRoute } from "@/components/auth/PrivateRoute";
 
 const navigation = [
   { name: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
@@ -72,21 +73,22 @@ export default function StudentLayout({
   const userInitials = userName.split(' ').map(n => n[0]).join('').toUpperCase() || "S";
 
   return (
-    <div className="min-h-screen bg-background flex">
-      {/* Mobile sidebar backdrop */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+    <PrivateRoute allowedRoles={["student"]}>
+      <div className="min-h-screen bg-background flex">
+        {/* Mobile sidebar backdrop */}
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
 
-      {/* Sidebar - Fixed position, stays visible on scroll */}
-      <aside
-        className={`fixed top-0 left-0 z-50 h-screen bg-card border-r transition-all duration-300 ease-in-out overflow-y-auto ${
-          sidebarOpen ? "w-72 translate-x-0" : "w-0 -translate-x-full lg:w-16 lg:translate-x-0"
-        }`}
-      >
+        {/* Sidebar - Fixed position, stays visible on scroll */}
+        <aside
+          className={`fixed top-0 left-0 z-50 h-screen bg-card border-r transition-all duration-300 ease-in-out overflow-y-auto ${
+            sidebarOpen ? "w-72 translate-x-0" : "w-0 -translate-x-full lg:w-16 lg:translate-x-0"
+          }`}
+        >
         <div className="flex flex-col h-full">
           {/* Logo and Toggle */}
           <div className="flex items-center justify-between p-4 border-b">
@@ -318,7 +320,8 @@ export default function StudentLayout({
         {/* Page content */}
         <main className="p-4 lg:p-8">{children}</main>
       </div>
-    </div>
+      </div>
+    </PrivateRoute>
   );
 }
 
