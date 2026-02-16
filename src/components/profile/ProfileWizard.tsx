@@ -109,7 +109,7 @@ export function ProfileWizard({
         cgpa: profile.cgpa,
         technical_skills: profile.technical_skills || [],
         soft_skills: profile.soft_skills || [],
-        experience_type: profile.experience_type || "",
+        experience_type: profile.experience_type || undefined,
         internship_details: profile.internship_details || [],
         projects: profile.projects || [],
         languages: profile.languages || [],

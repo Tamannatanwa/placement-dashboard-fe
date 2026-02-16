@@ -139,28 +139,33 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {statCards.map((stat, index) => {
           const Icon = stat.icon;
-          const CardWrapper = stat.link ? Link : "div";
-          const wrapperProps = stat.link ? { href: stat.link } : {};
+          const cardContent = (
+            <Card className={`hover:shadow-lg transition-shadow ${stat.link ? "cursor-pointer" : ""}`}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  {stat.title}
+                </CardTitle>
+                <div className={`p-2 rounded-lg ${stat.bgColor}`}>
+                  <Icon className={`h-5 w-5 ${stat.color}`} />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stat.value.toLocaleString()}</div>
+                {stat.subtitle && (
+                  <p className="text-xs text-muted-foreground mt-1">{stat.subtitle}</p>
+                )}
+              </CardContent>
+            </Card>
+          );
 
-          return (
-            <CardWrapper key={index} {...wrapperProps} className={stat.link ? "block" : ""}>
-              <Card className={`hover:shadow-lg transition-shadow ${stat.link ? "cursor-pointer" : ""}`}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    {stat.title}
-                  </CardTitle>
-                  <div className={`p-2 rounded-lg ${stat.bgColor}`}>
-                    <Icon className={`h-5 w-5 ${stat.color}`} />
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stat.value.toLocaleString()}</div>
-                  {stat.subtitle && (
-                    <p className="text-xs text-muted-foreground mt-1">{stat.subtitle}</p>
-                  )}
-                </CardContent>
-              </Card>
-            </CardWrapper>
+          return stat.link ? (
+            <Link key={index} href={stat.link} className="block">
+              {cardContent}
+            </Link>
+          ) : (
+            <div key={index}>
+              {cardContent}
+            </div>
           );
         })}
       </div>
