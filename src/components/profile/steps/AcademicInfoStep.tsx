@@ -55,9 +55,10 @@ export const AcademicInfoStep = forwardRef<AcademicInfoStepHandle, StepContentPr
         college_name: formData.college_name || "",
         course: formData.course || "",
         branch: formData.branch || "",
-        passing_year: formData.passing_year,
-        percentage: formData.percentage,
-        cgpa: formData.cgpa,
+        // Avoid passing `null` to inputs; React warns on value={null}
+        passing_year: formData.passing_year ?? undefined,
+        percentage: formData.percentage ?? undefined,
+        cgpa: formData.cgpa ?? undefined,
       },
       mode: "onChange",
     });
@@ -69,9 +70,10 @@ export const AcademicInfoStep = forwardRef<AcademicInfoStepHandle, StepContentPr
         college_name: formData.college_name || "",
         course: formData.course || "",
         branch: formData.branch || "",
-        passing_year: formData.passing_year,
-        percentage: formData.percentage,
-        cgpa: formData.cgpa,
+        // Normalize potential `null` values coming from backend/state
+        passing_year: formData.passing_year ?? undefined,
+        percentage: formData.percentage ?? undefined,
+        cgpa: formData.cgpa ?? undefined,
       });
     }, [
       formData.highest_qualification,
