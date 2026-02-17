@@ -127,29 +127,29 @@ export function ProfileWizard({
         internship_details: profile.internship_details || [],
         projects: profile.projects || [],
         languages: profile.languages || [],
-        // Handle nested preferences object or flat fields (backward compatibility)
+        // Handle nested preference object or flat fields (backward compatibility)
         // Ensure arrays are always arrays (not null/undefined)
-        job_type: Array.isArray(profile.preferences?.job_type) 
-          ? profile.preferences.job_type 
+        job_type: Array.isArray(profile.preference?.job_type) 
+          ? profile.preference.job_type 
           : Array.isArray(profile.job_type) 
             ? profile.job_type 
             : [],
-        work_mode: Array.isArray(profile.preferences?.work_mode) 
-          ? profile.preferences.work_mode 
+        work_mode: Array.isArray(profile.preference?.work_mode) 
+          ? profile.preference.work_mode 
           : Array.isArray(profile.work_mode) 
             ? profile.work_mode 
             : [],
-        preferred_job_role: Array.isArray(profile.preferences?.preferred_job_role) 
-          ? profile.preferences.preferred_job_role 
+        preferred_job_role: Array.isArray(profile.preference?.preferred_job_role) 
+          ? profile.preference.preferred_job_role 
           : Array.isArray(profile.preferred_job_role) 
             ? profile.preferred_job_role 
             : [],
-        preferred_location: Array.isArray(profile.preferences?.preferred_location) 
-          ? profile.preferences.preferred_location 
+        preferred_location: Array.isArray(profile.preference?.preferred_location) 
+          ? profile.preference.preferred_location 
           : Array.isArray(profile.preferred_location) 
             ? profile.preferred_location 
             : [],
-        expected_salary: profile.preferences?.expected_salary ?? profile.expected_salary,
+        expected_salary: profile.preference?.expected_salary ?? profile.expected_salary,
         github_profile: profile.github_profile || "",
         linkedin_profile: profile.linkedin_profile || "",
         portfolio_url: profile.portfolio_url || "",
@@ -157,13 +157,13 @@ export function ProfileWizard({
         resume_url: profile.resume_url || "",
       });
       
-      // Debug: Log preferences data to verify it's loaded correctly
+      // Debug: Log preference data to verify it's loaded correctly
       console.log("Profile loaded - Preferences:", {
-        preferences: profile.preferences,
-        job_type: Array.isArray(profile.preferences?.job_type) ? profile.preferences.job_type : Array.isArray(profile.job_type) ? profile.job_type : [],
-        work_mode: Array.isArray(profile.preferences?.work_mode) ? profile.preferences.work_mode : Array.isArray(profile.work_mode) ? profile.work_mode : [],
-        preferred_job_role: Array.isArray(profile.preferences?.preferred_job_role) ? profile.preferences.preferred_job_role : Array.isArray(profile.preferred_job_role) ? profile.preferred_job_role : [],
-        preferred_location: Array.isArray(profile.preferences?.preferred_location) ? profile.preferences.preferred_location : Array.isArray(profile.preferred_location) ? profile.preferred_location : [],
+        preference: profile.preference,
+        job_type: Array.isArray(profile.preference?.job_type) ? profile.preference.job_type : Array.isArray(profile.job_type) ? profile.job_type : [],
+        work_mode: Array.isArray(profile.preference?.work_mode) ? profile.preference.work_mode : Array.isArray(profile.work_mode) ? profile.work_mode : [],
+        preferred_job_role: Array.isArray(profile.preference?.preferred_job_role) ? profile.preference.preferred_job_role : Array.isArray(profile.preferred_job_role) ? profile.preferred_job_role : [],
+        preferred_location: Array.isArray(profile.preference?.preferred_location) ? profile.preference.preferred_location : Array.isArray(profile.preferred_location) ? profile.preferred_location : [],
       });
       
       setProfileLoaded(true);

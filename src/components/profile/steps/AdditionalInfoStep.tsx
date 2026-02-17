@@ -96,7 +96,7 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
         resume_url: formData.resume_url || "",
       };
       
-      // Debug: Log preferences data
+      // Debug: Log preference data
       console.log("AdditionalInfoStep - Form reset with data:", {
         preferred_job_role: resetData.preferred_job_role,
         preferred_location: resetData.preferred_location,
