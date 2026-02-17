@@ -304,6 +304,7 @@ export const studentsApi = {
     const queryString = params.toString();
     const url = `/api/v1/students/me/recommended-jobs${queryString ? `?${queryString}` : ""}`;
     const response = await api.get<RecommendedJobsResponse>(url);
+    console.log(response);
     return response.data;
   },
 

@@ -62,7 +62,7 @@ export interface StudentProfile {
   languages?: LanguageProficiency[];
   
   // Job Preferences (nested object - preferred)
-  preference?: {
+  preferences?: {
     job_type?: string[];
     work_mode?: string[];
     preferred_job_role?: string[];
@@ -70,7 +70,7 @@ export interface StudentProfile {
     expected_salary?: number;
   };
   
-  // Job Preferences (flat fields - deprecated, use preference object instead)
+  // Job Preferences (flat fields - deprecated, use preferences object instead)
   // Kept for backward compatibility and internal form state
   job_type?: string[];
   work_mode?: string[];
