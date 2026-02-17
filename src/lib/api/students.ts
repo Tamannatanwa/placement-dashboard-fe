@@ -20,7 +20,7 @@ export interface DashboardResponse {
 
 // Track job view request body
 export interface TrackJobViewData {
-  job_id: number;
+  job_id: string;
   duration_seconds: number;
   source: string;
 }
@@ -198,7 +198,7 @@ export const studentsApi = {
    * POST /api/v1/students/me/jobs/{job_id}/view
    */
   trackJobView: async (
-    jobId: number,
+    jobId: string,
     data: TrackJobViewData
   ): Promise<TrackJobViewResponse> => {
     const api = getApiInstance();
@@ -312,7 +312,7 @@ export const studentsApi = {
    * Get similar jobs
    * GET /api/v1/students/me/jobs/{job_id}/similar
    */
-  getSimilarJobs: async (jobId: number): Promise<SimilarJobsResponse> => {
+  getSimilarJobs: async (jobId: string): Promise<SimilarJobsResponse> => {
     const api = getApiInstance();
     const response = await api.get<SimilarJobsResponse>(
       `/api/v1/students/me/jobs/${jobId}/similar`

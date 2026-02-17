@@ -17,7 +17,8 @@ export const getApiInstance = (): AxiosInstance => {
     headers: {
       "Content-Type": "application/json",
     },
-    timeout: 10000, // 10 second timeout
+    // Slightly higher timeout to accommodate recommendation queries while still failing fast on real issues
+    timeout: 15000,
   });
 
   // Add auth token to requests
