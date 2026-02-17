@@ -25,7 +25,7 @@ export default function SavedJobsPage() {
   const router = useRouter();
   const [savedJobs, setSavedJobs] = useState<SavedJob[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     loadSavedJobs();
@@ -44,17 +44,18 @@ export default function SavedJobsPage() {
     }
   };
 
-  const handleUnsave = async (savedJobId: number, jobId: string) => {
+  const handleUnsave = async (savedJobId: string, jobId: string) => {
     setDeletingId(savedJobId);
     try {
-      // TODO: Replace with actual API call
-      // await studentsApi.unsaveJob(savedJobId);
+      // Delete saved job via API
+      const api = (await import("@/lib/api/axios-instance")).getApiInstance();
+      await api.delete(`/api/v1/students/me/saved-jobs/${savedJobId}`);
       
-      // For now, just remove from local state
+      // Remove from local state
       setSavedJobs((prev) => prev.filter((sj) => sj.id !== savedJobId));
       toast.success("Job removed from saved");
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Failed to unsave job");
+      toast.error(error.response?.data?.detail || error.response?.data?.message || "Failed to unsave job");
       console.error("Error unsaving job:", error);
     } finally {
       setDeletingId(null);
@@ -116,6 +117,7 @@ export default function SavedJobsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {savedJobs.map((savedJob) => {
               const job = savedJob.job;
+              if (!job) return null; // Skip if job is null
               return (
                 <Card key={savedJob.id} className="hover:shadow-lg transition-shadow">
                   <CardContent className="p-6">

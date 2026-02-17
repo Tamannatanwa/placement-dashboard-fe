@@ -143,8 +143,7 @@ export default function JobDetailPage() {
 
   const handleSave = async (targetJobId?: string) => {
     const jobIdToSave = targetJobId || jobId;
-    const jobIdNum = parseInt(jobIdToSave, 10);
-    if (isNaN(jobIdNum)) return;
+    if (!jobIdToSave) return;
 
     try {
       const isCurrentlySaved = savedJobs.has(jobIdToSave);
@@ -155,7 +154,7 @@ export default function JobDetailPage() {
       }
 
       await studentsApi.saveJob({
-        job_id: jobIdNum,
+        job_id: jobIdToSave, // UUID as string
       });
 
       setSavedJobs((prev) => {
