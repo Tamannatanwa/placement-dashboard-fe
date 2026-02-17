@@ -12,6 +12,7 @@ import { JobFilters } from "@/components/jobs/JobFilters";
 import { JobCard } from "@/components/jobs/JobCard";
 import { jobsApi } from "@/lib/api/jobs";
 import { studentsApi } from "@/lib/api/students";
+import { savedJobsApi } from "@/lib/api/saved-jobs";
 import { Job, JobFilters as JobFiltersType } from "@/types/job";
 import { toast } from "sonner";
 import {
@@ -118,7 +119,7 @@ export default function StudentDashboard() {
   // Load saved jobs from API
   const loadSavedJobs = async () => {
     try {
-      const response = await studentsApi.getSavedJobs();
+      const response = await savedJobsApi.getSavedJobs();
       const savedJobIds = new Set(response.saved_jobs.map((sj) => String(sj.job_id)));
       setSavedJobs(savedJobIds);
       setSavedJobsCount(response.total);
@@ -226,9 +227,6 @@ export default function StudentDashboard() {
 
   // Handle save job using API
   const handleSave = async (jobId: string) => {
-    const jobIdNum = parseInt(jobId, 10);
-    if (isNaN(jobIdNum)) return;
-
     try {
       const isCurrentlySaved = savedJobs.has(jobId);
       
@@ -240,8 +238,8 @@ export default function StudentDashboard() {
       }
 
       // Save job via API
-      await studentsApi.saveJob({
-        job_id: jobIdNum,
+      await savedJobsApi.saveJob({
+        job_id: jobId,
       });
 
       // Update local state
@@ -254,7 +252,7 @@ export default function StudentDashboard() {
       toast.success("Job saved successfully");
     } catch (error: any) {
       console.error("Error saving job:", error);
-      toast.error(error.response?.data?.message || "Failed to save job");
+      toast.error(error.response?.data?.detail || error.response?.data?.message || "Failed to save job");
     }
   };
 

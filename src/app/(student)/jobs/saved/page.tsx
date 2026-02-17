@@ -6,7 +6,7 @@ import { Bookmark, Briefcase, MapPin, Clock, Users, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { studentsApi, SavedJob } from "@/lib/api/students";
+import { savedJobsApi, SavedJob } from "@/lib/api/saved-jobs";
 import { Job } from "@/types/job";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -34,10 +34,10 @@ export default function SavedJobsPage() {
   const loadSavedJobs = async () => {
     setIsLoading(true);
     try {
-      const response = await studentsApi.getSavedJobs();
+      const response = await savedJobsApi.getSavedJobs();
       setSavedJobs(response.saved_jobs || []);
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Failed to load saved jobs");
+      toast.error(error.response?.data?.detail || error.response?.data?.message || "Failed to load saved jobs");
       console.error("Error loading saved jobs:", error);
     } finally {
       setIsLoading(false);
@@ -47,11 +47,7 @@ export default function SavedJobsPage() {
   const handleUnsave = async (savedJobId: string, jobId: string) => {
     setDeletingId(savedJobId);
     try {
-      // Delete saved job via API
-      const api = (await import("@/lib/api/axios-instance")).getApiInstance();
-      await api.delete(`/api/v1/students/me/saved-jobs/${savedJobId}`);
-      
-      // Remove from local state
+      await savedJobsApi.removeSavedJob(savedJobId);
       setSavedJobs((prev) => prev.filter((sj) => sj.id !== savedJobId));
       toast.success("Job removed from saved");
     } catch (error: any) {
@@ -117,7 +113,6 @@ export default function SavedJobsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {savedJobs.map((savedJob) => {
               const job = savedJob.job;
-              if (!job) return null; // Skip if job is null
               return (
                 <Card key={savedJob.id} className="hover:shadow-lg transition-shadow">
                   <CardContent className="p-6">

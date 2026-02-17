@@ -106,11 +106,11 @@ export interface ProfileCompletenessResponse {
 
 // Saved job item
 export interface SavedJob {
-  id: string; // UUID as string
-  job_id: string; // UUID as string
-  job: Job | null;
-  folder: string | null;
-  notes: string | null;
+  id: number;
+  job_id: number;
+  job: Job;
+  folder: string;
+  notes: string;
   saved_at: string;
 }
 
@@ -123,17 +123,20 @@ export interface SavedJobsResponse {
 
 // Save job request
 export interface SaveJobData {
-  job_id: string; // UUID as string
-  folder?: string | null;
-  notes?: string | null;
+  job_id: number;
+  folder?: string;
+  notes?: string;
 }
 
 // Check if saved response
 export interface CheckSavedResponse {
-  job_id: string;
-  is_saved: boolean;
-  saved_job_id: string | null;
-  folder: string | null;
+  detail?: Array<{
+    loc: (string | number)[];
+    msg: string;
+    type: string;
+  }>;
+  is_saved?: boolean;
+  saved_job?: SavedJob;
 }
 
 // Recommended job item
@@ -277,7 +280,7 @@ export const studentsApi = {
    * Check if job is saved
    * GET /api/v1/students/me/saved-jobs/check/{job_id}
    */
-  checkIfSaved: async (jobId: string): Promise<CheckSavedResponse> => {
+  checkIfSaved: async (jobId: number): Promise<CheckSavedResponse> => {
     const api = getApiInstance();
     const response = await api.get<CheckSavedResponse>(
       `/api/v1/students/me/saved-jobs/check/${jobId}`

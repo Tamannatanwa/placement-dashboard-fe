@@ -6,6 +6,7 @@ import { ArrowLeft, MapPin, Clock, Users, ExternalLink, Bookmark } from "lucide-
 import { Button } from "@/components/ui/button";
 import { jobsApi } from "@/lib/api/jobs";
 import { studentsApi } from "@/lib/api/students";
+import { savedJobsApi } from "@/lib/api/saved-jobs";
 import { Job } from "@/types/job";
 import { JobCard } from "@/components/jobs/JobCard";
 import { toast } from "sonner";
@@ -71,11 +72,8 @@ export default function JobDetailPage() {
   };
 
   const checkIfSaved = async () => {
-    const jobIdNum = parseInt(jobId, 10);
-    if (isNaN(jobIdNum)) return;
-
     try {
-      const response = await studentsApi.checkIfSaved(jobIdNum);
+      const response = await savedJobsApi.checkIfSaved(jobId);
       setIsSaved(response.is_saved || false);
     } catch (error: any) {
       console.error("Error checking if job is saved:", error);
@@ -124,7 +122,7 @@ export default function JobDetailPage() {
 
   const loadSavedJobs = async () => {
     try {
-      const response = await studentsApi.getSavedJobs();
+      const response = await savedJobsApi.getSavedJobs();
       const savedJobIds = new Set(response.saved_jobs.map((sj) => String(sj.job_id)));
       setSavedJobs(savedJobIds);
     } catch (error: any) {
@@ -143,7 +141,6 @@ export default function JobDetailPage() {
 
   const handleSave = async (targetJobId?: string) => {
     const jobIdToSave = targetJobId || jobId;
-    if (!jobIdToSave) return;
 
     try {
       const isCurrentlySaved = savedJobs.has(jobIdToSave);
@@ -153,8 +150,8 @@ export default function JobDetailPage() {
         return;
       }
 
-      await studentsApi.saveJob({
-        job_id: jobIdToSave, // UUID as string
+      await savedJobsApi.saveJob({
+        job_id: jobIdToSave,
       });
 
       setSavedJobs((prev) => {
@@ -170,7 +167,7 @@ export default function JobDetailPage() {
       toast.success("Job saved successfully");
     } catch (error: any) {
       console.error("Error saving job:", error);
-      toast.error(error.response?.data?.message || "Failed to save job");
+      toast.error(error.response?.data?.detail || error.response?.data?.message || "Failed to save job");
     }
   };
 
