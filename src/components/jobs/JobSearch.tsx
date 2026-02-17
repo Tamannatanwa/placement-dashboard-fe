@@ -2,7 +2,7 @@
 
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface JobSearchProps {
   onSearch: (query: string) => void;
@@ -21,6 +21,16 @@ export function JobSearch({ onSearch, placeholder }: JobSearchProps) {
     onSearch(searchQuery);
   };
 
+  // Trigger debounced search as the user types for a smoother UX.
+  // Important: depend only on searchQuery to avoid infinite loops when parent recreates onSearch.
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      onSearch(searchQuery);
+    }, 300);
+
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
   return (
     <form onSubmit={handleSubmit} className="w-full">
       <div className="relative">
@@ -31,8 +41,6 @@ export function JobSearch({ onSearch, placeholder }: JobSearchProps) {
           value={searchQuery}
           onChange={(e) => {
             setSearchQuery(e.target.value);
-            // Optional: Real-time search
-            // onSearch(e.target.value);
           }}
           className="pl-10 h-12 text-base"
         />
@@ -40,8 +48,5 @@ export function JobSearch({ onSearch, placeholder }: JobSearchProps) {
     </form>
   );
 }
-
-
-
 
 

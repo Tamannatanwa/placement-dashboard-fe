@@ -182,26 +182,11 @@ export default function StudentDashboard() {
     }
   };
 
-  // Handle search - filter by skills or title
+  // Handle search - filter by title / company / skills on the client side only.
+  // We avoid mapping this text directly to backend `skills` filter,
+  // since that expects exact skill tokens and can hide many relevant jobs.
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    // If API supports search, we can add it to filters
-    // For now, we'll filter client-side
-    if (query.trim()) {
-      // Update filters with skills search if it looks like skills
-      const skills = query.split(",").map((s) => s.trim()).filter(Boolean);
-      if (skills.length > 0) {
-        setFilters({
-          ...filters,
-          skills: skills.join(","),
-          page: 1, // Reset to first page
-        });
-      }
-    } else {
-      // Clear skills filter when search is cleared
-      const { skills, ...restFilters } = filters;
-      setFilters({ ...restFilters, page: 1 });
-    }
   };
 
   // Handle job application with view tracking

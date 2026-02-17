@@ -70,24 +70,11 @@ export default function JobsPage() {
     }
   };
 
+  // Handle text search purely on the client side (title/company/skills_required).
+  // We intentionally do NOT send this query as a backend `skills` filter,
+  // because that expects exact skill names and can hide many valid jobs.
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    if (query.trim()) {
-      const skills = query
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean);
-      if (skills.length > 0) {
-        setFilters({
-          ...filters,
-          skills: skills.join(","),
-          page: 1,
-        });
-      }
-    } else {
-      const { skills, ...restFilters } = filters;
-      setFilters({ ...restFilters, page: 1 });
-    }
   };
 
   const handleApply = (jobId: string) => {
