@@ -130,10 +130,32 @@ export default function JobDetailPage() {
     }
   };
 
+  // Clean up common garbage characters around apply links so they don't break
+  // e.g. `"https://example.com/**"` -> `https://example.com/`
+  const sanitizeApplyLink = (raw?: string | null): string | null => {
+    if (!raw) return null;
+
+    let url = raw.trim();
+    if (!url) return null;
+
+    // Strip obvious wrapping characters at the very start/end
+    url = url.replace(/^["'`]+/, "").replace(/["'`]+$/, "");
+
+    // Remove leading/trailing asterisks
+    url = url.replace(/^\*+/, "").replace(/\*+$/, "");
+
+    // Collapse trailing '/**', '/*', etc. down to a single '/'
+    url = url.replace(/\/\*+$/, "/");
+
+    return url || null;
+  };
+
   const handleApply = (jobId?: string) => {
     const targetJob = jobId ? similarJobs.find((j) => j.id === jobId) : job;
-    if (targetJob?.source_url) {
-      window.open(targetJob.source_url, "_blank");
+    const sanitized = sanitizeApplyLink(targetJob?.source_url);
+
+    if (sanitized) {
+      window.open(sanitized, "_blank");
     } else {
       toast.info("Application link not available");
     }
@@ -203,6 +225,8 @@ export default function JobDetailPage() {
     const type = job.employment_type || "";
     return type.charAt(0).toUpperCase() + type.slice(1);
   };
+
+  const sanitizedSourceUrl = sanitizeApplyLink(job.source_url);
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -289,10 +313,10 @@ export default function JobDetailPage() {
               Apply Now
               <ExternalLink className="h-4 w-4 ml-2" />
             </Button>
-            {job.source_url && (
+            {sanitizedSourceUrl && (
               <Button
                 variant="outline"
-                onClick={() => window.open(job.source_url, "_blank")}
+                onClick={() => window.open(sanitizedSourceUrl, "_blank")}
                 size="lg"
               >
                 View Original Posting
