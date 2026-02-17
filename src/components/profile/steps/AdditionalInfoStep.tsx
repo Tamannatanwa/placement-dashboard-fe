@@ -46,6 +46,8 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
     const [resumeFileName, setResumeFileName] = useState<string | null>(null);
     const [techSkillInput, setTechSkillInput] = useState("");
     const [softSkillInput, setSoftSkillInput] = useState("");
+    const [jobRoleInput, setJobRoleInput] = useState("");
+    const [locationInput, setLocationInput] = useState("");
 
     const form = useForm<AdditionalInfoFormData>({
       resolver: zodResolver(additionalInfoSchema),
@@ -72,24 +74,37 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
 
     // Sync form values when formData changes externally
     useEffect(() => {
-      form.reset({
-        technical_skills: formData.technical_skills || [],
-        soft_skills: formData.soft_skills || [],
-        experience_type: formData.experience_type || undefined,
-        internship_details: formData.internship_details || [],
-        projects: formData.projects || [],
-        languages: formData.languages || [],
-        job_type: formData.job_type || [],
-        work_mode: formData.work_mode || [],
-        preferred_job_role: formData.preferred_job_role || [],
-        preferred_location: formData.preferred_location || [],
+      // Ensure arrays are always arrays (not null/undefined)
+      const resetData = {
+        technical_skills: Array.isArray(formData.technical_skills) ? formData.technical_skills : [],
+        soft_skills: Array.isArray(formData.soft_skills) ? formData.soft_skills : [],
+        experience_type: (formData.experience_type === "fresher" || formData.experience_type === "experienced") 
+          ? formData.experience_type 
+          : undefined,
+        internship_details: Array.isArray(formData.internship_details) ? formData.internship_details : [],
+        projects: Array.isArray(formData.projects) ? formData.projects : [],
+        languages: Array.isArray(formData.languages) ? formData.languages : [],
+        job_type: Array.isArray(formData.job_type) ? formData.job_type : [],
+        work_mode: Array.isArray(formData.work_mode) ? formData.work_mode : [],
+        preferred_job_role: Array.isArray(formData.preferred_job_role) ? formData.preferred_job_role : [],
+        preferred_location: Array.isArray(formData.preferred_location) ? formData.preferred_location : [],
         expected_salary: formData.expected_salary,
         github_profile: formData.github_profile || "",
         linkedin_profile: formData.linkedin_profile || "",
         portfolio_url: formData.portfolio_url || "",
         coding_platforms: formData.coding_platforms || {},
         resume_url: formData.resume_url || "",
+      };
+      
+      // Debug: Log preference data
+      console.log("AdditionalInfoStep - Form reset with data:", {
+        preferred_job_role: resetData.preferred_job_role,
+        preferred_location: resetData.preferred_location,
+        job_type: resetData.job_type,
+        work_mode: resetData.work_mode,
       });
+      
+      form.reset(resetData);
       if (formData.resume_url) {
         const urlParts = formData.resume_url.split('/');
         setResumeFileName(urlParts[urlParts.length - 1] || 'resume.pdf');
@@ -249,22 +264,22 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
     };
 
     const addJobRole = () => {
-      const input = prompt("Enter preferred job role:");
-      if (input?.trim()) {
+      if (jobRoleInput.trim()) {
         const current = form.getValues("preferred_job_role") || [];
-        if (!current.includes(input.trim())) {
-          form.setValue("preferred_job_role", [...current, input.trim()]);
+        if (!current.includes(jobRoleInput.trim())) {
+          form.setValue("preferred_job_role", [...current, jobRoleInput.trim()]);
+          setJobRoleInput("");
           handleChange();
         }
       }
     };
 
     const addLocation = () => {
-      const input = prompt("Enter preferred location:");
-      if (input?.trim()) {
+      if (locationInput.trim()) {
         const current = form.getValues("preferred_location") || [];
-        if (!current.includes(input.trim())) {
-          form.setValue("preferred_location", [...current, input.trim()]);
+        if (!current.includes(locationInput.trim())) {
+          form.setValue("preferred_location", [...current, locationInput.trim()]);
+          setLocationInput("");
           handleChange();
         }
       }
@@ -636,7 +651,7 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {JOB_TYPES.filter((type) => !field.value?.includes(type)).map((type) => (
+                          {JOB_TYPES.filter((type) => !(field.value || []).includes(type)).map((type) => (
                             <SelectItem key={type} value={type}>
                               {type}
                             </SelectItem>
@@ -685,7 +700,7 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {WORK_MODES.filter((mode) => !field.value?.includes(mode)).map((mode) => (
+                          {WORK_MODES.filter((mode) => !(field.value || []).includes(mode)).map((mode) => (
                             <SelectItem key={mode} value={mode}>
                               {mode}
                             </SelectItem>
@@ -722,6 +737,8 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
                       <div className="flex gap-2">
                         <Input
                           placeholder="Add preferred job role"
+                          value={jobRoleInput}
+                          onChange={(e) => setJobRoleInput(e.target.value)}
                           onKeyPress={(e) => {
                             if (e.key === 'Enter') {
                               e.preventDefault();
@@ -764,6 +781,8 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
                       <div className="flex gap-2">
                         <Input
                           placeholder="Add preferred location"
+                          value={locationInput}
+                          onChange={(e) => setLocationInput(e.target.value)}
                           onKeyPress={(e) => {
                             if (e.key === 'Enter') {
                               e.preventDefault();
@@ -776,9 +795,9 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
                           <Plus className="h-4 w-4" />
                         </Button>
                       </div>
-                      {field.value && field.value.length > 0 && (
+                      {(field.value || []).length > 0 && (
                         <div className="flex flex-wrap gap-2 mt-2">
-                          {field.value.map((location, idx) => (
+                          {(field.value || []).map((location, idx) => (
                             <Badge key={idx} variant="secondary" className="gap-1">
                               {location}
                               <X

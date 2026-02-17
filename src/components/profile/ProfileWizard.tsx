@@ -99,7 +99,21 @@ export function ProfileWizard({
         date_of_birth: profile.date_of_birth || "",
         gender: profile.gender || "",
         current_address: profile.current_address || "",
-        highest_qualification: profile.highest_qualification || "",
+        highest_qualification: profile.highest_qualification 
+          ? (() => {
+              const qual = profile.highest_qualification.toLowerCase();
+              // Map backend lowercase values to frontend capitalized format
+              const qualMap: { [key: string]: string } = {
+                '10th': '10th',
+                '12th': '12th',
+                'diploma': 'Diploma',
+                'graduation': 'Graduation',
+                'post-graduation': 'Post-Graduation',
+                'phd': 'PhD'
+              };
+              return qualMap[qual] || qual.charAt(0).toUpperCase() + qual.slice(1);
+            })()
+          : "",
         college_name: profile.college_name || "",
         college_id: profile.college_id || 0,
         course: profile.course || "",
@@ -113,17 +127,45 @@ export function ProfileWizard({
         internship_details: profile.internship_details || [],
         projects: profile.projects || [],
         languages: profile.languages || [],
-        job_type: profile.job_type || [],
-        work_mode: profile.work_mode || [],
-        preferred_job_role: profile.preferred_job_role || [],
-        preferred_location: profile.preferred_location || [],
-        expected_salary: profile.expected_salary,
+        // Handle nested preference object or flat fields (backward compatibility)
+        // Ensure arrays are always arrays (not null/undefined)
+        job_type: Array.isArray(profile.preference?.job_type) 
+          ? profile.preference.job_type 
+          : Array.isArray(profile.job_type) 
+            ? profile.job_type 
+            : [],
+        work_mode: Array.isArray(profile.preference?.work_mode) 
+          ? profile.preference.work_mode 
+          : Array.isArray(profile.work_mode) 
+            ? profile.work_mode 
+            : [],
+        preferred_job_role: Array.isArray(profile.preference?.preferred_job_role) 
+          ? profile.preference.preferred_job_role 
+          : Array.isArray(profile.preferred_job_role) 
+            ? profile.preferred_job_role 
+            : [],
+        preferred_location: Array.isArray(profile.preference?.preferred_location) 
+          ? profile.preference.preferred_location 
+          : Array.isArray(profile.preferred_location) 
+            ? profile.preferred_location 
+            : [],
+        expected_salary: profile.preference?.expected_salary ?? profile.expected_salary,
         github_profile: profile.github_profile || "",
         linkedin_profile: profile.linkedin_profile || "",
         portfolio_url: profile.portfolio_url || "",
         coding_platforms: profile.coding_platforms || {},
         resume_url: profile.resume_url || "",
       });
+      
+      // Debug: Log preference data to verify it's loaded correctly
+      console.log("Profile loaded - Preferences:", {
+        preference: profile.preference,
+        job_type: Array.isArray(profile.preference?.job_type) ? profile.preference.job_type : Array.isArray(profile.job_type) ? profile.job_type : [],
+        work_mode: Array.isArray(profile.preference?.work_mode) ? profile.preference.work_mode : Array.isArray(profile.work_mode) ? profile.work_mode : [],
+        preferred_job_role: Array.isArray(profile.preference?.preferred_job_role) ? profile.preference.preferred_job_role : Array.isArray(profile.preferred_job_role) ? profile.preferred_job_role : [],
+        preferred_location: Array.isArray(profile.preference?.preferred_location) ? profile.preference.preferred_location : Array.isArray(profile.preferred_location) ? profile.preferred_location : [],
+      });
+      
       setProfileLoaded(true);
     } catch (error: any) {
       console.error("Failed to load profile:", error);
@@ -295,7 +337,7 @@ export function ProfileWizard({
         if ('current_address' in formData) updateData.current_address = formData.current_address || null;
         
         // Education Details
-        if ('highest_qualification' in formData) updateData.highest_qualification = formData.highest_qualification || null;
+        if ('highest_qualification' in formData) updateData.highest_qualification = formData.highest_qualification && formData.highest_qualification.trim() ? formData.highest_qualification.trim() : null;
         if ('college_name' in formData) updateData.college_name = formData.college_name || null;
         if ('college_id' in formData) updateData.college_id = formData.college_id || null;
         if ('course' in formData) updateData.course = formData.course || null;
