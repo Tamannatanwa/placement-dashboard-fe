@@ -1,12 +1,6 @@
 import axios, { AxiosInstance } from "axios";
 
-// In production (Vercel), use relative URLs so requests go through Vercel's reverse proxy
-// This avoids HTTPS → HTTP mixed-content errors
-// In development, use NEXT_PUBLIC_BASE_URL or fallback to localhost:8000
-const API_BASE_URL =
-  process.env.NODE_ENV === "production"
-    ? ""
-    : process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:8000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:8000";
 
 // Create a SINGLE shared axios instance (singleton pattern)
 let apiInstance: AxiosInstance | null = null;
@@ -68,5 +62,3 @@ export const getApiInstance = (): AxiosInstance => {
 
 // Export the base URL for other uses
 export { API_BASE_URL };
-
-
