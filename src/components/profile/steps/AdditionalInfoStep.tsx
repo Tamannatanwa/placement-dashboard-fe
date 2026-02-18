@@ -936,7 +936,7 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
               </div>
 
               {/* Resume Upload Section */}
-              <div className="space-y-4 pt-4 border-t">
+              {/* <div className="space-y-4 pt-4 border-t">
                 <h3 className="text-lg font-semibold">Document Upload</h3>
                 
                 <FormField
@@ -1015,7 +1015,7 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
                     </FormItem>
                   )}
                 />
-              </div>
+              </div> */}
             </form>
           </Form>
         </CardContent>
