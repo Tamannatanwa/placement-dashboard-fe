@@ -111,122 +111,124 @@ export default function SavedJobsPage() {
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {savedJobs.map((savedJob) => {
-              const job = savedJob.job;
-              return (
-                <Card key={savedJob.id} className="hover:shadow-lg transition-shadow">
-                  <CardContent className="p-6">
-                    {/* Header */}
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-start gap-4 flex-1">
-                        <div className="h-12 w-12 rounded-lg bg-cyan-500/10 dark:bg-cyan-400/10 flex items-center justify-center flex-shrink-0">
-                          <span className="text-cyan-600 dark:text-cyan-400 font-bold text-lg">
-                            {job.company_name?.charAt(0) || "J"}
-                          </span>
+            {savedJobs
+              .filter((savedJob) => savedJob.job !== null)
+              .map((savedJob) => {
+                const job = savedJob.job!;
+                return (
+                  <Card key={savedJob.id} className="hover:shadow-lg transition-shadow">
+                    <CardContent className="p-6">
+                      {/* Header */}
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-start gap-4 flex-1">
+                          <div className="h-12 w-12 rounded-lg bg-cyan-500/10 dark:bg-cyan-400/10 flex items-center justify-center flex-shrink-0">
+                            <span className="text-cyan-600 dark:text-cyan-400 font-bold text-lg">
+                              {job.company_name?.charAt(0) || "J"}
+                            </span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-lg mb-1">{job.title}</h3>
+                            <p className="text-muted-foreground text-sm">{job.company_name}</p>
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-lg mb-1">{job.title}</h3>
-                          <p className="text-muted-foreground text-sm">{job.company_name}</p>
-                        </div>
-                      </div>
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-muted-foreground hover:text-red-600 dark:hover:text-red-400"
-                            disabled={deletingId === savedJob.id}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Remove saved job?</DialogTitle>
-                            <DialogDescription>
-                              Are you sure you want to remove this job from your saved list? You can always save it again later.
-                            </DialogDescription>
-                          </DialogHeader>
-                          <DialogFooter>
-                            <DialogClose asChild>
-                              <Button variant="outline">Cancel</Button>
-                            </DialogClose>
-                            <DialogClose
-                              onClick={() => handleUnsave(savedJob.id, job.id)}
-                              className="bg-red-600 hover:bg-red-700 text-white"
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-muted-foreground hover:text-red-600 dark:hover:text-red-400"
+                              disabled={deletingId === savedJob.id}
                             >
-                              Remove
-                            </DialogClose>
-                          </DialogFooter>
-                        </DialogContent>
-                      </Dialog>
-                    </div>
-
-                    {/* Location & Salary */}
-                    <div className="flex flex-wrap items-center gap-4 mb-3 text-sm text-muted-foreground">
-                      {job.location && (
-                        <div className="flex items-center gap-1.5">
-                          <MapPin className="h-4 w-4" />
-                          <span>{job.location}</span>
-                        </div>
-                      )}
-                      <div>{formatSalary(job)}</div>
-                    </div>
-
-                    {/* Employment Type */}
-                    {job.employment_type && (
-                      <div className="mb-3">
-                        <Badge variant="outline" className="bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20">
-                          {job.employment_type.charAt(0).toUpperCase() + job.employment_type.slice(1)}
-                        </Badge>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Remove saved job?</DialogTitle>
+                              <DialogDescription>
+                                Are you sure you want to remove this job from your saved list? You can always save it again later.
+                              </DialogDescription>
+                            </DialogHeader>
+                            <DialogFooter>
+                              <DialogClose asChild>
+                                <Button variant="outline">Cancel</Button>
+                              </DialogClose>
+                              <DialogClose
+                                onClick={() => handleUnsave(savedJob.id, job.id)}
+                                className="bg-red-600 hover:bg-red-700 text-white"
+                              >
+                                Remove
+                              </DialogClose>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
                       </div>
-                    )}
 
-                    {/* Skills */}
-                    {job.skills_required && job.skills_required.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {job.skills_required.slice(0, 3).map((skill, index) => (
-                          <span
-                            key={index}
-                            className="px-2 py-1 rounded text-xs bg-muted text-muted-foreground"
-                          >
-                            {skill}
-                          </span>
-                        ))}
-                        {job.skills_required.length > 3 && (
-                          <span className="px-2 py-1 rounded text-xs bg-muted text-muted-foreground">
-                            +{job.skills_required.length - 3} more
-                          </span>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Footer */}
-                    <div className="flex items-center justify-between pt-4 border-t">
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          <span>Saved {formatDistanceToNow(new Date(savedJob.saved_at), { addSuffix: true })}</span>
-                        </div>
-                        {job.application_count !== undefined && (
-                          <div className="flex items-center gap-1">
-                            <Users className="h-3 w-3" />
-                            <span>{job.application_count} applicants</span>
+                      {/* Location & Salary */}
+                      <div className="flex flex-wrap items-center gap-4 mb-3 text-sm text-muted-foreground">
+                        {job.location && (
+                          <div className="flex items-center gap-1.5">
+                            <MapPin className="h-4 w-4" />
+                            <span>{job.location}</span>
                           </div>
                         )}
+                        <div>{formatSalary(job)}</div>
                       </div>
-                      <Button
-                        onClick={() => handleApply(job.id)}
-                        className="bg-cyan-600 hover:bg-cyan-700 dark:bg-cyan-500 dark:hover:bg-cyan-600 text-white"
-                        size="sm"
-                      >
-                        Apply Now
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+
+                      {/* Employment Type */}
+                      {job.employment_type && (
+                        <div className="mb-3">
+                          <Badge variant="outline" className="bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20">
+                            {job.employment_type.charAt(0).toUpperCase() + job.employment_type.slice(1)}
+                          </Badge>
+                        </div>
+                      )}
+
+                      {/* Skills */}
+                      {job.skills_required && job.skills_required.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {job.skills_required.slice(0, 3).map((skill, index) => (
+                            <span
+                              key={index}
+                              className="px-2 py-1 rounded text-xs bg-muted text-muted-foreground"
+                            >
+                              {skill}
+                            </span>
+                          ))}
+                          {job.skills_required.length > 3 && (
+                            <span className="px-2 py-1 rounded text-xs bg-muted text-muted-foreground">
+                              +{job.skills_required.length - 3} more
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Footer */}
+                      <div className="flex items-center justify-between pt-4 border-t">
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            <span>Saved {formatDistanceToNow(new Date(savedJob.saved_at), { addSuffix: true })}</span>
+                          </div>
+                          {job.application_count !== undefined && (
+                            <div className="flex items-center gap-1">
+                              <Users className="h-3 w-3" />
+                              <span>{job.application_count} applicants</span>
+                            </div>
+                          )}
+                        </div>
+                        <Button
+                          onClick={() => handleApply(job.id)}
+                          className="bg-cyan-600 hover:bg-cyan-700 dark:bg-cyan-500 dark:hover:bg-cyan-600 text-white"
+                          size="sm"
+                        >
+                          Apply Now
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
           </div>
         )}
     </div>

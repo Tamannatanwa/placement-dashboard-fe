@@ -46,8 +46,8 @@ export default function JobDetailPage() {
         const jobIdNum = parseInt(jobId, 10);
         if (!isNaN(jobIdNum) && duration > 0) {
           // Track final view duration (fire and forget)
-          studentsApi.trackJobView(jobIdNum, {
-            job_id: jobIdNum,
+          studentsApi.trackJobView(String(jobIdNum), {
+            job_id: String(jobIdNum),
             duration_seconds: duration,
             source: "job_detail",
           }).catch((error) => {
@@ -89,8 +89,8 @@ export default function JobDetailPage() {
     if (isNaN(jobIdNum)) return;
 
     try {
-      await studentsApi.trackJobView(jobIdNum, {
-        job_id: jobIdNum,
+      await studentsApi.trackJobView(String(jobIdNum), {
+        job_id: String(jobIdNum),
         duration_seconds: 0, // Initial view, duration tracked on unmount
         source: "job_detail",
       });
@@ -108,7 +108,7 @@ export default function JobDetailPage() {
 
     setIsLoadingSimilar(true);
     try {
-      const response = await studentsApi.getSimilarJobs(jobIdNum);
+      const response = await studentsApi.getSimilarJobs(String(jobIdNum));
       if (response.jobs) {
         setSimilarJobs(response.jobs);
       }

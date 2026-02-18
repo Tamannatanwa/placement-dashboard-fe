@@ -195,8 +195,8 @@ export default function StudentDashboard() {
       // Track job view before navigating
       const jobIdNum = parseInt(jobId, 10);
       if (!isNaN(jobIdNum)) {
-        await studentsApi.trackJobView(jobIdNum, {
-          job_id: jobIdNum,
+        await studentsApi.trackJobView(String(jobIdNum), {
+          job_id: String(jobIdNum),
           duration_seconds: 0, // We'll track duration on the detail page
           source: "dashboard",
         });
