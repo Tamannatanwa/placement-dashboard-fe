@@ -138,8 +138,8 @@ export default function JobsPage() {
   return (
     <div className="space-y-8">
       <div className="space-y-2">
-        <h1 className="text-3xl md:text-4xl font-bold">Jobs</h1>
-        <p className="text-muted-foreground text-lg">
+        <h1 className="text-3xl md:text-4xl font-bold text-white">Jobs</h1>
+        <p className="text-gray-300 text-lg">
           Browse all opportunities and apply directly.
         </p>
       </div>
@@ -153,7 +153,7 @@ export default function JobsPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-card border rounded-lg p-6">
+      <div className="backdrop-blur-xl border-2 border-gray-600 rounded-2xl bg-white/8 p-6">
         <JobFilters
           filters={filters}
           onFiltersChange={setFilters}
@@ -171,7 +171,7 @@ export default function JobsPage() {
 
       {/* All Jobs Section */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">
+        <h2 className="text-xl font-semibold text-white">
           {filteredJobs.length} Jobs Found
         </h2>
         <Select
@@ -197,11 +197,11 @@ export default function JobsPage() {
       {/* Job Listings with infinite scroll */}
       {isLoading && (filters.page || 1) === 1 ? (
         <div className="text-center py-12">
-          <div className="text-muted-foreground">Loading jobs...</div>
+          <div className="text-gray-300">Loading jobs...</div>
         </div>
       ) : filteredJobs.length === 0 ? (
         <div className="text-center py-12">
-          <div className="text-muted-foreground">
+          <div className="text-gray-300">
             No jobs found. Try adjusting your filters.
           </div>
         </div>
@@ -221,7 +221,7 @@ export default function JobsPage() {
           {hasMoreJobs && (
             <div
               ref={loadMoreTriggerRef}
-              className="flex items-center justify-center py-6 text-sm text-muted-foreground"
+              className="flex items-center justify-center py-6 text-sm text-gray-300"
             >
               {isLoadingMore ? "Loading more jobs..." : "Scroll to load more jobs"}
             </div>

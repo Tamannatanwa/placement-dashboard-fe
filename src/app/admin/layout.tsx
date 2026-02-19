@@ -31,6 +31,7 @@ import { authApi } from "@/lib/api/auth";
 import { toast } from "sonner";
 import { ClientOnly } from "@/components/ui/ClientOnly";
 import { PrivateRoute } from "@/components/auth/PrivateRoute";
+import { AnimatedBackground } from "@/components/layouts/AnimatedBackground";
 
 const navigation = [
   { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
@@ -75,18 +76,20 @@ export default function AdminLayout({
 
   return (
     <PrivateRoute allowedRoles={["admin"]}>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen relative">
+        <AnimatedBackground backgroundImage="/images/bgImage.svg" />
+        
         {/* Mobile sidebar backdrop */}
         {sidebarOpen && (
           <div
-            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
             onClick={() => setSidebarOpen(false)}
           />
         )}
 
         {/* Sidebar */}
         <aside
-          className={`fixed top-0 left-0 z-50 h-full w-64 bg-card border-r transition-transform duration-300 lg:translate-x-0 ${
+          className={`fixed top-0 left-0 z-50 h-full w-64 backdrop-blur-xl border-2 border-gray-600 bg-[#8185B2]/10 transition-transform duration-300 lg:translate-x-0 ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
@@ -94,7 +97,7 @@ export default function AdminLayout({
           {/* Logo */}
           <div className="flex items-center justify-between p-6 border-b">
             <Link href="/admin/dashboard" className="flex items-center gap-2">
-              <Shield className="h-6 w-6 text-cyan-500 dark:text-cyan-400" />
+              <Shield className="h-6 w-6 text-purple-400" />
               <span className="font-bold text-xl">PlaceHub Admin</span>
             </Link>
             <Button
@@ -118,8 +121,8 @@ export default function AdminLayout({
                   onClick={() => setSidebarOpen(false)}
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                     isActive
-                      ? "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 font-medium"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      ? "backdrop-blur-xl border-2 border-gray-600 bg-white/8 text-white font-medium"
+                      : "text-gray-300 hover:bg-[#282142] hover:text-white"
                   }`}
                 >
                   <item.icon className="h-5 w-5" />
@@ -134,7 +137,7 @@ export default function AdminLayout({
             <ClientOnly
               fallback={
                 <div className="flex items-center gap-3 p-2">
-                  <Avatar className="h-8 w-8 bg-cyan-600 text-white">
+                  <Avatar className="h-8 w-8 bg-gradient-to-r from-purple-600 to-blue-600 text-white">
                     <AvatarFallback>{userInitials}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
@@ -180,7 +183,7 @@ export default function AdminLayout({
       {/* Main content */}
       <div className="lg:pl-64">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <header className="sticky top-0 z-30 border-b-2 border-gray-600 backdrop-blur-xl bg-[#8185B2]/10 supports-[backdrop-filter]:backdrop-blur-xl">
           <div className="flex items-center justify-between px-4 py-4">
             <Button
               variant="ghost"
@@ -195,7 +198,11 @@ export default function AdminLayout({
         </header>
 
         {/* Page content */}
-        <main className="p-4 lg:p-8">{children}</main>
+        <main className="p-4 lg:p-8 relative z-10">
+          <div className="backdrop-blur-xl border-2 border-gray-600 rounded-2xl overflow-hidden bg-white/8 min-h-[calc(100vh-8rem)] p-6">
+            {children}
+          </div>
+        </main>
       </div>
         </div>
     </PrivateRoute>

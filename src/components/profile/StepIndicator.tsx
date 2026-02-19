@@ -35,10 +35,10 @@ export function StepIndicator({
                   className={cn(
                     "flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all",
                     isCompleted
-                      ? "bg-cyan-600 border-cyan-600 text-white"
+                      ? "bg-blue-500 border-blue-500 text-white"
                       : isCurrent
-                      ? "bg-cyan-50 dark:bg-cyan-950 border-cyan-600 text-cyan-600 dark:text-cyan-400"
-                      : "bg-background border-muted-foreground/30 text-muted-foreground",
+                      ? "backdrop-blur-xl border-2 border-blue-500 bg-white/8 text-blue-400"
+                      : "backdrop-blur-xl border-2 border-gray-600 bg-white/8 text-gray-400",
                     isClickable && "cursor-pointer hover:scale-110",
                     !isClickable && "cursor-not-allowed"
                   )}
@@ -54,10 +54,10 @@ export function StepIndicator({
                     className={cn(
                       "text-xs font-medium",
                       isCurrent
-                        ? "text-cyan-600 dark:text-cyan-400"
+                        ? "text-blue-400"
                         : isCompleted
-                        ? "text-foreground"
-                        : "text-muted-foreground"
+                        ? "text-white"
+                        : "text-gray-400"
                     )}
                   >
                     {step.title}
@@ -71,8 +71,8 @@ export function StepIndicator({
                   className={cn(
                     "h-0.5 flex-1 mx-2 transition-colors",
                     completedSteps.includes(index) || currentStep > index
-                      ? "bg-cyan-600"
-                      : "bg-muted-foreground/30"
+                      ? "bg-blue-500"
+                      : "bg-gray-600"
                   )}
                 />
               )}

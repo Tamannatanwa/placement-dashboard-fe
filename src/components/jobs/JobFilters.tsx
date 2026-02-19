@@ -37,15 +37,15 @@ export function JobFilters({ filters, onFiltersChange, onClear }: JobFiltersProp
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm font-medium">Filters:</span>
+          <Filter className="h-4 w-4 text-gray-300" />
+          <span className="text-sm font-medium text-white">Filters:</span>
         </div>
         {hasActiveFilters && (
           <Button
             variant="ghost"
             size="sm"
             onClick={onClear}
-            className="text-xs"
+            className="text-xs text-gray-300 hover:text-white hover:bg-[#282142] transition-colors duration-300"
           >
             <X className="h-3 w-3 mr-1" />
             Clear All
@@ -56,7 +56,7 @@ export function JobFilters({ filters, onFiltersChange, onClear }: JobFiltersProp
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Employment Type */}
         <div>
-          <label className="text-xs text-muted-foreground mb-2 block">
+          <label className="text-xs text-gray-300 mb-2 block">
             Employment Type
           </label>
           <Select
@@ -78,7 +78,7 @@ export function JobFilters({ filters, onFiltersChange, onClear }: JobFiltersProp
 
         {/* Work Type */}
         <div>
-          <label className="text-xs text-muted-foreground mb-2 block">
+          <label className="text-xs text-gray-300 mb-2 block">
             Work Type
           </label>
           <Select
@@ -99,7 +99,7 @@ export function JobFilters({ filters, onFiltersChange, onClear }: JobFiltersProp
 
         {/* Location */}
         <div>
-          <label className="text-xs text-muted-foreground mb-2 block">
+          <label className="text-xs text-gray-300 mb-2 block">
             Location
           </label>
           <Select
@@ -126,7 +126,7 @@ export function JobFilters({ filters, onFiltersChange, onClear }: JobFiltersProp
 
         {/* Fresher Filter */}
         <div>
-          <label className="text-xs text-muted-foreground mb-2 block">
+          <label className="text-xs text-gray-300 mb-2 block">
             Experience
           </label>
           <Select

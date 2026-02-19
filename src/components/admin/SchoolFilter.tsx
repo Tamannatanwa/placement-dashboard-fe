@@ -83,7 +83,7 @@ export function SchoolFilter({ selectedSchool, onSchoolChange, availableSchools,
           onClick={() => onSchoolChange(school.value)}
           className={
             selectedSchool === school.value
-              ? "bg-cyan-600 hover:bg-cyan-700 dark:bg-cyan-500 dark:hover:bg-cyan-600 text-white"
+              ? "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg shadow-purple-500/50"
               : ""
           }
         >

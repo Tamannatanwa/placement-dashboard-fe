@@ -34,7 +34,7 @@ export function JobSearch({ onSearch, placeholder }: JobSearchProps) {
   return (
     <form onSubmit={handleSubmit} className="w-full">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-300 z-10" />
         <Input
           type="text"
           placeholder={placeholder || "Search jobs by title, company, or skills..."}
@@ -42,7 +42,7 @@ export function JobSearch({ onSearch, placeholder }: JobSearchProps) {
           onChange={(e) => {
             setSearchQuery(e.target.value);
           }}
-          className="pl-10 h-12 text-base"
+          className="pl-10 h-12 text-base backdrop-blur-xl border-2 border-gray-600 bg-white/8 text-white placeholder:text-gray-400 focus:border-gray-500"
         />
       </div>
     </form>

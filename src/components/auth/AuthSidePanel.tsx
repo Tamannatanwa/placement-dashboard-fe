@@ -1,6 +1,7 @@
 "use client";
 
 import { Briefcase } from "lucide-react";
+import { AnimatedBackground } from "@/components/layouts/AnimatedBackground";
 
 interface AuthSidePanelProps {
   title: string;
@@ -9,17 +10,18 @@ interface AuthSidePanelProps {
 
 export function AuthSidePanel({ title, description }: AuthSidePanelProps) {
   return (
-    <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 items-center justify-center p-12 relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-0 left-0 w-96 h-96 bg-cyan-400 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-teal-400 rounded-full blur-3xl" />
+    <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-12 relative overflow-hidden">
+      <AnimatedBackground backgroundImage="/images/bgImage.svg" />
+      {/* Background Pattern Overlay */}
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute top-0 left-0 w-96 h-96 bg-purple-500 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-500 rounded-full blur-3xl" />
       </div>
       
       <div className="relative z-10 text-center space-y-8 max-w-md">
         <div className="flex justify-center">
-          <div className="h-24 w-24 rounded-2xl bg-cyan-500/20 dark:bg-cyan-400/20 flex items-center justify-center backdrop-blur-sm border border-cyan-500/30 dark:border-cyan-400/30">
-            <Briefcase className="h-12 w-12 text-cyan-400 dark:text-cyan-300" />
+          <div className="h-24 w-24 rounded-2xl glass flex items-center justify-center border border-purple-500/30">
+            <Briefcase className="h-12 w-12 text-purple-300" />
           </div>
         </div>
         
@@ -27,7 +29,7 @@ export function AuthSidePanel({ title, description }: AuthSidePanelProps) {
           <h2 className="text-3xl md:text-4xl font-bold text-white">
             {title}
           </h2>
-          <p className="text-lg text-slate-300 dark:text-slate-400 leading-relaxed">
+          <p className="text-lg text-slate-300 leading-relaxed">
             {description}
           </p>
         </div>

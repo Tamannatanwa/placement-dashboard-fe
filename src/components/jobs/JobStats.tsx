@@ -51,15 +51,15 @@ export function JobStats({ availableJobs, newThisWeek, applied, saved }: JobStat
         return (
           <div
             key={stat.label}
-            className="p-4 rounded-lg border bg-card hover:shadow-md transition-shadow"
+            className="p-4 rounded-2xl backdrop-blur-xl border-2 border-gray-600 bg-white/8 hover:shadow-md transition-shadow"
           >
             <div className="flex items-center gap-3">
-              <div className={`h-10 w-10 rounded-lg ${stat.bgColor} flex items-center justify-center`}>
-                <Icon className={`h-5 w-5 ${stat.color}`} />
+              <div className="h-10 w-10 rounded-lg backdrop-blur-xl border-2 border-gray-600 bg-white/8 flex items-center justify-center">
+                <Icon className="h-5 w-5 text-white" />
               </div>
               <div>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <div className="text-sm text-muted-foreground">{stat.label}</div>
+                <div className="text-2xl font-bold text-white">{stat.value}</div>
+                <div className="text-sm text-gray-300">{stat.label}</div>
               </div>
             </div>
           </div>

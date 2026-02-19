@@ -74,7 +74,7 @@ export default function SavedJobsPage() {
   if (isLoading) {
     return (
       <div className="text-center py-12">
-        <div className="text-muted-foreground">Loading saved jobs...</div>
+        <div className="text-gray-300">Loading saved jobs...</div>
       </div>
     );
   }
@@ -83,11 +83,11 @@ export default function SavedJobsPage() {
     <div className="space-y-8">
         {/* Header */}
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold flex items-center gap-3">
-            <Bookmark className="h-8 w-8 text-cyan-500 dark:text-cyan-400" />
+          <h1 className="text-3xl font-bold flex items-center gap-3 text-white">
+            <Bookmark className="h-8 w-8 text-white" />
             Saved Jobs
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-gray-300">
             {savedJobs.length} {savedJobs.length === 1 ? "job" : "jobs"} saved
           </p>
         </div>
@@ -96,14 +96,14 @@ export default function SavedJobsPage() {
         {savedJobs.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">
-              <Bookmark className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-lg font-semibold mb-2">No saved jobs yet</h3>
-              <p className="text-muted-foreground mb-4">
+              <Bookmark className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+              <h3 className="text-lg font-semibold mb-2 text-white">No saved jobs yet</h3>
+              <p className="text-gray-300 mb-4">
                 Start exploring jobs and save the ones you're interested in
               </p>
               <Button
                 onClick={() => router.push("/student/dashboard")}
-                className="bg-cyan-600 hover:bg-cyan-700 dark:bg-cyan-500 dark:hover:bg-cyan-600 text-white"
+                className="bg-blue-500 hover:bg-blue-600 text-white transition-colors duration-300"
               >
                 Browse Jobs
               </Button>
@@ -121,14 +121,14 @@ export default function SavedJobsPage() {
                       {/* Header */}
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex items-start gap-4 flex-1">
-                          <div className="h-12 w-12 rounded-lg bg-cyan-500/10 dark:bg-cyan-400/10 flex items-center justify-center flex-shrink-0">
-                            <span className="text-cyan-600 dark:text-cyan-400 font-bold text-lg">
+                          <div className="h-12 w-12 rounded-lg backdrop-blur-xl border-2 border-gray-600 bg-white/8 flex items-center justify-center flex-shrink-0">
+                            <span className="text-white font-bold text-lg">
                               {job.company_name?.charAt(0) || "J"}
                             </span>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-lg mb-1">{job.title}</h3>
-                            <p className="text-muted-foreground text-sm">{job.company_name}</p>
+                            <h3 className="font-semibold text-lg mb-1 text-white">{job.title}</h3>
+                            <p className="text-gray-300 text-sm">{job.company_name}</p>
                           </div>
                         </div>
                         <Dialog>
@@ -136,7 +136,7 @@ export default function SavedJobsPage() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="text-muted-foreground hover:text-red-600 dark:hover:text-red-400"
+                              className="text-gray-300 hover:text-red-500 hover:bg-red-500/20 transition-colors duration-300"
                               disabled={deletingId === savedJob.id}
                             >
                               <Trash2 className="h-4 w-4" />
@@ -165,7 +165,7 @@ export default function SavedJobsPage() {
                       </div>
 
                       {/* Location & Salary */}
-                      <div className="flex flex-wrap items-center gap-4 mb-3 text-sm text-muted-foreground">
+                      <div className="flex flex-wrap items-center gap-4 mb-3 text-sm text-gray-300">
                         {job.location && (
                           <div className="flex items-center gap-1.5">
                             <MapPin className="h-4 w-4" />
@@ -178,7 +178,7 @@ export default function SavedJobsPage() {
                       {/* Employment Type */}
                       {job.employment_type && (
                         <div className="mb-3">
-                          <Badge variant="outline" className="bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20">
+                          <Badge variant="outline" className="backdrop-blur-xl border-2 border-gray-600 bg-white/8 text-white">
                             {job.employment_type.charAt(0).toUpperCase() + job.employment_type.slice(1)}
                           </Badge>
                         </div>
@@ -190,13 +190,13 @@ export default function SavedJobsPage() {
                           {job.skills_required.slice(0, 3).map((skill, index) => (
                             <span
                               key={index}
-                              className="px-2 py-1 rounded text-xs bg-muted text-muted-foreground"
+                              className="px-2 py-1 rounded text-xs backdrop-blur-xl border border-gray-600 bg-white/8 text-gray-300"
                             >
                               {skill}
                             </span>
                           ))}
                           {job.skills_required.length > 3 && (
-                            <span className="px-2 py-1 rounded text-xs bg-muted text-muted-foreground">
+                            <span className="px-2 py-1 rounded text-xs backdrop-blur-xl border border-gray-600 bg-white/8 text-gray-300">
                               +{job.skills_required.length - 3} more
                             </span>
                           )}
@@ -204,8 +204,8 @@ export default function SavedJobsPage() {
                       )}
 
                       {/* Footer */}
-                      <div className="flex items-center justify-between pt-4 border-t">
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      <div className="flex items-center justify-between pt-4 border-t border-gray-600">
+                        <div className="flex items-center gap-4 text-xs text-gray-300">
                           <div className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
                             <span>Saved {formatDistanceToNow(new Date(savedJob.saved_at), { addSuffix: true })}</span>
@@ -219,7 +219,7 @@ export default function SavedJobsPage() {
                         </div>
                         <Button
                           onClick={() => handleApply(job.id)}
-                          className="bg-cyan-600 hover:bg-cyan-700 dark:bg-cyan-500 dark:hover:bg-cyan-600 text-white"
+                          className="bg-blue-500 hover:bg-blue-600 text-white transition-colors duration-300"
                           size="sm"
                         >
                           Apply Now

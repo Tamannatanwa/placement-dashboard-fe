@@ -196,7 +196,7 @@ export default function JobDetailPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-muted-foreground">Loading job details...</div>
+        <div className="text-gray-300">Loading job details...</div>
       </div>
     );
   }
@@ -205,8 +205,8 @@ export default function JobDetailPage() {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-center space-y-4">
-          <div className="text-muted-foreground">Job not found</div>
-          <Button onClick={() => router.back()}>Go Back</Button>
+          <div className="text-gray-300">Job not found</div>
+          <Button onClick={() => router.back()} className="bg-blue-500 hover:bg-blue-600 text-white transition-colors duration-300">Go Back</Button>
         </div>
       </div>
     );
@@ -234,20 +234,20 @@ export default function JobDetailPage() {
         <Button
           variant="ghost"
           onClick={() => router.back()}
-          className="mb-6"
+          className="mb-6 text-gray-300 hover:text-white hover:bg-[#282142] transition-colors duration-300"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Jobs
         </Button>
 
         {/* Job Header */}
-        <div className="bg-card border rounded-lg p-6 mb-6">
+        <div className="backdrop-blur-xl border-2 border-gray-600 rounded-2xl bg-white/8 p-6 mb-6">
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1">
-              <h1 className="text-3xl font-bold mb-2">{job.title}</h1>
-              <p className="text-xl text-muted-foreground mb-4">{job.company_name}</p>
+              <h1 className="text-3xl font-bold mb-2 text-white">{job.title}</h1>
+              <p className="text-xl text-gray-300 mb-4">{job.company_name}</p>
               
-              <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-4">
+              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-300 mb-4">
                 {job.location && (
                   <div className="flex items-center gap-1.5">
                     <MapPin className="h-4 w-4" />
@@ -274,17 +274,17 @@ export default function JobDetailPage() {
 
               <div className="flex flex-wrap gap-2">
                 {job.employment_type && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium backdrop-blur-xl border-2 border-gray-600 bg-white/8 text-white">
                     {getEmploymentType()}
                   </span>
                 )}
                 {job.work_type && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-slate-500/10 text-slate-600 dark:text-slate-400 border border-slate-500/20">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium backdrop-blur-xl border-2 border-gray-600 bg-white/8 text-white">
                     {job.work_type}
                   </span>
                 )}
                 {job.is_fresher && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium backdrop-blur-xl border-2 border-gray-600 bg-white/8 text-white">
                     Fresher Friendly
                   </span>
                 )}
@@ -296,7 +296,7 @@ export default function JobDetailPage() {
                 variant="outline"
                 size="icon"
                 onClick={() => handleSave()}
-                className={isSaved ? "bg-cyan-500/10" : ""}
+                className={`backdrop-blur-xl border-2 border-gray-600 bg-white/8 text-gray-300 hover:text-white hover:bg-[#282142] transition-colors duration-300 ${isSaved ? "text-white" : ""}`}
               >
                 <Bookmark className={`h-5 w-5 ${isSaved ? "fill-current" : ""}`} />
               </Button>
@@ -307,7 +307,7 @@ export default function JobDetailPage() {
           <div className="flex gap-3">
             <Button
               onClick={() => handleApply()}
-              className="bg-cyan-600 hover:bg-cyan-700 dark:bg-cyan-500 dark:hover:bg-cyan-600 text-white"
+              className="bg-blue-500 hover:bg-blue-600 text-white transition-colors duration-300"
               size="lg"
             >
               Apply Now
@@ -318,6 +318,7 @@ export default function JobDetailPage() {
                 variant="outline"
                 onClick={() => window.open(sanitizedSourceUrl, "_blank")}
                 size="lg"
+                className="backdrop-blur-xl border-2 border-gray-600 bg-white/8 text-white hover:bg-[#282142] transition-colors duration-300"
               >
                 View Original Posting
                 <ExternalLink className="h-4 w-4 ml-2" />
@@ -330,23 +331,23 @@ export default function JobDetailPage() {
         <div className="space-y-6">
           {/* Description */}
           {job.description && (
-            <div className="bg-card border rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Job Description</h2>
-              <div className="prose prose-sm dark:prose-invert max-w-none">
-                <p className="whitespace-pre-wrap text-muted-foreground">{job.description}</p>
+            <div className="backdrop-blur-xl border-2 border-gray-600 rounded-2xl bg-white/8 p-6">
+              <h2 className="text-xl font-semibold mb-4 text-white">Job Description</h2>
+              <div className="prose prose-sm max-w-none">
+                <p className="whitespace-pre-wrap text-gray-300">{job.description}</p>
               </div>
             </div>
           )}
 
           {/* Skills Required */}
           {job.skills_required && job.skills_required.length > 0 && (
-            <div className="bg-card border rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Skills Required</h2>
+            <div className="backdrop-blur-xl border-2 border-gray-600 rounded-2xl bg-white/8 p-6">
+              <h2 className="text-xl font-semibold mb-4 text-white">Skills Required</h2>
               <div className="flex flex-wrap gap-2">
                 {job.skills_required.map((skill, index) => (
                   <span
                     key={index}
-                    className="px-3 py-1 rounded-md bg-muted text-muted-foreground text-sm"
+                    className="px-3 py-1 rounded-md backdrop-blur-xl border border-gray-600 bg-white/8 text-gray-300 text-sm"
                   >
                     {skill}
                   </span>
@@ -356,33 +357,33 @@ export default function JobDetailPage() {
           )}
 
           {/* Experience & Salary Details */}
-          <div className="bg-card border rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Job Details</h2>
+          <div className="backdrop-blur-xl border-2 border-gray-600 rounded-2xl bg-white/8 p-6">
+            <h2 className="text-xl font-semibold mb-4 text-white">Job Details</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {job.experience_min !== undefined && job.experience_max !== undefined && (
                 <div>
-                  <div className="text-sm text-muted-foreground mb-1">Experience Required</div>
-                  <div className="font-medium">
+                  <div className="text-sm text-gray-300 mb-1">Experience Required</div>
+                  <div className="font-medium text-white">
                     {job.experience_min} - {job.experience_max} years
                   </div>
                 </div>
               )}
               {job.salary_min && job.salary_max && (
                 <div>
-                  <div className="text-sm text-muted-foreground mb-1">Salary Range</div>
-                  <div className="font-medium">{formatSalary()}</div>
+                  <div className="text-sm text-gray-300 mb-1">Salary Range</div>
+                  <div className="font-medium text-white">{formatSalary()}</div>
                 </div>
               )}
               {job.location && (
                 <div>
-                  <div className="text-sm text-muted-foreground mb-1">Location</div>
-                  <div className="font-medium">{job.location}</div>
+                  <div className="text-sm text-gray-300 mb-1">Location</div>
+                  <div className="font-medium text-white">{job.location}</div>
                 </div>
               )}
               {job.employment_type && (
                 <div>
-                  <div className="text-sm text-muted-foreground mb-1">Employment Type</div>
-                  <div className="font-medium">{getEmploymentType()}</div>
+                  <div className="text-sm text-gray-300 mb-1">Employment Type</div>
+                  <div className="font-medium text-white">{getEmploymentType()}</div>
                 </div>
               )}
             </div>
@@ -390,27 +391,27 @@ export default function JobDetailPage() {
 
           {/* Company Info */}
           {job.company && (
-            <div className="bg-card border rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">About Company</h2>
+            <div className="backdrop-blur-xl border-2 border-gray-600 rounded-2xl bg-white/8 p-6">
+              <h2 className="text-xl font-semibold mb-4 text-white">About Company</h2>
               <div className="space-y-2">
                 <div>
-                  <div className="text-sm text-muted-foreground mb-1">Company Name</div>
-                  <div className="font-medium">{job.company.name}</div>
+                  <div className="text-sm text-gray-300 mb-1">Company Name</div>
+                  <div className="font-medium text-white">{job.company.name}</div>
                 </div>
                 {job.company.domain && (
                   <div>
-                    <div className="text-sm text-muted-foreground mb-1">Domain</div>
-                    <div className="font-medium">{job.company.domain}</div>
+                    <div className="text-sm text-gray-300 mb-1">Domain</div>
+                    <div className="font-medium text-white">{job.company.domain}</div>
                   </div>
                 )}
                 {job.company.website && (
                   <div>
-                    <div className="text-sm text-muted-foreground mb-1">Website</div>
+                    <div className="text-sm text-gray-300 mb-1">Website</div>
                     <a
                       href={job.company.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-medium text-cyan-600 dark:text-cyan-400 hover:underline"
+                      className="font-medium text-blue-400 hover:text-blue-300 hover:underline transition-colors duration-300"
                     >
                       {job.company.website}
                     </a>
@@ -422,11 +423,11 @@ export default function JobDetailPage() {
 
           {/* Similar Jobs */}
           {similarJobs.length > 0 && (
-            <div className="bg-card border rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Similar Jobs</h2>
+            <div className="backdrop-blur-xl border-2 border-gray-600 rounded-2xl bg-white/8 p-6">
+              <h2 className="text-xl font-semibold mb-4 text-white">Similar Jobs</h2>
               {isLoadingSimilar ? (
                 <div className="text-center py-8">
-                  <div className="text-muted-foreground">Loading similar jobs...</div>
+                  <div className="text-gray-300">Loading similar jobs...</div>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

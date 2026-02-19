@@ -427,31 +427,30 @@ export function ProfileWizard({
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-muted-foreground">Loading profile...</div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-gray-300">Loading profile...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="space-y-6">
         {/* Back Button */}
         <Button
           variant="ghost"
           onClick={() => router.back()}
-          className="mb-6"
+          className="text-gray-300 hover:text-white hover:bg-[#282142] transition-colors duration-300"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
 
         {/* Progress Bar */}
-        <Card className="mb-6 border-cyan-500/20 bg-cyan-500/5">
+        <Card className="backdrop-blur-xl border-2 border-gray-600 rounded-2xl bg-white/8">
           <div className="p-6">
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-lg font-semibold">Complete Your Profile</h2>
-              <span className="text-sm font-medium text-cyan-600 dark:text-cyan-400">
+              <h2 className="text-lg font-semibold text-white">Complete Your Profile</h2>
+              <span className="text-sm font-medium text-blue-400">
                 {Math.round(progress)}% Complete
               </span>
             </div>
@@ -460,7 +459,7 @@ export function ProfileWizard({
         </Card>
 
         {/* Step Indicator */}
-        <Card className="mb-6">
+        <Card className="backdrop-blur-xl border-2 border-gray-600 rounded-2xl bg-white/8">
           <div className="p-6">
             <StepIndicator
               steps={STEPS.map((s) => ({
@@ -476,7 +475,7 @@ export function ProfileWizard({
         </Card>
 
         {/* Step Content */}
-        <div className="mb-6">
+        <div>
           {currentStep === 0 && (
             <PersonalInfoStep
               ref={personalInfoRef}
@@ -508,7 +507,7 @@ export function ProfileWizard({
         </div>
 
         {/* Navigation */}
-        <Card>
+        <Card className="backdrop-blur-xl border-2 border-gray-600 rounded-2xl bg-white/8">
           <div className="p-6">
             <StepNavigation
               currentStep={currentStep}
@@ -521,7 +520,6 @@ export function ProfileWizard({
             />
           </div>
         </Card>
-      </div>
     </div>
   );
 }

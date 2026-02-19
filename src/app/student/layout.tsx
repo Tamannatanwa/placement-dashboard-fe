@@ -31,6 +31,7 @@ import { authApi } from "@/lib/api/auth";
 import { toast } from "sonner";
 import { ClientOnly } from "@/components/ui/ClientOnly";
 import { PrivateRoute } from "@/components/auth/PrivateRoute";
+import { AnimatedBackground } from "@/components/layouts/AnimatedBackground";
 
 const navigation = [
   { name: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
@@ -74,18 +75,20 @@ export default function StudentLayout({
 
   return (
     <PrivateRoute allowedRoles={["student"]}>
-      <div className="min-h-screen bg-background flex">
+      <div className="min-h-screen flex relative">
+        <AnimatedBackground backgroundImage="/images/bgImage.svg" />
+        
         {/* Mobile sidebar backdrop */}
         {sidebarOpen && (
           <div
-            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
             onClick={() => setSidebarOpen(false)}
           />
         )}
 
         {/* Sidebar - Fixed position, stays visible on scroll */}
         <aside
-          className={`fixed top-0 left-0 z-50 h-screen bg-card border-r transition-all duration-300 ease-in-out overflow-y-auto ${
+          className={`fixed top-0 left-0 z-50 h-screen backdrop-blur-xl border-2 border-gray-600 bg-[#8185B2]/10 transition-all duration-300 ease-in-out overflow-y-auto ${
             sidebarOpen ? "w-72 translate-x-0" : "w-0 -translate-x-full lg:w-16 lg:translate-x-0"
           }`}
         >
@@ -98,7 +101,7 @@ export default function StudentLayout({
                 sidebarOpen ? "opacity-100" : "opacity-0 lg:opacity-100"
               }`}
             >
-              <Briefcase className="h-6 w-6 text-cyan-500 dark:text-cyan-400 flex-shrink-0" />
+              <Briefcase className="h-6 w-6 text-purple-400 flex-shrink-0" />
               <span className={`font-bold text-xl whitespace-nowrap ${
                 sidebarOpen ? "block" : "hidden lg:hidden"
               }`}>
@@ -145,8 +148,8 @@ export default function StudentLayout({
                   }}
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors group ${
                     isActive
-                      ? "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 font-medium"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      ? "backdrop-blur-xl border-2 border-gray-600 bg-white/8 text-white font-medium"
+                      : "text-gray-300 hover:bg-[#282142] hover:text-white"
                   }`}
                   title={!sidebarOpen ? item.name : undefined}
                 >
@@ -168,7 +171,7 @@ export default function StudentLayout({
                 <div className={`flex items-center gap-3 p-2 ${
                   sidebarOpen ? "" : "justify-center"
                 }`}>
-                  <Avatar className="h-8 w-8 bg-cyan-600 text-white flex-shrink-0">
+                  <Avatar className="h-8 w-8 bg-gradient-to-r from-purple-600 to-blue-600 text-white flex-shrink-0">
                     <AvatarFallback>{userInitials}</AvatarFallback>
                   </Avatar>
                   <div className={`flex-1 min-w-0 ${
@@ -231,7 +234,7 @@ export default function StudentLayout({
         sidebarOpen ? "lg:ml-72" : "lg:ml-16"
       }`}>
         {/* Top bar */}
-        <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <header className="sticky top-0 z-30 border-b-2 border-gray-600 backdrop-blur-xl bg-[#8185B2]/10 supports-[backdrop-filter]:backdrop-blur-xl">
           <div className="flex items-center justify-between px-4 py-4">
             <div className="flex items-center gap-2">
               <Button
@@ -260,7 +263,7 @@ export default function StudentLayout({
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="h-5 w-5" />
                 {notificationsUnread > 0 && (
-                  <span className="absolute top-0 right-0 h-2 w-2 bg-cyan-600 rounded-full" />
+                  <span className="absolute top-0 right-0 h-2 w-2 bg-purple-500 rounded-full" />
                 )}
               </Button>
               <ClientOnly
@@ -318,7 +321,11 @@ export default function StudentLayout({
         </header>
 
         {/* Page content */}
-        <main className="p-4 lg:p-8">{children}</main>
+        <main className="p-4 lg:p-8 relative z-10">
+          <div className="backdrop-blur-xl border-2 border-gray-600 rounded-2xl overflow-hidden bg-white/8 min-h-[calc(100vh-8rem)] p-6">
+            {children}
+          </div>
+        </main>
       </div>
       </div>
     </PrivateRoute>

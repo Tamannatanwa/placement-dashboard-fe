@@ -31,6 +31,7 @@ import { authApi } from "@/lib/api/auth";
 import { toast } from "sonner";
 import { ClientOnly } from "@/components/ui/ClientOnly";
 import { PrivateRoute } from "@/components/auth/PrivateRoute";
+import { AnimatedBackground } from "@/components/layouts/AnimatedBackground";
 
 const navigation = [
   { name: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
@@ -74,32 +75,34 @@ export default function StudentLayout({
 
   return (
     <PrivateRoute allowedRoles={["student"]}>
-      <div className="min-h-screen bg-background flex">
+      <div className="min-h-screen flex relative">
+        <AnimatedBackground backgroundImage="/images/bgImage.svg" />
+        
         {/* Mobile sidebar backdrop */}
         {sidebarOpen && (
           <div
-            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
             onClick={() => setSidebarOpen(false)}
           />
         )}
 
         {/* Sidebar - Fixed position, stays visible on scroll */}
         <aside
-          className={`fixed top-0 left-0 z-50 h-screen bg-card border-r transition-all duration-300 ease-in-out overflow-y-auto ${
+          className={`fixed top-0 left-0 z-50 h-screen backdrop-blur-xl border-2 border-gray-600 bg-[#8185B2]/10 transition-all duration-300 ease-in-out overflow-y-auto ${
             sidebarOpen ? "w-72 translate-x-0" : "w-0 -translate-x-full lg:w-16 lg:translate-x-0"
           }`}
         >
         <div className="flex flex-col h-full">
           {/* Logo and Toggle */}
-          <div className="flex items-center justify-between p-4 border-b">
+          <div className="flex items-center justify-between p-4 border-b border-gray-600">
             <Link 
               href="/student/dashboard" 
               className={`flex items-center gap-2 transition-opacity ${
                 sidebarOpen ? "opacity-100" : "opacity-0 lg:opacity-100"
               }`}
             >
-              <Briefcase className="h-6 w-6 text-cyan-500 dark:text-cyan-400 flex-shrink-0" />
-              <span className={`font-bold text-xl whitespace-nowrap ${
+              <Briefcase className="h-6 w-6 text-purple-400 flex-shrink-0" />
+              <span className={`font-bold text-xl whitespace-nowrap text-white ${
                 sidebarOpen ? "block" : "hidden lg:hidden"
               }`}>
                 PlaceHub
@@ -109,7 +112,7 @@ export default function StudentLayout({
               <Button
                 variant="ghost"
                 size="icon"
-                className="lg:hidden"
+                className="lg:hidden text-gray-300 hover:text-white"
                 onClick={() => setSidebarOpen(false)}
               >
                 <X className="h-5 w-5" />
@@ -117,7 +120,7 @@ export default function StudentLayout({
               <Button
                 variant="ghost"
                 size="icon"
-                className="hidden lg:flex"
+                className="hidden lg:flex text-gray-300 hover:text-white"
                 onClick={() => setSidebarOpen(!sidebarOpen)}
               >
                 {sidebarOpen ? (
@@ -145,8 +148,8 @@ export default function StudentLayout({
                   }}
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors group ${
                     isActive
-                      ? "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 font-medium"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      ? "backdrop-blur-xl border-2 border-gray-600 bg-white/8 text-white font-medium"
+                      : "text-gray-300 hover:bg-[#282142] hover:text-white"
                   }`}
                   title={!sidebarOpen ? item.name : undefined}
                 >
@@ -162,20 +165,20 @@ export default function StudentLayout({
           </nav>
 
           {/* User section */}
-          <div className="p-4 border-t">
+          <div className="p-4 border-t border-gray-600">
             <ClientOnly
               fallback={
                 <div className={`flex items-center gap-3 p-2 ${
                   sidebarOpen ? "" : "justify-center"
                 }`}>
-                  <Avatar className="h-8 w-8 bg-cyan-600 text-white flex-shrink-0">
+                  <Avatar className="h-8 w-8 bg-gradient-to-r from-purple-600 to-blue-600 text-white flex-shrink-0">
                     <AvatarFallback>{userInitials}</AvatarFallback>
                   </Avatar>
                   <div className={`flex-1 min-w-0 ${
                     sidebarOpen ? "block" : "hidden lg:hidden"
                   }`}>
-                    <div className="text-sm font-medium truncate">{userName}</div>
-                    <div className="text-xs text-muted-foreground capitalize">
+                    <div className="text-sm font-medium truncate text-white">{userName}</div>
+                    <div className="text-xs text-gray-300 capitalize">
                       {userInfo?.role || "Student"}
                     </div>
                   </div>
@@ -187,35 +190,35 @@ export default function StudentLayout({
                   <Button variant="ghost" className={`w-full p-2 h-auto ${
                     !sidebarOpen ? "justify-center lg:justify-start" : "justify-start"
                   }`}>
-                    <Avatar className="h-8 w-8 bg-cyan-600 text-white flex-shrink-0">
+                    <Avatar className="h-8 w-8 bg-gradient-to-r from-purple-600 to-blue-600 text-white flex-shrink-0">
                       <AvatarFallback>{userInitials}</AvatarFallback>
                     </Avatar>
                     <div className={`text-left ml-3 ${
                       sidebarOpen ? "block" : "hidden lg:block"
                     }`}>
-                      <div className="text-sm font-medium truncate">{userName}</div>
-                      <div className="text-xs text-muted-foreground capitalize">
+                      <div className="text-sm font-medium truncate text-white">{userName}</div>
+                      <div className="text-xs text-gray-300 capitalize">
                         {userInfo?.role || "Student"}
                       </div>
                     </div>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuContent align="end" className="w-56 glass-modal">
                   <DropdownMenuLabel>
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">{userName}</p>
-                      <p className="text-xs leading-none text-muted-foreground">
+                      <p className="text-sm font-medium leading-none text-white">{userName}</p>
+                      <p className="text-xs leading-none text-gray-300">
                         {userInfo?.email}
                       </p>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => router.push("/student/settings")}>
+                  <DropdownMenuItem onClick={() => router.push("/student/settings")} className="text-gray-300 hover:text-white hover:bg-[#282142]">
                     <Settings className="mr-2 h-4 w-4" />
                     <span>Settings</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout} className="text-red-600 dark:text-red-400">
+                  <DropdownMenuItem onClick={handleLogout} className="text-red-400 hover:text-red-300 hover:bg-red-500/20">
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Log out</span>
                   </DropdownMenuItem>
@@ -231,13 +234,13 @@ export default function StudentLayout({
         sidebarOpen ? "lg:ml-72" : "lg:ml-16"
       }`}>
         {/* Top bar */}
-        <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <header className="sticky top-0 z-30 border-b-2 border-gray-600 backdrop-blur-xl bg-[#8185B2]/10 supports-[backdrop-filter]:backdrop-blur-xl">
           <div className="flex items-center justify-between px-4 py-4">
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
                 size="icon"
-                className="lg:hidden"
+                className="lg:hidden text-gray-300 hover:text-white"
                 onClick={() => setSidebarOpen(true)}
               >
                 <Menu className="h-5 w-5" />
@@ -245,7 +248,7 @@ export default function StudentLayout({
               <Button
                 variant="ghost"
                 size="icon"
-                className="hidden lg:flex"
+                className="hidden lg:flex text-gray-300 hover:text-white"
                 onClick={() => setSidebarOpen(!sidebarOpen)}
               >
                 {sidebarOpen ? (
@@ -257,55 +260,51 @@ export default function StudentLayout({
             </div>
             <div className="flex-1" />
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" className="relative">
+              <Button variant="ghost" size="icon" className="relative text-gray-300 hover:text-white">
                 <Bell className="h-5 w-5" />
                 {notificationsUnread > 0 && (
-                  <span className="absolute top-0 right-0 h-2 w-2 bg-cyan-600 rounded-full" />
+                  <span className="absolute top-0 right-0 h-2 w-2 bg-purple-500 rounded-full" />
                 )}
               </Button>
               <ClientOnly
                 fallback={
-                  <Avatar className="h-8 w-8 bg-cyan-600 text-white">
+                  <Avatar className="h-8 w-8 bg-gradient-to-r from-purple-600 to-blue-600 text-white">
                     <AvatarFallback>{userInitials}</AvatarFallback>
                   </Avatar>
                 }
               >
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="flex items-center gap-2">
-                      <Avatar className="h-8 w-8 bg-cyan-600 text-white">
+                    <Button variant="ghost" className="flex items-center gap-2 text-gray-300 hover:text-white">
+                      <Avatar className="h-8 w-8 bg-gradient-to-r from-purple-600 to-blue-600 text-white">
                         <AvatarFallback>{userInitials}</AvatarFallback>
                       </Avatar>
                       <div className="hidden md:block text-left">
-                        <div className="text-sm font-medium truncate">{userName}</div>
-                        <div className="text-xs text-muted-foreground capitalize">
+                        <div className="text-sm font-medium truncate text-white">{userName}</div>
+                        <div className="text-xs text-gray-300 capitalize">
                           {userInfo?.role || "Student"}
                         </div>
                       </div>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56" align="end">
+                  <DropdownMenuContent className="w-56 glass-modal" align="end">
                     <DropdownMenuLabel>
                       <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">{userName}</p>
-                        <p className="text-xs leading-none text-muted-foreground capitalize">
+                        <p className="text-sm font-medium leading-none text-white">{userName}</p>
+                        <p className="text-xs leading-none text-gray-300 capitalize">
                           {userInfo?.role || "Student"}
                         </p>
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    {/* <DropdownMenuItem onClick={() => router.push("/profile/wizard")}>
-                      <UserCircle className="mr-2 h-4 w-4" />
-                      <span>Profile</span>
-                    </DropdownMenuItem> */}
-                    <DropdownMenuItem onClick={() => router.push("/student/settings")}>
+                    <DropdownMenuItem onClick={() => router.push("/student/settings")} className="text-gray-300 hover:text-white hover:bg-[#282142]">
                       <Settings className="mr-2 h-4 w-4" />
                       <span>Settings</span>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={handleLogout}
-                      className="text-red-600 dark:text-red-400"
+                      className="text-red-400 hover:text-red-300 hover:bg-red-500/20"
                     >
                       <LogOut className="mr-2 h-4 w-4" />
                       <span>Log out</span>
@@ -318,9 +317,13 @@ export default function StudentLayout({
         </header>
 
         {/* Page content */}
-        <main className="p-4 lg:p-8">{children}</main>
+        <main className="p-4 lg:p-8 relative z-10">
+          <div className="backdrop-blur-xl border-2 border-gray-600 rounded-2xl overflow-hidden bg-white/8 min-h-[calc(100vh-8rem)] p-6">
+            {children}
+          </div>
+        </main>
       </div>
-        </div>
+      </div>
     </PrivateRoute>
   );
 }

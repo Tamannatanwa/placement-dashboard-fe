@@ -83,15 +83,15 @@ export const PersonalInfoStep = forwardRef<PersonalInfoStepHandle, StepContentPr
     };
 
     return (
-      <Card className="border-cyan-500/20">
+      <Card className="backdrop-blur-xl border-2 border-gray-600 rounded-2xl bg-white/8">
         <CardHeader>
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-cyan-100 dark:bg-cyan-950">
-              <User className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
+            <div className="p-2 rounded-lg backdrop-blur-xl border-2 border-gray-600 bg-white/8">
+              <User className="h-5 w-5 text-white" />
             </div>
             <div>
-              <CardTitle>Personal Details</CardTitle>
-              <CardDescription>Enter your basic personal information</CardDescription>
+              <CardTitle className="text-white">Personal Details</CardTitle>
+              <CardDescription className="text-gray-300">Enter your basic personal information</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -105,7 +105,7 @@ export const PersonalInfoStep = forwardRef<PersonalInfoStepHandle, StepContentPr
                   name="first_name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>First Name</FormLabel>
+                      <FormLabel className="text-white">First Name</FormLabel>
                       <FormControl>
                         <Input placeholder="John" {...field} className="h-11" />
                       </FormControl>
@@ -119,7 +119,7 @@ export const PersonalInfoStep = forwardRef<PersonalInfoStepHandle, StepContentPr
                   name="last_name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Last Name</FormLabel>
+                      <FormLabel className="text-white">Last Name</FormLabel>
                       <FormControl>
                         <Input placeholder="Doe" {...field} className="h-11" />
                       </FormControl>
@@ -135,7 +135,7 @@ export const PersonalInfoStep = forwardRef<PersonalInfoStepHandle, StepContentPr
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Mobile Number</FormLabel>
+                    <FormLabel className="text-white">Mobile Number</FormLabel>
                     <FormControl>
                       <Input
                         type="tel"
@@ -144,7 +144,7 @@ export const PersonalInfoStep = forwardRef<PersonalInfoStepHandle, StepContentPr
                         className="h-11"
                       />
                     </FormControl>
-                    <FormDescription>Include country code (e.g., +91-9876543210)</FormDescription>
+                    <FormDescription className="text-gray-300">Include country code (e.g., +91-9876543210)</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -152,14 +152,14 @@ export const PersonalInfoStep = forwardRef<PersonalInfoStepHandle, StepContentPr
 
               {/* Email ID */}
               {formData.email && (
-                <div className="pt-4 border-t">
-                  <FormLabel>Email ID</FormLabel>
+                <div className="pt-4 border-t border-gray-600">
+                  <FormLabel className="text-white">Email ID</FormLabel>
                   <Input
                     value={formData.email}
                     disabled
-                    className="mt-1.5 h-11 bg-muted"
+                    className="mt-1.5 h-11 backdrop-blur-xl border-2 border-gray-600 bg-white/8"
                   />
-                  <p className="text-sm text-muted-foreground mt-1.5">
+                  <p className="text-sm text-gray-300 mt-1.5">
                     Email cannot be changed
                   </p>
                 </div>
@@ -171,7 +171,7 @@ export const PersonalInfoStep = forwardRef<PersonalInfoStepHandle, StepContentPr
                 name="date_of_birth"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Date of Birth</FormLabel>
+                    <FormLabel className="text-white">Date of Birth</FormLabel>
                     <FormControl>
                       <Input
                         type="date"
@@ -191,7 +191,7 @@ export const PersonalInfoStep = forwardRef<PersonalInfoStepHandle, StepContentPr
                 name="gender"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Gender</FormLabel>
+                    <FormLabel className="text-white">Gender</FormLabel>
                     <Select
                       onValueChange={(value) => {
                         field.onChange(value);
@@ -223,12 +223,12 @@ export const PersonalInfoStep = forwardRef<PersonalInfoStepHandle, StepContentPr
                 name="current_address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Current Address</FormLabel>
+                    <FormLabel className="text-white">Current Address</FormLabel>
                     <FormControl>
                       <textarea
                         {...field}
                         placeholder="123 Main Street, City, State, Country - PIN Code"
-                        className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="flex min-h-[80px] w-full rounded-md backdrop-blur-xl border-2 border-gray-600 bg-white/8 px-3 py-2 text-sm text-white placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         rows={3}
                       />
                     </FormControl>

@@ -286,11 +286,11 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
     };
 
     return (
-      <Card className="border-cyan-500/20">
+      <Card className="backdrop-blur-xl border-2 border-gray-600 rounded-2xl bg-white/8">
         <CardHeader>
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-cyan-100 dark:bg-cyan-950">
-              <FileText className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
+            <div className="p-2 rounded-lg backdrop-blur-xl border-2 border-gray-600 bg-white/8">
+              <FileText className="h-5 w-5 text-white" />
             </div>
             <div>
               <CardTitle>Additional Information</CardTitle>
@@ -311,7 +311,7 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
                   name="technical_skills"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Technical Skills (e.g. Java, Python, React, MS Excel)</FormLabel>
+                      <FormLabel className="text-white">Technical Skills (e.g. Java, Python, React, MS Excel)</FormLabel>
                       <div className="flex gap-2">
                         <Input
                           placeholder="Add technical skill"
@@ -353,7 +353,7 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
                   name="soft_skills"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Soft Skills (Communication, Teamwork, Time Management)</FormLabel>
+                      <FormLabel className="text-white">Soft Skills (Communication, Teamwork, Time Management)</FormLabel>
                       <div className="flex gap-2">
                         <Input
                           placeholder="Add soft skill"
@@ -399,7 +399,7 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
                   name="experience_type"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Fresher / Experienced</FormLabel>
+                      <FormLabel className="text-white">Fresher / Experienced</FormLabel>
                       <Select
                         onValueChange={(value) => {
                           field.onChange(value);
@@ -428,7 +428,7 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
                 {/* Internship Details */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <FormLabel>Internship Details (Company Name, Duration)</FormLabel>
+                    <FormLabel className="text-white">Internship Details (Company Name, Duration)</FormLabel>
                     <Button type="button" onClick={addInternship} size="sm" variant="outline">
                       <Plus className="h-4 w-4 mr-1" />
                       Add Internship
@@ -499,7 +499,7 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
                 {/* Projects */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <FormLabel>Project Title / Description</FormLabel>
+                    <FormLabel className="text-white">Project Title / Description</FormLabel>
                     <Button type="button" onClick={addProject} size="sm" variant="outline">
                       <Plus className="h-4 w-4 mr-1" />
                       Add Project
@@ -635,7 +635,7 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
                   name="job_type"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Job Type (Internship / Full-Time / Part-Time)</FormLabel>
+                      <FormLabel className="text-white">Job Type (Internship / Full-Time / Part-Time)</FormLabel>
                       <Select
                         onValueChange={(value) => {
                           const current = field.value || [];
@@ -684,7 +684,7 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
                   name="work_mode"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Work Mode (Remote / Hybrid / Office)</FormLabel>
+                      <FormLabel className="text-white">Work Mode (Remote / Hybrid / Office)</FormLabel>
                       <Select
                         onValueChange={(value) => {
                           const current = field.value || [];
@@ -733,7 +733,7 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
                   name="preferred_job_role"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Preferred Job Role</FormLabel>
+                      <FormLabel className="text-white">Preferred Job Role</FormLabel>
                       <div className="flex gap-2">
                         <Input
                           placeholder="Add preferred job role"
@@ -777,7 +777,7 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
                   name="preferred_location"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Preferred Location</FormLabel>
+                      <FormLabel className="text-white">Preferred Location</FormLabel>
                       <div className="flex gap-2">
                         <Input
                           placeholder="Add preferred location"
@@ -821,7 +821,7 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
                   name="expected_salary"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Expected Salary (optional)</FormLabel>
+                      <FormLabel className="text-white">Expected Salary (optional)</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -851,7 +851,7 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
                   name="github_profile"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>GitHub Profile</FormLabel>
+                      <FormLabel className="text-white">GitHub Profile</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -873,7 +873,7 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
                   name="linkedin_profile"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>LinkedIn Profile</FormLabel>
+                      <FormLabel className="text-white">LinkedIn Profile</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -895,7 +895,7 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
                   name="portfolio_url"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Portfolio / Personal Website</FormLabel>
+                      <FormLabel className="text-white">Portfolio / Personal Website</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -913,7 +913,7 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
                 />
 
                 <div>
-                  <FormLabel>Coding Platforms (LeetCode, HackerRank)</FormLabel>
+                  <FormLabel className="text-white">Coding Platforms (LeetCode, HackerRank)</FormLabel>
                   <div className="space-y-2 mt-2">
                     {["LeetCode", "HackerRank", "CodeChef", "Codeforces"].map((platform) => (
                       <Input
@@ -944,7 +944,7 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
                   name="resume_url"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Resume Upload (PDF)</FormLabel>
+                      <FormLabel className="text-white">Resume Upload (PDF)</FormLabel>
                       <FormControl>
                         <div className="space-y-3">
                           {formData.resume_url ? (

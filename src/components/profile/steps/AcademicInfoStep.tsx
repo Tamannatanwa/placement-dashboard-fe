@@ -112,12 +112,12 @@ export const AcademicInfoStep = forwardRef<AcademicInfoStepHandle, StepContentPr
     };
 
     return (
-      <Card className="border-cyan-500/20">
+      <Card className="backdrop-blur-xl border-2 border-gray-600 rounded-2xl bg-white/8">
         <CardHeader>
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-cyan-100 dark:bg-cyan-950">
-              <GraduationCap className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
-            </div>
+                <div className="p-2 rounded-lg backdrop-blur-xl border-2 border-gray-600 bg-white/8">
+                  <GraduationCap className="h-5 w-5 text-white" />
+                </div>
             <div>
               <CardTitle>Education Details</CardTitle>
               <CardDescription>Provide your academic information</CardDescription>
@@ -133,7 +133,7 @@ export const AcademicInfoStep = forwardRef<AcademicInfoStepHandle, StepContentPr
                 name="highest_qualification"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Highest Qualification</FormLabel>
+                    <FormLabel className="text-white">Highest Qualification</FormLabel>
                     <Select
                       onValueChange={(value) => {
                         field.onChange(value);
@@ -168,7 +168,7 @@ export const AcademicInfoStep = forwardRef<AcademicInfoStepHandle, StepContentPr
                 name="college_name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>College / University Name</FormLabel>
+                    <FormLabel className="text-white">College / University Name</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="e.g., ABC Engineering College"
@@ -188,7 +188,7 @@ export const AcademicInfoStep = forwardRef<AcademicInfoStepHandle, StepContentPr
                   name="course"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Course</FormLabel>
+                      <FormLabel className="text-white">Course</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="e.g., Bachelor of Technology"
@@ -206,7 +206,7 @@ export const AcademicInfoStep = forwardRef<AcademicInfoStepHandle, StepContentPr
                   name="branch"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Branch</FormLabel>
+                      <FormLabel className="text-white">Branch</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="e.g., Computer Science and Engineering"
@@ -226,7 +226,7 @@ export const AcademicInfoStep = forwardRef<AcademicInfoStepHandle, StepContentPr
                 name="passing_year"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Year of Passing</FormLabel>
+                    <FormLabel className="text-white">Year of Passing</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -252,7 +252,7 @@ export const AcademicInfoStep = forwardRef<AcademicInfoStepHandle, StepContentPr
                   name="percentage"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Percentage (optional)</FormLabel>
+                      <FormLabel className="text-white">Percentage (optional)</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -280,7 +280,7 @@ export const AcademicInfoStep = forwardRef<AcademicInfoStepHandle, StepContentPr
                   name="cgpa"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>CGPA (optional)</FormLabel>
+                      <FormLabel className="text-white">CGPA (optional)</FormLabel>
                       <FormControl>
                         <Input
                           type="number"

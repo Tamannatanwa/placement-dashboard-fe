@@ -22,19 +22,19 @@ export function StepNavigation({
   };
 
   return (
-    <div className="flex items-center justify-between pt-6 border-t">
+    <div className="flex items-center justify-between pt-6 border-t border-gray-600">
       <Button
         type="button"
         variant="outline"
         onClick={onPrevious}
         disabled={!canGoPrevious || isSubmitting}
-        className="min-w-[120px]"
+        className="min-w-[120px] backdrop-blur-xl border-2 border-gray-600 bg-white/8 text-white hover:bg-[#282142] transition-colors duration-300"
       >
         <ArrowLeft className="h-4 w-4 mr-2" />
         Previous
       </Button>
 
-      <div className="text-sm text-muted-foreground">
+      <div className="text-sm text-gray-300">
         Step {currentStep + 1} of {totalSteps}
       </div>
 
@@ -42,7 +42,7 @@ export function StepNavigation({
         type="button"
         onClick={handleClick}
         disabled={isSubmitting}
-        className="min-w-[120px] bg-cyan-600 hover:bg-cyan-700 dark:bg-cyan-500 dark:hover:bg-cyan-600 text-white disabled:opacity-50"
+        className="min-w-[120px] bg-blue-500 hover:bg-blue-600 text-white disabled:opacity-50 transition-colors duration-300"
       >
         {isLastStep ? (
           <>

@@ -118,11 +118,11 @@ export function ReviewStep({ formData, onEditStep }: ReviewStepProps) {
   ];
 
   return (
-    <Card className="border-cyan-500/20">
+    <Card className="backdrop-blur-xl border-2 border-gray-600 rounded-2xl bg-white/8">
       <CardHeader>
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-lg bg-green-100 dark:bg-green-950">
-            <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+          <div className="p-2 rounded-lg backdrop-blur-xl border-2 border-gray-600 bg-white/8">
+            <CheckCircle2 className="h-5 w-5 text-white" />
           </div>
           <div>
             <CardTitle>Review Your Information</CardTitle>

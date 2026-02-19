@@ -301,30 +301,30 @@ export default function StudentDashboard() {
     <div className="space-y-8">
         {/* Welcome Section */}
         <div className="space-y-2">
-          <h1 className="text-3xl md:text-4xl font-bold">
+          <h1 className="text-3xl md:text-4xl font-bold text-white">
             Welcome back! 👋
           </h1>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-gray-300 text-lg">
             Discover your next career opportunity
           </p>
         </div>
 
         {/* Profile Completeness Alert */}
         {!isDashboardLoading && profileCompleteness !== undefined && (
-          <Card className={profileCompleteness === 100 ? "border-green-500/20 bg-green-500/5" : "border-cyan-500/20 bg-cyan-500/5"}>
+          <Card className="backdrop-blur-xl border-2 border-gray-600 rounded-2xl bg-white/8">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   {profileCompleteness === 100 ? (
-                    <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    <CheckCircle2 className="h-5 w-5 text-green-400" />
                   ) : (
-                    <AlertCircle className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
+                    <AlertCircle className="h-5 w-5 text-blue-400" />
                   )}
-                  <CardTitle className="text-base">Profile Strength</CardTitle>
+                  <CardTitle className="text-base text-white">Profile Strength</CardTitle>
                 </div>
-                <span className="text-sm font-medium">{profileCompleteness}%</span>
+                <span className="text-sm font-medium text-white">{profileCompleteness}%</span>
               </div>
-              <CardDescription>
+              <CardDescription className="text-gray-300">
                 {profileCompleteness === 100
                   ? "Congratulations! Your profile is complete."
                   : profileCompleteness >= 85
@@ -337,8 +337,8 @@ export default function StudentDashboard() {
               <Button
                 onClick={() => router.push("/profile/wizard")}
                 className={profileCompleteness === 100 
-                  ? "w-full sm:w-auto bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white"
-                  : "w-full sm:w-auto bg-cyan-600 hover:bg-cyan-700 dark:bg-cyan-500 dark:hover:bg-cyan-600 text-white"
+                  ? "w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white transition-colors duration-300"
+                  : "w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white transition-colors duration-300"
                 }
               >
                 {profileCompleteness === 100 ? "Update Profile" : "Complete Profile"}
@@ -364,7 +364,7 @@ export default function StudentDashboard() {
         </div>
 
         {/* Filters */}
-        <div className="bg-card border rounded-lg p-6">
+        <div className="backdrop-blur-xl border-2 border-gray-600 rounded-2xl bg-white/8 p-6">
           <JobFilters
             filters={filters}
             onFiltersChange={setFilters}
@@ -384,15 +384,15 @@ export default function StudentDashboard() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-semibold">Recommended for You</h2>
-                <p className="text-sm text-muted-foreground">
+                <h2 className="text-xl font-semibold text-white">Recommended for You</h2>
+                <p className="text-sm text-gray-300">
                   Jobs matched to your profile
                 </p>
               </div>
             </div>
             {isLoadingRecommended ? (
               <div className="text-center py-8">
-                <div className="text-muted-foreground">Loading recommendations...</div>
+                <div className="text-gray-300">Loading recommendations...</div>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -415,8 +415,8 @@ export default function StudentDashboard() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-semibold">Recent Jobs</h2>
-                <p className="text-sm text-muted-foreground">
+                <h2 className="text-xl font-semibold text-white">Recent Jobs</h2>
+                <p className="text-sm text-gray-300">
                   Jobs you might be interested in
                 </p>
               </div>
@@ -437,7 +437,7 @@ export default function StudentDashboard() {
 
         {/* All Jobs Section */}
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">
+          <h2 className="text-xl font-semibold text-white">
             {filteredJobs.length} Jobs Found
           </h2>
           <Select
@@ -461,11 +461,11 @@ export default function StudentDashboard() {
         {/* Job Listings with infinite scroll */}
         {isLoading && filters.page === 1 ? (
           <div className="text-center py-12">
-            <div className="text-muted-foreground">Loading jobs...</div>
+            <div className="text-gray-300">Loading jobs...</div>
           </div>
         ) : filteredJobs.length === 0 ? (
           <div className="text-center py-12">
-            <div className="text-muted-foreground">No jobs found. Try adjusting your filters.</div>
+            <div className="text-gray-300">No jobs found. Try adjusting your filters.</div>
           </div>
         ) : (
           <>
@@ -483,7 +483,7 @@ export default function StudentDashboard() {
             {hasMoreJobs && (
               <div
                 ref={loadMoreTriggerRef}
-                className="flex items-center justify-center py-6 text-sm text-muted-foreground"
+                className="flex items-center justify-center py-6 text-sm text-gray-300"
               >
                 {isLoadingMore ? "Loading more jobs..." : "Scroll to load more jobs"}
               </div>
