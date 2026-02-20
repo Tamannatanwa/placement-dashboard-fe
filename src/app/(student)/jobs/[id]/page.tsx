@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, MapPin, Clock, Users, ExternalLink, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -22,14 +22,12 @@ export default function JobDetailPage() {
   const [job, setJob] = useState<Job | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaved, setIsSaved] = useState(false);
+  const hasLoadedRef = useRef(false);
 
-  useEffect(() => {
-    if (jobId) {
-      loadJob();
-    }
-  }, [jobId]);
-
-  const loadJob = async () => {
+  const loadJob = useCallback(async () => {
+    if (!jobId || hasLoadedRef.current) return;
+    
+    hasLoadedRef.current = true;
     setIsLoading(true);
     try {
       const data = await jobsApi.getJob(jobId);
@@ -37,10 +35,18 @@ export default function JobDetailPage() {
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to load job details");
       console.error("Error loading job:", error);
+      hasLoadedRef.current = false; // Reset on error so it can retry
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [jobId]);
+
+  useEffect(() => {
+    hasLoadedRef.current = false; // Reset when jobId changes
+    if (jobId) {
+      loadJob();
+    }
+  }, [jobId, loadJob]);
 
 
   // Clean up common garbage characters around apply links so they don't break
