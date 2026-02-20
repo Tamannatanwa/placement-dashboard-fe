@@ -1,14 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, MapPin, Clock, Users, ExternalLink, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { jobsApi } from "@/lib/api/jobs";
-import { studentsApi } from "@/lib/api/students";
 import { savedJobsApi } from "@/lib/api/saved-jobs";
 import { Job } from "@/types/job";
-import { JobCard } from "@/components/jobs/JobCard";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 
@@ -22,43 +20,14 @@ export default function JobDetailPage() {
   const jobId = params.id as string;
 
   const [job, setJob] = useState<Job | null>(null);
-  const [similarJobs, setSimilarJobs] = useState<Job[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingSimilar, setIsLoadingSimilar] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
-  const [savedJobs, setSavedJobs] = useState<Set<string>>(new Set());
-  const viewStartTime = useRef<number>(Date.now());
-  const hasTrackedView = useRef<boolean>(false);
+  const hasLoadedRef = useRef(false);
 
-  useEffect(() => {
-    if (jobId) {
-      loadJob();
-      checkIfSaved();
-      trackJobView();
-      loadSimilarJobs();
-      loadSavedJobs();
-    }
-
-    // Track view duration when component unmounts
-    return () => {
-      if (hasTrackedView.current && jobId) {
-        const duration = Math.floor((Date.now() - viewStartTime.current) / 1000);
-        const jobIdNum = parseInt(jobId, 10);
-        if (!isNaN(jobIdNum) && duration > 0) {
-          // Track final view duration (fire and forget)
-          studentsApi.trackJobView(String(jobIdNum), {
-            job_id: String(jobIdNum),
-            duration_seconds: duration,
-            source: "job_detail",
-          }).catch((error) => {
-            console.error("Error tracking final job view:", error);
-          });
-        }
-      }
-    };
-  }, [jobId]);
-
-  const loadJob = async () => {
+  const loadJob = useCallback(async () => {
+    if (!jobId || hasLoadedRef.current) return;
+    
+    hasLoadedRef.current = true;
     setIsLoading(true);
     try {
       const data = await jobsApi.getJob(jobId);
@@ -66,69 +35,19 @@ export default function JobDetailPage() {
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to load job details");
       console.error("Error loading job:", error);
+      hasLoadedRef.current = false; // Reset on error so it can retry
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [jobId]);
 
-  const checkIfSaved = async () => {
-    try {
-      const response = await savedJobsApi.checkIfSaved(jobId);
-      setIsSaved(response.is_saved || false);
-    } catch (error: any) {
-      console.error("Error checking if job is saved:", error);
-      // Silently fail - default to not saved
-      setIsSaved(false);
+  useEffect(() => {
+    hasLoadedRef.current = false; // Reset when jobId changes
+    if (jobId) {
+      loadJob();
     }
-  };
+  }, [jobId, loadJob]);
 
-  const trackJobView = async () => {
-    if (hasTrackedView.current) return;
-    
-    const jobIdNum = parseInt(jobId, 10);
-    if (isNaN(jobIdNum)) return;
-
-    try {
-      await studentsApi.trackJobView(String(jobIdNum), {
-        job_id: String(jobIdNum),
-        duration_seconds: 0, // Initial view, duration tracked on unmount
-        source: "job_detail",
-      });
-      hasTrackedView.current = true;
-    } catch (error) {
-      // Silently fail - view tracking is not critical
-      console.error("Error tracking job view:", error);
-    }
-  };
-
-
-  const loadSimilarJobs = async () => {
-    const jobIdNum = parseInt(jobId, 10);
-    if (isNaN(jobIdNum)) return;
-
-    setIsLoadingSimilar(true);
-    try {
-      const response = await studentsApi.getSimilarJobs(String(jobIdNum));
-      if (response.jobs) {
-        setSimilarJobs(response.jobs);
-      }
-    } catch (error: any) {
-      console.error("Error loading similar jobs:", error);
-      // Silently fail - similar jobs are optional
-    } finally {
-      setIsLoadingSimilar(false);
-    }
-  };
-
-  const loadSavedJobs = async () => {
-    try {
-      const response = await savedJobsApi.getSavedJobs();
-      const savedJobIds = new Set(response.saved_jobs.map((sj) => String(sj.job_id)));
-      setSavedJobs(savedJobIds);
-    } catch (error: any) {
-      console.error("Error loading saved jobs:", error);
-    }
-  };
 
   // Clean up common garbage characters around apply links so they don't break
   // e.g. `"https://example.com/**"` -> `https://example.com/`
@@ -150,9 +69,8 @@ export default function JobDetailPage() {
     return url || null;
   };
 
-  const handleApply = (jobId?: string) => {
-    const targetJob = jobId ? similarJobs.find((j) => j.id === jobId) : job;
-    const sanitized = sanitizeApplyLink(targetJob?.source_url);
+  const handleApply = () => {
+    const sanitized = sanitizeApplyLink(job?.source_url);
 
     if (sanitized) {
       window.open(sanitized, "_blank");
@@ -161,31 +79,18 @@ export default function JobDetailPage() {
     }
   };
 
-  const handleSave = async (targetJobId?: string) => {
-    const jobIdToSave = targetJobId || jobId;
-
+  const handleSave = async () => {
     try {
-      const isCurrentlySaved = savedJobs.has(jobIdToSave);
-      
-      if (isCurrentlySaved) {
+      if (isSaved) {
         toast.info("To unsave, please use the saved jobs page");
         return;
       }
 
       await savedJobsApi.saveJob({
-        job_id: jobIdToSave,
-      });
-
-      setSavedJobs((prev) => {
-        const newSet = new Set(prev);
-        newSet.add(jobIdToSave);
-        return newSet;
+        job_id: jobId,
       });
       
-      if (jobIdToSave === jobId) {
-        setIsSaved(true);
-      }
-      
+      setIsSaved(true);
       toast.success("Job saved successfully");
     } catch (error: any) {
       console.error("Error saving job:", error);
@@ -420,29 +325,6 @@ export default function JobDetailPage() {
             </div>
           )}
 
-          {/* Similar Jobs */}
-          {similarJobs.length > 0 && (
-            <div className="bg-card border rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Similar Jobs</h2>
-              {isLoadingSimilar ? (
-                <div className="text-center py-8">
-                  <div className="text-muted-foreground">Loading similar jobs...</div>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {similarJobs.slice(0, 4).map((similarJob) => (
-                    <JobCard
-                      key={similarJob.id}
-                      job={similarJob}
-                      onApply={() => handleApply(similarJob.id)}
-                      onSave={() => handleSave(similarJob.id)}
-                      isSaved={savedJobs.has(similarJob.id)}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
         </div>
     </div>
   );

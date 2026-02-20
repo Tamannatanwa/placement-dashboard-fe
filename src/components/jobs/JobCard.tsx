@@ -132,7 +132,7 @@ export function JobCard({ job, onApply, onSave, isSaved = false }: JobCardProps)
           className="bg-cyan-600 hover:bg-cyan-700 dark:bg-cyan-500 dark:hover:bg-cyan-600 text-white"
           size="sm"
         >
-          Apply Now
+          View Details
         </Button>
       </div>
     </div>

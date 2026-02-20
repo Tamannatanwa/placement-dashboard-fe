@@ -189,24 +189,9 @@ export default function StudentDashboard() {
     setSearchQuery(query);
   };
 
-  // Handle job application with view tracking
-  const handleApply = async (jobId: string) => {
-    try {
-      // Track job view before navigating
-      const jobIdNum = parseInt(jobId, 10);
-      if (!isNaN(jobIdNum)) {
-        await studentsApi.trackJobView(String(jobIdNum), {
-          job_id: String(jobIdNum),
-          duration_seconds: 0, // We'll track duration on the detail page
-          source: "dashboard",
-        });
-      }
-    } catch (error) {
-      // Silently fail - view tracking is not critical
-      console.error("Error tracking job view:", error);
-    }
-    
-    // Navigate to job detail or application page
+  // Handle job application
+  const handleApply = (jobId: string) => {
+    // Navigate to job detail page
     router.push(`/jobs/${jobId}`);
   };
 
