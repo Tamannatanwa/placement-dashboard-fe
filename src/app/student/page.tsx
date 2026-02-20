@@ -7,8 +7,8 @@ export default function StudentPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Redirect to student dashboard
-    router.replace("/student/dashboard");
+    // Redirect to the main jobs experience
+    router.replace("/jobs");
   }, [router]);
 
   return (

@@ -68,7 +68,8 @@ export function getDashboardRoute(role: string): string {
       return "/placement/dashboard";
     case "student":
     default:
-      return "/student/dashboard";
+      // For students, the primary experience is the simplified Jobs page
+      return "/jobs";
   }
 }
 

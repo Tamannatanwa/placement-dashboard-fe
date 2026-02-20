@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  LayoutDashboard,
   Briefcase,
   Bookmark,
   UserCircle,
@@ -34,7 +33,6 @@ import { PrivateRoute } from "@/components/auth/PrivateRoute";
 import { AnimatedBackground } from "@/components/layouts/AnimatedBackground";
 
 const navigation = [
-  { name: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
   { name: "Jobs", href: "/jobs", icon: Briefcase },
   { name: "Saved Jobs", href: "/jobs/saved", icon: Bookmark },
   { name: "Profile", href: "/profile/wizard", icon: UserCircle },
@@ -96,7 +94,7 @@ export default function StudentLayout({
           {/* Logo and Toggle */}
           <div className="flex items-center justify-between p-4 border-b">
             <Link 
-              href="/student/dashboard" 
+              href="/jobs" 
               className={`flex items-center gap-2 transition-opacity ${
                 sidebarOpen ? "opacity-100" : "opacity-0 lg:opacity-100"
               }`}

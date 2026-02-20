@@ -99,10 +99,10 @@ export default function SavedJobsPage() {
               <Bookmark className="h-12 w-12 mx-auto mb-4 text-gray-400" />
               <h3 className="text-lg font-semibold mb-2 text-white">No saved jobs yet</h3>
               <p className="text-gray-300 mb-4">
-                Start exploring jobs and save the ones you're interested in
+                Start exploring jobs and save the ones you're interested in.
               </p>
               <Button
-                onClick={() => router.push("/student/dashboard")}
+                onClick={() => router.push("/jobs")}
                 className="bg-blue-500 hover:bg-blue-600 text-white transition-colors duration-300"
               >
                 Browse Jobs
