@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Info, ArrowRight } from "lucide-react";
+import { Zap } from "lucide-react";
 import Link from "next/link";
 
 export default function JobsPage() {
@@ -218,47 +218,63 @@ export default function JobsPage() {
     };
   }, [hasMoreJobs, isLoading, isLoadingMore, filters.page, filters.size, totalJobs]);
 
+  // Active filter labels for chips
+  const activeFilterChips = useMemo(() => {
+    const chips: { key: keyof JobFiltersType; label: string }[] = [];
+    if (filters.employment_type) {
+      const label = filters.employment_type.charAt(0).toUpperCase() + filters.employment_type.slice(1).replace(/-/g, " ");
+      chips.push({ key: "employment_type", label });
+    }
+    if (filters.work_type) {
+      const label = filters.work_type === "on-site" ? "On-Site" : filters.work_type.charAt(0).toUpperCase() + filters.work_type.slice(1);
+      chips.push({ key: "work_type", label });
+    }
+    if (filters.location) chips.push({ key: "location", label: filters.location });
+    if (filters.is_fresher === true) chips.push({ key: "is_fresher", label: "Fresher" });
+    if (filters.is_fresher === false) chips.push({ key: "is_fresher", label: "Experienced" });
+    return chips;
+  }, [filters]);
+
+  const clearFilter = (key: keyof JobFiltersType) => {
+    setFilters((prev) => ({ ...prev, [key]: undefined }));
+  };
+
   return (
-    <div className="space-y-2">
-      {/* Single row: title + search + profile (profile stretches to fill right) */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-        <div className="shrink-0 space-y-0.5">
-          <h1 className="text-2xl font-bold">Jobs</h1>
-          <p className="text-xs text-muted-foreground">
-            Browse all opportunities and apply directly.
-          </p>
-        </div>
-        <div className="w-full min-w-0 sm:w-64 sm:flex-none">
-          <JobSearch
-            onSearch={handleSearch}
-            placeholder="Search jobs by title, company, or skills..."
-          />
-        </div>
-        {profileCompleteness !== null && profileCompleteness < 100 && (
-          <div className="flex min-w-0 flex-1 items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2">
-            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-amber-500/20">
-              <Info className="h-3 w-3 text-amber-600 dark:text-amber-400" />
+    <div className="space-y-3">
+      {/* <h1 className="text-xl font-bold">Jobs</h1> */}
+
+      {/* Full-width profile completion banner */}
+      {profileCompleteness !== null && profileCompleteness < 100 && (
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-500/20">
+              <Zap className="h-5 w-5 text-amber-600 dark:text-amber-400" />
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-medium text-foreground leading-tight">
-                Complete your profile for more jobs & better recommendations.
+            <div className="min-w-0">
+              <p className="font-medium text-foreground">Complete your profile for better matches</p>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Add your skills, experience & preferences to unlock 3x more relevant jobs
               </p>
-              <Link
-                href="/profile/view"
-                className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 mt-0.5"
-              >
-                Complete profile →
-              </Link>
             </div>
           </div>
-        )}
-      </div>
+          <Link
+            href="/profile/view"
+            className="shrink-0 inline-flex items-center justify-center rounded-md bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-600"
+          >
+            Complete Profile
+          </Link>
+        </div>
+      )}
 
-      {/* Filters + content: minimal gap so job list starts higher */}
+      {/* Sidebar (search + filters) + Main (tabs, chips, results) */}
       <div className="flex flex-col gap-3 lg:flex-row lg:gap-4">
-        {/* Sidebar Filters */}
+        {/* Sidebar: search at top, then filters */}
         <aside className="lg:w-56 flex-shrink-0">
-          <div className="bg-card border rounded-lg p-3 sticky top-4">
+          <div className="bg-card border rounded-lg p-3 sticky top-4 space-y-3">
+            <JobSearch
+              onSearch={handleSearch}
+              placeholder="Title, company, or skills..."
+            />
             <JobFilters
               filters={filters}
               onFiltersChange={setFilters}
@@ -277,30 +293,45 @@ export default function JobsPage() {
 
         {/* Main Content Area - tight spacing so cards start sooner */}
         <div className="flex-1 space-y-3 min-w-0">
-          {/* Segmented control: Recommended Jobs | All Jobs */}
-          <div className="inline-flex rounded-lg bg-[#E8E8E8] p-0.5">
-            <button
-              type="button"
-              onClick={() => setJobsTab("recommended")}
-              className={`rounded-md px-5 py-2.5 text-sm font-medium uppercase tracking-wide transition-colors ${
-                jobsTab === "recommended"
-                  ? "bg-[#5BC0DE] text-white shadow-sm"
-                  : "text-[#6B7280] hover:bg-[#DDDDDD]"
-              }`}
-            >
-              Recommended Jobs
-            </button>
-            <button
-              type="button"
-              onClick={() => setJobsTab("all")}
-              className={`rounded-md px-5 py-2.5 text-sm font-medium uppercase tracking-wide transition-colors ${
-                jobsTab === "all"
-                  ? "bg-[#5BC0DE] text-white shadow-sm"
-                  : "text-[#6B7280] hover:bg-[#DDDDDD]"
-              }`}
-            >
-              All Jobs
-            </button>
+          {/* Tabs: Recommended | All Jobs */}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex rounded-lg bg-muted p-0.5">
+              <button
+                type="button"
+                onClick={() => setJobsTab("recommended")}
+                className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+                  jobsTab === "recommended"
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Recommended
+              </button>
+              <button
+                type="button"
+                onClick={() => setJobsTab("all")}
+                className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+                  jobsTab === "all"
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                All Jobs
+              </button>
+            </div>
+            {/* Active filter chips */}
+            {jobsTab === "all" &&
+              activeFilterChips.map(({ key, label }) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => clearFilter(key)}
+                  className="inline-flex items-center gap-1.5 rounded-full border bg-muted/50 pl-3 pr-1.5 py-1 text-xs font-medium hover:bg-muted"
+                >
+                  {label}
+                  <span aria-hidden className="text-muted-foreground hover:text-foreground">×</span>
+                </button>
+              ))}
           </div>
 
           {/* Section 1: Recommended Jobs */}
@@ -346,9 +377,9 @@ export default function JobsPage() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-semibold">All Jobs</h2>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {filteredJobs.length} {filteredJobs.length === 1 ? "job" : "jobs"} found
+                  <h2 className="text-lg font-semibold">All Jobs</h2>
+                  <p className="text-sm text-muted-foreground mt-0.5">
+                    {filteredJobs.length} results
                   </p>
                 </div>
                 <Select
