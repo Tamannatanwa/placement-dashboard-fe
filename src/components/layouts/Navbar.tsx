@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Briefcase, LogOut, User, Settings } from "lucide-react";
-import { isAuthenticated, getUserInfo, getUserRole, getDashboardRoute } from "@/lib/utils/auth";
+import { isAuthenticated, getUserInfo, getUserRole } from "@/lib/utils/auth";
 import { authApi } from "@/lib/api/auth";
 import { toast } from "sonner";
 import { ClientOnly } from "@/components/ui/ClientOnly";
@@ -56,12 +56,6 @@ export function Navbar() {
     }
   };
 
-  const handleDashboardClick = () => {
-    if (userInfo?.role) {
-      router.push(getDashboardRoute(userInfo.role));
-    }
-  };
-
   return (
     <nav className="fixed top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
@@ -82,9 +76,6 @@ export function Navbar() {
         <div className="flex items-center gap-4">
           {isAuth && userInfo ? (
             <>
-              <Button variant="ghost" onClick={handleDashboardClick} className="hidden sm:flex">
-                Dashboard
-              </Button>
               <ClientOnly
                 fallback={
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
@@ -116,10 +107,6 @@ export function Navbar() {
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleDashboardClick}>
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Dashboard</span>
-                    </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => {
                         if (userInfo?.role === "student") {

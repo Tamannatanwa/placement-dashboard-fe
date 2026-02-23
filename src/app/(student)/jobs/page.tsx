@@ -17,6 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Info, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 export default function JobsPage() {
   const router = useRouter();
@@ -36,12 +38,28 @@ export default function JobsPage() {
   const [savedJobs, setSavedJobs] = useState<Set<string>>(new Set());
   const [savedJobsCount, setSavedJobsCount] = useState(0);
   const [jobsTab, setJobsTab] = useState<"recommended" | "all">("recommended");
+  const [profileCompleteness, setProfileCompleteness] = useState<number | null>(null);
 
   useEffect(() => {
     loadJobs();
     loadRecommendedJobs();
     loadSavedJobs();
   }, [filters]);
+
+  useEffect(() => {
+    loadProfileCompleteness();
+  }, []);
+
+  const loadProfileCompleteness = async () => {
+    try {
+      const profile = await studentsApi.getMyProfile();
+      if (profile.profile_completeness !== undefined) {
+        setProfileCompleteness(profile.profile_completeness);
+      }
+    } catch {
+      // Silently fail
+    }
+  };
 
   const loadJobs = async () => {
     const currentPage = filters.page || 1;
@@ -212,6 +230,32 @@ export default function JobsPage() {
           Browse all opportunities and apply directly.
         </p>
       </div>
+
+      {/* Profile completion notice - different design: slim info bar */}
+      {profileCompleteness !== null && profileCompleteness < 100 && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-500/20">
+              <Info className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-foreground">
+                Complete your profile to see more jobs and get better recommendations
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Recommended and personalized jobs are based on your profile completion.
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/profile/view"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300"
+          >
+            Complete profile
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      )}
 
       {/* Search Bar */}
       <div className="max-w-2xl">
