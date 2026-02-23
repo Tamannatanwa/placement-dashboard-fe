@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Bookmark, Briefcase, MapPin, Clock, Users, Trash2 } from "lucide-react";
+import { Bookmark, Briefcase, MapPin, Clock, Users, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -73,8 +73,9 @@ export default function SavedJobsPage() {
 
   if (isLoading) {
     return (
-      <div className="text-center py-12">
-        <div className="text-muted-foreground">Loading saved jobs...</div>
+      <div className="flex flex-col items-center justify-center py-16 gap-4">
+        <Loader2 className="h-10 w-10 animate-spin text-cyan-600 dark:text-cyan-400" />
+        <p className="text-muted-foreground">Loading saved jobs...</p>
       </div>
     );
   }

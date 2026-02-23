@@ -37,6 +37,7 @@ export default function JobsPage() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [savedJobs, setSavedJobs] = useState<Set<string>>(new Set());
   const [savedJobsCount, setSavedJobsCount] = useState(0);
+  const [savingJobId, setSavingJobId] = useState<string | null>(null);
   const [jobsTab, setJobsTab] = useState<"recommended" | "all">("all");
   const [profileCompleteness, setProfileCompleteness] = useState<number | null>(null);
 
@@ -138,22 +139,16 @@ export default function JobsPage() {
 
   // Handle save job using API
   const handleSave = async (jobId: string) => {
+    const isCurrentlySaved = savedJobs.has(jobId);
+    if (isCurrentlySaved) {
+      toast.info("To unsave, please use the saved jobs page");
+      return;
+    }
+    setSavingJobId(jobId);
     try {
-      const isCurrentlySaved = savedJobs.has(jobId);
-      
-      if (isCurrentlySaved) {
-        // Check if saved to get the saved job ID, then we'd need a delete endpoint
-        // For now, we'll just show a message that unsaving requires the delete endpoint
-        toast.info("To unsave, please use the saved jobs page");
-        return;
-      }
-
-      // Save job via API
       await savedJobsApi.saveJob({
         job_id: jobId,
       });
-
-      // Update local state
       setSavedJobs((prev) => {
         const newSet = new Set(prev);
         newSet.add(jobId);
@@ -164,6 +159,8 @@ export default function JobsPage() {
     } catch (error: any) {
       console.error("Error saving job:", error);
       toast.error(error.response?.data?.detail || error.response?.data?.message || "Failed to save job");
+    } finally {
+      setSavingJobId(null);
     }
   };
 
@@ -339,6 +336,7 @@ export default function JobsPage() {
                       onApply={handleApply}
                       onSave={handleSave}
                       isSaved={savedJobs.has(job.id)}
+                      isSaving={savingJobId === job.id}
                     />
                   ))}
                 </div>
@@ -397,6 +395,7 @@ export default function JobsPage() {
                         onApply={handleApply}
                         onSave={handleSave}
                         isSaved={savedJobs.has(job.id)}
+                        isSaving={savingJobId === job.id}
                       />
                     ))}
                   </div>

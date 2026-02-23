@@ -2,7 +2,7 @@
 
 import { Job } from "@/types/job";
 import { Button } from "@/components/ui/button";
-import { MapPin, Bookmark, Clock, Users } from "lucide-react";
+import { MapPin, Bookmark, Clock, Users, Loader2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 interface JobCardProps {
@@ -10,13 +10,14 @@ interface JobCardProps {
   onApply: (jobId: string) => void;
   onSave: (jobId: string) => void;
   isSaved?: boolean;
+  isSaving?: boolean;
 }
 
 /**
  * Job card component displaying job information
  * Shows title, company, location, salary, type, description, skills
  */
-export function JobCard({ job, onApply, onSave, isSaved = false }: JobCardProps) {
+export function JobCard({ job, onApply, onSave, isSaved = false, isSaving = false }: JobCardProps) {
   // Format salary range
   const formatSalary = () => {
     if (job.salary_min && job.salary_max) {
@@ -42,11 +43,16 @@ export function JobCard({ job, onApply, onSave, isSaved = false }: JobCardProps)
     <div className="border rounded-lg p-6 hover:shadow-lg transition-shadow bg-card relative">
       {/* Save Button */}
       <button
-        onClick={() => onSave(job.id)}
-        className="absolute top-4 right-4 text-muted-foreground hover:text-cyan-600 dark:hover:text-cyan-400"
+        onClick={() => !isSaving && onSave(job.id)}
+        disabled={isSaving}
+        className="absolute top-4 right-4 text-muted-foreground hover:text-cyan-600 dark:hover:text-cyan-400 disabled:opacity-70 disabled:pointer-events-none"
         aria-label={isSaved ? "Unsave job" : "Save job"}
       >
-        <Bookmark className={`h-5 w-5 ${isSaved ? "fill-current" : ""}`} />
+        {isSaving ? (
+          <Loader2 className="h-5 w-5 animate-spin text-cyan-600 dark:text-cyan-400" />
+        ) : (
+          <Bookmark className={`h-5 w-5 ${isSaved ? "fill-current" : ""}`} />
+        )}
       </button>
 
       {/* Job Icon & Title */}
