@@ -35,6 +35,7 @@ export default function JobsPage() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [savedJobs, setSavedJobs] = useState<Set<string>>(new Set());
   const [savedJobsCount, setSavedJobsCount] = useState(0);
+  const [jobsTab, setJobsTab] = useState<"recommended" | "all">("recommended");
 
   useEffect(() => {
     loadJobs();
@@ -242,9 +243,35 @@ export default function JobsPage() {
         </aside>
 
         {/* Main Content Area */}
-        <div className="flex-1 space-y-8">
+        <div className="flex-1 space-y-6">
+          {/* Segmented control: Recommended Jobs | All Jobs */}
+          <div className="inline-flex rounded-lg bg-[#E8E8E8] p-0.5">
+            <button
+              type="button"
+              onClick={() => setJobsTab("recommended")}
+              className={`rounded-md px-5 py-2.5 text-sm font-medium uppercase tracking-wide transition-colors ${
+                jobsTab === "recommended"
+                  ? "bg-[#5BC0DE] text-white shadow-sm"
+                  : "text-[#6B7280] hover:bg-[#DDDDDD]"
+              }`}
+            >
+              Recommended Jobs
+            </button>
+            <button
+              type="button"
+              onClick={() => setJobsTab("all")}
+              className={`rounded-md px-5 py-2.5 text-sm font-medium uppercase tracking-wide transition-colors ${
+                jobsTab === "all"
+                  ? "bg-[#5BC0DE] text-white shadow-sm"
+                  : "text-[#6B7280] hover:bg-[#DDDDDD]"
+              }`}
+            >
+              All Jobs
+            </button>
+          </div>
+
           {/* Section 1: Recommended Jobs */}
-          {recommendedJobs.length > 0 && (
+          {jobsTab === "recommended" && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -257,6 +284,12 @@ export default function JobsPage() {
               {isLoadingRecommended ? (
                 <div className="text-center py-8">
                   <div className="text-muted-foreground">Loading recommendations...</div>
+                </div>
+              ) : recommendedJobs.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="text-muted-foreground">
+                    No recommended jobs right now. Check All Jobs.
+                  </div>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -275,69 +308,71 @@ export default function JobsPage() {
           )}
 
           {/* Section 2: All Jobs */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-semibold">All Jobs</h2>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {filteredJobs.length} {filteredJobs.length === 1 ? "job" : "jobs"} found
-                </p>
+          {jobsTab === "all" && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-semibold">All Jobs</h2>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {filteredJobs.length} {filteredJobs.length === 1 ? "job" : "jobs"} found
+                  </p>
+                </div>
+                <Select
+                  value={filters.sort_by || "created_at"}
+                  onValueChange={(
+                    value: "created_at" | "title" | "location" | "view_count"
+                  ) => {
+                    setFilters({ ...filters, sort_by: value });
+                  }}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="created_at">Latest</SelectItem>
+                    <SelectItem value="title">Title</SelectItem>
+                    <SelectItem value="location">Location</SelectItem>
+                    <SelectItem value="view_count">Most Popular</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <Select
-                value={filters.sort_by || "created_at"}
-                onValueChange={(
-                  value: "created_at" | "title" | "location" | "view_count"
-                ) => {
-                  setFilters({ ...filters, sort_by: value });
-                }}
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="created_at">Latest</SelectItem>
-                  <SelectItem value="title">Title</SelectItem>
-                  <SelectItem value="location">Location</SelectItem>
-                  <SelectItem value="view_count">Most Popular</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
 
-            {/* Job Listings with infinite scroll */}
-            {isLoading && (filters.page || 1) === 1 ? (
-              <div className="text-center py-12">
-                <div className="text-muted-foreground">Loading jobs...</div>
-              </div>
-            ) : filteredJobs.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="text-muted-foreground">
-                  No jobs found. Try adjusting your filters.
+              {/* Job Listings with infinite scroll */}
+              {isLoading && (filters.page || 1) === 1 ? (
+                <div className="text-center py-12">
+                  <div className="text-muted-foreground">Loading jobs...</div>
                 </div>
-              </div>
-            ) : (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {filteredJobs.map((job) => (
-                    <JobCard
-                      key={job.id}
-                      job={job}
-                      onApply={handleApply}
-                      onSave={handleSave}
-                      isSaved={savedJobs.has(job.id)}
-                    />
-                  ))}
-                </div>
-                {hasMoreJobs && (
-                  <div
-                    ref={loadMoreTriggerRef}
-                    className="flex items-center justify-center py-6 text-sm text-muted-foreground"
-                  >
-                    {isLoadingMore ? "Loading more jobs..." : "Scroll to load more jobs"}
+              ) : filteredJobs.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="text-muted-foreground">
+                    No jobs found. Try adjusting your filters.
                   </div>
-                )}
-              </>
-            )}
-          </div>
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {filteredJobs.map((job) => (
+                      <JobCard
+                        key={job.id}
+                        job={job}
+                        onApply={handleApply}
+                        onSave={handleSave}
+                        isSaved={savedJobs.has(job.id)}
+                      />
+                    ))}
+                  </div>
+                  {hasMoreJobs && (
+                    <div
+                      ref={loadMoreTriggerRef}
+                      className="flex items-center justify-center py-6 text-sm text-muted-foreground"
+                    >
+                      {isLoadingMore ? "Loading more jobs..." : "Scroll to load more jobs"}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
