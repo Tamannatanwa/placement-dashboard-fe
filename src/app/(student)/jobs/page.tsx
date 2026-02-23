@@ -219,49 +219,46 @@ export default function JobsPage() {
   }, [hasMoreJobs, isLoading, isLoadingMore, filters.page, filters.size, totalJobs]);
 
   return (
-    <div className="space-y-6">
-      {/* Header row: title + subtitle left, profile notice right */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-        <div className="space-y-2 min-w-0">
-          <h1 className="text-3xl md:text-4xl font-bold">Jobs</h1>
-          <p className="text-muted-foreground text-lg">
+    <div className="space-y-2">
+      {/* Single row: title + search + profile (profile stretches to fill right) */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+        <div className="shrink-0 space-y-0.5">
+          <h1 className="text-2xl font-bold">Jobs</h1>
+          <p className="text-xs text-muted-foreground">
             Browse all opportunities and apply directly.
           </p>
         </div>
+        <div className="w-full min-w-0 sm:w-64 sm:flex-none">
+          <JobSearch
+            onSearch={handleSearch}
+            placeholder="Search jobs by title, company, or skills..."
+          />
+        </div>
         {profileCompleteness !== null && profileCompleteness < 100 && (
-          <div className="flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2 shrink-0">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-500/20">
-              <Info className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+          <div className="flex min-w-0 flex-1 items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2">
+            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-amber-500/20">
+              <Info className="h-3 w-3 text-amber-600 dark:text-amber-400" />
             </div>
-            <div className="min-w-0">
-              <p className="text-sm text-foreground">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-medium text-foreground leading-tight">
                 Complete your profile for more jobs & better recommendations.
               </p>
               <Link
                 href="/profile/view"
                 className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 mt-0.5"
               >
-                Complete profile
-                <ArrowRight className="h-3 w-3" />
+                Complete profile →
               </Link>
             </div>
           </div>
         )}
       </div>
 
-      {/* Search Bar */}
-      <div className="max-w-2xl">
-        <JobSearch
-          onSearch={handleSearch}
-          placeholder="Search jobs by title, company, or skills..."
-        />
-      </div>
-
-      {/* Main Content with Sidebar Filters */}
-      <div className="flex flex-col lg:flex-row gap-6">
+      {/* Filters + content: minimal gap so job list starts higher */}
+      <div className="flex flex-col gap-3 lg:flex-row lg:gap-4">
         {/* Sidebar Filters */}
-        <aside className="lg:w-64 flex-shrink-0">
-          <div className="bg-card border rounded-lg p-4 sticky top-4">
+        <aside className="lg:w-56 flex-shrink-0">
+          <div className="bg-card border rounded-lg p-3 sticky top-4">
             <JobFilters
               filters={filters}
               onFiltersChange={setFilters}
@@ -278,8 +275,8 @@ export default function JobsPage() {
           </div>
         </aside>
 
-        {/* Main Content Area */}
-        <div className="flex-1 space-y-6">
+        {/* Main Content Area - tight spacing so cards start sooner */}
+        <div className="flex-1 space-y-3 min-w-0">
           {/* Segmented control: Recommended Jobs | All Jobs */}
           <div className="inline-flex rounded-lg bg-[#E8E8E8] p-0.5">
             <button
