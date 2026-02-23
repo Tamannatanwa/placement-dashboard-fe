@@ -37,7 +37,7 @@ export default function JobsPage() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [savedJobs, setSavedJobs] = useState<Set<string>>(new Set());
   const [savedJobsCount, setSavedJobsCount] = useState(0);
-  const [jobsTab, setJobsTab] = useState<"recommended" | "all">("recommended");
+  const [jobsTab, setJobsTab] = useState<"recommended" | "all">("all");
   const [profileCompleteness, setProfileCompleteness] = useState<number | null>(null);
 
   useEffect(() => {
@@ -223,39 +223,34 @@ export default function JobsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-3xl md:text-4xl font-bold">Jobs</h1>
-        <p className="text-muted-foreground text-lg">
-          Browse all opportunities and apply directly.
-        </p>
-      </div>
-
-      {/* Profile completion notice - different design: slim info bar */}
-      {profileCompleteness !== null && profileCompleteness < 100 && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3">
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-500/20">
-              <Info className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+      {/* Header row: title + subtitle left, profile notice right */}
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div className="space-y-2 min-w-0">
+          <h1 className="text-3xl md:text-4xl font-bold">Jobs</h1>
+          <p className="text-muted-foreground text-lg">
+            Browse all opportunities and apply directly.
+          </p>
+        </div>
+        {profileCompleteness !== null && profileCompleteness < 100 && (
+          <div className="flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2 shrink-0">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-500/20">
+              <Info className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
             </div>
-            <div>
-              <p className="text-sm font-medium text-foreground">
-                Complete your profile to see more jobs and get better recommendations
+            <div className="min-w-0">
+              <p className="text-sm text-foreground">
+                Complete your profile for more jobs & better recommendations.
               </p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Recommended and personalized jobs are based on your profile completion.
-              </p>
+              <Link
+                href="/profile/view"
+                className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 mt-0.5"
+              >
+                Complete profile
+                <ArrowRight className="h-3 w-3" />
+              </Link>
             </div>
           </div>
-          <Link
-            href="/profile/view"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300"
-          >
-            Complete profile
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Search Bar */}
       <div className="max-w-2xl">
@@ -317,14 +312,14 @@ export default function JobsPage() {
           {/* Section 1: Recommended Jobs */}
           {jobsTab === "recommended" && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
+              {/* <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-2xl font-semibold">Recommended for You</h2>
                   <p className="text-sm text-muted-foreground mt-1">
                     Jobs matched to your profile
                   </p>
                 </div>
-              </div>
+              </div> */}
               {isLoadingRecommended ? (
                 <div className="text-center py-8">
                   <div className="text-muted-foreground">Loading recommendations...</div>
