@@ -13,14 +13,14 @@ import {
   Phone, 
   GraduationCap, 
   Briefcase, 
-  MapPin, 
   FileText, 
   Link as LinkIcon,
   Edit,
   Upload,
   X,
   Loader2,
-  CheckCircle2
+  CheckCircle2,
+  AlertCircle
 } from "lucide-react";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
@@ -129,7 +129,45 @@ export default function StudentProfileViewPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        {/* Header */}
+        {/* Profile Strength - at top */}
+        {profile.profile_completeness !== undefined && (
+          <Card className={`mb-6 ${profile.profile_completeness === 100 ? "border-green-500/20 bg-green-500/5" : "border-cyan-500/20 bg-cyan-500/5"}`}>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  {profile.profile_completeness === 100 ? (
+                    <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  ) : (
+                    <AlertCircle className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
+                  )}
+                  <CardTitle className="text-base">Profile Strength</CardTitle>
+                </div>
+                <span className="text-sm font-medium">{profile.profile_completeness}%</span>
+              </div>
+              <CardDescription>
+                {profile.profile_completeness === 100
+                  ? "Congratulations! Your profile is complete."
+                  : profile.profile_completeness >= 85
+                  ? "Your profile is looking great! Add skills to reach 100%"
+                  : "Complete your profile to get better job recommendations"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Progress value={profile.profile_completeness} className="h-2 mb-4" />
+              <Button
+                onClick={() => router.push("/profile/wizard")}
+                className={profile.profile_completeness === 100 
+                  ? "w-full sm:w-auto bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white"
+                  : "w-full sm:w-auto bg-cyan-600 hover:bg-cyan-700 dark:bg-cyan-500 dark:hover:bg-cyan-600 text-white"
+                }
+              >
+                {profile.profile_completeness === 100 ? "Update Profile" : "Complete Profile"}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Header
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold">My Profile</h1>
@@ -141,27 +179,7 @@ export default function StudentProfileViewPage() {
             <Edit className="h-4 w-4 mr-2" />
             Edit Profile
           </Button>
-        </div>
-
-        {/* Profile Completeness */}
-        {profile.profile_completeness !== undefined && (
-          <Card className="mb-6 border-cyan-500/20 bg-cyan-500/5">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">Profile Completeness</CardTitle>
-              <CardDescription>
-                {profile.profile_completeness >= 80
-                  ? "Your profile is complete!"
-                  : "Complete your profile to get better job recommendations"}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Progress value={profile.profile_completeness} className="h-2" />
-              <p className="text-sm text-muted-foreground mt-2">
-                {profile.profile_completeness}% complete
-              </p>
-            </CardContent>
-          </Card>
-        )}
+        </div> */}
 
         {/* Personal Information */}
         <Card className="mb-6">
@@ -226,7 +244,7 @@ export default function StudentProfileViewPage() {
         </Card>
 
         {/* Resume Section */}
-        <Card className="mb-6">
+        {/* <Card className="mb-6">
           <CardHeader>
             <div className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
@@ -342,7 +360,7 @@ export default function StudentProfileViewPage() {
               </div>
             )}
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* Additional Information */}
         {(profile as any).portfolio_url || (profile as any).skills ? (

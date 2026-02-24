@@ -68,7 +68,7 @@ export function getDashboardRoute(role: string): string {
       return "/placement/dashboard";
     case "student":
     default:
-      return "/student/dashboard";
+      return "/jobs";
   }
 }
 
