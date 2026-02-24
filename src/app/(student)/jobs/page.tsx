@@ -278,7 +278,10 @@ export default function JobsPage() {
             <div className="min-w-0">
               <p className="font-medium text-foreground">Complete your profile for better matches</p>
               <p className="text-sm text-muted-foreground mt-0.5">
-                Add your skills, experience & preferences to unlock 3x more relevant jobs
+                Add your skills, experience & preferences to unlock 3x more relevant jobs{" "}
+                <span className="font-semibold text-amber-700 dark:text-amber-400">
+                  ({profileCompleteness}% complete)
+                </span>
               </p>
             </div>
           </div>
