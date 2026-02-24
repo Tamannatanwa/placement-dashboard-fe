@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { isAuthenticated, getUserRole, getDashboardRoute } from "@/lib/utils/auth";
 import { GoogleLoginButton } from "@/components/auth/GoogleLoginButton";
+import { AnimatedBackground } from "@/components/layouts/AnimatedBackground";
 
 export default function Home() {
   const router = useRouter();
@@ -44,11 +45,17 @@ export default function Home() {
     }
   };
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background relative">
+      {/* Full-page animated background (visible across hero, features, CTA while scrolling) */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <AnimatedBackground />
+      </div>
+
+      <div className="relative z-10 flex flex-col min-h-screen">
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative flex-1 flex items-center justify-center min-h-[calc(100vh-4rem)] pt-16 overflow-hidden bg-gradient-to-b from-sky-50 via-white to-emerald-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+      <section className="relative flex-1 flex items-center justify-center min-h-[calc(100vh-4rem)] pt-16 overflow-hidden bg-gradient-to-b from-sky-50/80 via-white/90 to-emerald-50/80 dark:from-slate-950/90 dark:via-slate-900/95 dark:to-slate-950/90">
         <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.25),_transparent_55%),_radial-gradient(circle_at_bottom,_rgba(16,185,129,0.25),_transparent_55%)] dark:bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.25),_transparent_55%),_radial-gradient(circle_at_bottom,_rgba(16,185,129,0.25),_transparent_55%)]" />
 
         <div className="container mx-auto px-4 md:px-6 relative z-10">
@@ -292,6 +299,7 @@ export default function Home() {
       </section>
 
       <Footer />
+      </div>
     </div>
   );
 }
