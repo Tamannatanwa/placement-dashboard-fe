@@ -54,26 +54,26 @@ export default function Home() {
         <div className="container mx-auto px-4 md:px-6 relative z-10">
           <div className="grid gap-12 lg:grid-cols-2 items-center">
             <div className="space-y-8 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-100 text-cyan-700 text-sm font-medium border border-cyan-200 dark:bg-cyan-500/10 dark:text-cyan-300 dark:border-cyan-500/30">
+              <div className="animate-hero-in inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-100 text-cyan-700 text-sm font-medium border border-cyan-200 dark:bg-cyan-500/10 dark:text-cyan-300 dark:border-cyan-500/30" style={{ animationDelay: "0.1s", opacity: 0 }}>
                 <Sparkles className="h-4 w-4" />
                 AI-Powered Job Matching
               </div>
 
               <div className="space-y-4">
-                <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-slate-900 dark:text-white">
+                <h1 className="animate-hero-in text-4xl md:text-6xl font-bold tracking-tight text-slate-900 dark:text-white" style={{ animationDelay: "0.2s", opacity: 0 }}>
                   Find Your Dream Job{" "}
                   <span className="bg-gradient-to-r from-cyan-500 via-teal-500 to-emerald-500 bg-clip-text text-transparent">
                     Faster Than Ever
                   </span>
                 </h1>
 
-                <p className="text-lg md:text-xl text-slate-600 dark:text-slate-300 max-w-xl mx-auto lg:mx-0">
+                <p className="animate-hero-in text-lg md:text-xl text-slate-600 dark:text-slate-300 max-w-xl mx-auto lg:mx-0" style={{ animationDelay: "0.35s", opacity: 0 }}>
                   Access thousands of curated openings from verified companies, track your applications, and land your perfect role with a personalized dashboard.
                 </p>
               </div>
 
               {isLoggedIn ? (
-                <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
+                <div className="animate-hero-in flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4" style={{ animationDelay: "0.5s", opacity: 0 }}>
                   <Button
                     size="lg"
                     className="w-full sm:w-auto bg-cyan-600 hover:bg-cyan-700 dark:bg-cyan-500 dark:hover:bg-cyan-600 text-white"
@@ -95,7 +95,7 @@ export default function Home() {
                   </Button>
                 </div>
               ) : (
-                <div className="space-y-4 max-w-md mx-auto lg:mx-0 pt-2">
+                <div className="animate-hero-in space-y-4 max-w-md mx-auto lg:mx-0 pt-2" style={{ animationDelay: "0.5s", opacity: 0 }}>
                   <div className="rounded-2xl border border-cyan-100 bg-white/80 dark:border-slate-700 dark:bg-slate-900/80 shadow-xl p-4 sm:p-5 space-y-3">
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 rounded-xl bg-cyan-100 flex items-center justify-center dark:bg-cyan-500/20">
@@ -119,7 +119,7 @@ export default function Home() {
             </div>
 
             <div className="relative">
-              <div className="relative rounded-3xl border border-cyan-100 bg-white/80 shadow-2xl p-8 space-y-6 dark:border-slate-700 dark:bg-slate-900/80">
+              <div className="animate-hero-card relative rounded-3xl border border-cyan-100 bg-white/80 shadow-2xl p-8 space-y-6 dark:border-slate-700 dark:bg-slate-900/80" style={{ animationDelay: "0.25s", opacity: 0 }}>
                 <div className="flex justify-center lg:justify-start">
                   <div className="h-20 w-20 rounded-2xl bg-cyan-100 flex items-center justify-center dark:bg-cyan-500/20">
                     <Briefcase className="h-10 w-10 text-cyan-600 dark:text-cyan-300" />
