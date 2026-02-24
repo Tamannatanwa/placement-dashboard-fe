@@ -201,17 +201,35 @@ export default function JobsPage() {
     }
   };
 
-  const filteredJobs = useMemo(() => {
-    if (!searchQuery.trim()) return jobs;
-    return jobs.filter(
-      (job) =>
-        job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        job.company_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        job.skills_required?.some((skill) =>
-          skill.toLowerCase().includes(searchQuery.toLowerCase())
-        )
+  const matchesSearch = (job: Job, query: string) => {
+    if (!query.trim()) return true;
+    const q = query.toLowerCase();
+    return (
+      job.title.toLowerCase().includes(q) ||
+      job.company_name?.toLowerCase().includes(q) ||
+      job.skills_required?.some((skill) => skill.toLowerCase().includes(q))
     );
+  };
+
+  // All Jobs: backend already applies filters; only client-side search here
+  const filteredJobs = useMemo(() => {
+    return jobs.filter((job) => matchesSearch(job, searchQuery));
   }, [jobs, searchQuery]);
+
+  // Recommended: client-side search + same filter logic as All Jobs (employment_type, work_type, location, is_fresher)
+  const matchesFilters = (job: Job) => {
+    if (filters.employment_type && job.employment_type !== filters.employment_type) return false;
+    if (filters.work_type && job.work_type !== filters.work_type) return false;
+    if (filters.location && !job.location?.toLowerCase().includes(filters.location.toLowerCase())) return false;
+    if (filters.is_fresher !== undefined && job.is_fresher !== filters.is_fresher) return false;
+    return true;
+  };
+
+  const filteredRecommendedJobs = useMemo(() => {
+    return recommendedJobs.filter(
+      (job) => matchesSearch(job, searchQuery) && matchesFilters(job)
+    );
+  }, [recommendedJobs, searchQuery, filters.employment_type, filters.work_type, filters.location, filters.is_fresher]);
 
   const pageSize = filters.size || 20;
   // Show "Load more" when: API says more exist, OR we have a full page (might be more); hide only after a load returned 0 items
@@ -326,9 +344,8 @@ export default function JobsPage() {
                 All Jobs
               </button>
             </div>
-            {/* Active filter chips */}
-            {jobsTab === "all" &&
-              activeFilterChips.map(({ key, label }) => (
+            {/* Active filter chips (both tabs) */}
+            {activeFilterChips.map(({ key, label }) => (
                 <button
                   key={key}
                   type="button"
@@ -349,9 +366,9 @@ export default function JobsPage() {
                   <h2 className="text-lg font-semibold">Recommended</h2>
                   <p className="text-sm text-muted-foreground mt-0.5">
                     {!isLoadingRecommended && totalRecommended > 0
-                      ? `${recommendedJobs.length} of ${totalRecommended} recommended jobs`
-                      : recommendedJobs.length > 0
-                        ? `${recommendedJobs.length} results`
+                      ? `${filteredRecommendedJobs.length} of ${totalRecommended} recommended jobs`
+                      : filteredRecommendedJobs.length > 0
+                        ? `${filteredRecommendedJobs.length} results`
                         : "Jobs matched to your profile"}
                   </p>
                 </div>
@@ -360,16 +377,18 @@ export default function JobsPage() {
                 <div className="text-center py-8">
                   <div className="text-muted-foreground">Loading recommendations...</div>
                 </div>
-              ) : recommendedJobs.length === 0 ? (
+              ) : filteredRecommendedJobs.length === 0 ? (
                 <div className="text-center py-12">
                   <div className="text-muted-foreground">
-                    No recommended jobs right now. Check All Jobs.
+                    {recommendedJobs.length === 0
+                      ? "No recommended jobs right now. Check All Jobs."
+                      : "No recommended jobs match your filters. Try adjusting filters."}
                   </div>
                 </div>
               ) : (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {recommendedJobs.map((job) => (
+                    {filteredRecommendedJobs.map((job) => (
                       <JobCard
                         key={job.id}
                         job={job}
