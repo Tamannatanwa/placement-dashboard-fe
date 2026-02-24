@@ -42,12 +42,17 @@ export default function JobsPage() {
   const [jobsTab, setJobsTab] = useState<"recommended" | "all">("all");
   const [profileCompleteness, setProfileCompleteness] = useState<number | null>(null);
   const [noMore, setNoMore] = useState(false);
+  const [totalRecommended, setTotalRecommended] = useState(0);
+  const [isLoadingMoreRecommended, setIsLoadingMoreRecommended] = useState(false);
 
   useEffect(() => {
     loadJobs();
-    loadRecommendedJobs();
     loadSavedJobs();
   }, [filters]);
+
+  useEffect(() => {
+    loadRecommendedJobs(0);
+  }, []);
 
   useEffect(() => {
     loadProfileCompleteness();
@@ -107,19 +112,29 @@ export default function JobsPage() {
     }
   };
 
-  // Load recommended jobs from API
-  const loadRecommendedJobs = async () => {
-    setIsLoadingRecommended(true);
+  const RECOMMENDED_PAGE_SIZE = 20;
+
+  // Load recommended jobs from API (offset 0 = initial, else append)
+  const loadRecommendedJobs = async (offset: number) => {
+    const isInitial = offset === 0;
+    if (isInitial) setIsLoadingRecommended(true);
+    else setIsLoadingMoreRecommended(true);
     try {
-      const response = await studentsApi.getRecommendedJobs(10, 0);
+      const response = await studentsApi.getRecommendedJobs(RECOMMENDED_PAGE_SIZE, offset);
       const jobs = response.recommendations.map((rec) => rec.job);
-      setRecommendedJobs(jobs);
+      setTotalRecommended(response.total);
+      setRecommendedJobs((prev) => (isInitial ? jobs : [...prev, ...jobs]));
     } catch (error: any) {
       console.error("Error loading recommended jobs:", error);
-      // Silently fail - recommendations are optional
     } finally {
-      setIsLoadingRecommended(false);
+      if (isInitial) setIsLoadingRecommended(false);
+      else setIsLoadingMoreRecommended(false);
     }
+  };
+
+  const loadMoreRecommended = () => {
+    if (isLoadingMoreRecommended || recommendedJobs.length >= totalRecommended) return;
+    loadRecommendedJobs(recommendedJobs.length);
   };
 
   // Load saved jobs from API
@@ -316,14 +331,18 @@ export default function JobsPage() {
           {/* Section 1: Recommended Jobs */}
           {jobsTab === "recommended" && (
             <div className="space-y-4">
-              {/* <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-semibold">Recommended for You</h2>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Jobs matched to your profile
+                  <h2 className="text-lg font-semibold">Recommended</h2>
+                  <p className="text-sm text-muted-foreground mt-0.5">
+                    {!isLoadingRecommended && totalRecommended > 0
+                      ? `${recommendedJobs.length} of ${totalRecommended} recommended jobs`
+                      : recommendedJobs.length > 0
+                        ? `${recommendedJobs.length} results`
+                        : "Jobs matched to your profile"}
                   </p>
                 </div>
-              </div> */}
+              </div>
               {isLoadingRecommended ? (
                 <div className="text-center py-8">
                   <div className="text-muted-foreground">Loading recommendations...</div>
@@ -335,18 +354,31 @@ export default function JobsPage() {
                   </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {recommendedJobs.map((job) => (
-                    <JobCard
-                      key={job.id}
-                      job={job}
-                      onApply={handleApply}
-                      onSave={handleSave}
-                      isSaved={savedJobs.has(job.id)}
-                      isSaving={savingJobId === job.id}
-                    />
-                  ))}
-                </div>
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {recommendedJobs.map((job) => (
+                      <JobCard
+                        key={job.id}
+                        job={job}
+                        onApply={handleApply}
+                        onSave={handleSave}
+                        isSaved={savedJobs.has(job.id)}
+                        isSaving={savingJobId === job.id}
+                      />
+                    ))}
+                  </div>
+                  {recommendedJobs.length < totalRecommended && (
+                    <div className="flex justify-center py-6">
+                      <Button
+                        variant="outline"
+                        onClick={loadMoreRecommended}
+                        disabled={isLoadingMoreRecommended}
+                      >
+                        {isLoadingMoreRecommended ? "Loading more..." : "Load more jobs"}
+                      </Button>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )}
