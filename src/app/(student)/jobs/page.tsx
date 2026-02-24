@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { JobSearch } from "@/components/jobs/JobSearch";
 import { JobFilters } from "@/components/jobs/JobFilters";
@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Zap } from "lucide-react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function JobsPage() {
   const router = useRouter();
@@ -40,6 +41,7 @@ export default function JobsPage() {
   const [savingJobId, setSavingJobId] = useState<string | null>(null);
   const [jobsTab, setJobsTab] = useState<"recommended" | "all">("all");
   const [profileCompleteness, setProfileCompleteness] = useState<number | null>(null);
+  const [noMore, setNoMore] = useState(false);
 
   useEffect(() => {
     loadJobs();
@@ -74,6 +76,13 @@ export default function JobsPage() {
 
     try {
       const response = await jobsApi.getJobs(filters);
+
+      if (isFirstPage) {
+        setNoMore(false);
+      }
+      if (!isFirstPage && response.items.length === 0) {
+        setNoMore(true);
+      }
 
       setJobs((prevJobs) => {
         if (isFirstPage) {
@@ -176,47 +185,17 @@ export default function JobsPage() {
     );
   }, [jobs, searchQuery]);
 
-  const hasMoreJobs = jobs.length < totalJobs;
-  const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
+  const pageSize = filters.size || 20;
+  // Show "Load more" when: API says more exist, OR we have a full page (might be more); hide only after a load returned 0 items
+  const hasMoreJobs = !noMore && (jobs.length < totalJobs || jobs.length >= pageSize);
 
-  // Infinite scroll: load next page when the sentinel div becomes visible
-  useEffect(() => {
-    if (!hasMoreJobs) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const firstEntry = entries[0];
-        if (
-          firstEntry.isIntersecting &&
-          !isLoading &&
-          !isLoadingMore &&
-          (filters.page || 1) * (filters.size || 20) < totalJobs
-        ) {
-          setFilters((prev) => ({
-            ...prev,
-            page: (prev.page || 1) + 1,
-          }));
-        }
-      },
-      {
-        root: null,
-        rootMargin: "200px",
-        threshold: 0.1,
-      }
-    );
-
-    const current = loadMoreTriggerRef.current;
-    if (current) {
-      observer.observe(current);
-    }
-
-    return () => {
-      if (current) {
-        observer.unobserve(current);
-      }
-      observer.disconnect();
-    };
-  }, [hasMoreJobs, isLoading, isLoadingMore, filters.page, filters.size, totalJobs]);
+  const loadMore = () => {
+    if (!hasMoreJobs || isLoadingMore) return;
+    setFilters((prev) => ({
+      ...prev,
+      page: (prev.page || 1) + 1,
+    }));
+  };
 
   // Active filter labels for chips
   const activeFilterChips = useMemo(() => {
@@ -428,11 +407,14 @@ export default function JobsPage() {
                     ))}
                   </div>
                   {hasMoreJobs && (
-                    <div
-                      ref={loadMoreTriggerRef}
-                      className="flex items-center justify-center py-6 text-sm text-muted-foreground"
-                    >
-                      {isLoadingMore ? "Loading more jobs..." : "Scroll to load more jobs"}
+                    <div className="flex justify-center py-6">
+                      <Button
+                        variant="outline"
+                        onClick={loadMore}
+                        disabled={isLoadingMore}
+                      >
+                        {isLoadingMore ? "Loading more..." : "Load more jobs"}
+                      </Button>
                     </div>
                   )}
                 </>
