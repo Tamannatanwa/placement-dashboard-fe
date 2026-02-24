@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Bookmark, Briefcase, MapPin, Clock, Users, Trash2, Loader2 } from "lucide-react";
+import { Bookmark, Briefcase, MapPin, Clock, Users, Trash2, Loader2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +12,6 @@ import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -26,6 +25,7 @@ export default function SavedJobsPage() {
   const [savedJobs, setSavedJobs] = useState<SavedJob[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState<SavedJob | null>(null);
 
   useEffect(() => {
     loadSavedJobs();
@@ -49,6 +49,7 @@ export default function SavedJobsPage() {
     try {
       await savedJobsApi.removeSavedJob(savedJobId);
       setSavedJobs((prev) => prev.filter((sj) => sj.id !== savedJobId));
+      setDeleteConfirmOpen(null);
       toast.success("Job removed from saved");
     } catch (error: any) {
       toast.error(error.response?.data?.detail || error.response?.data?.message || "Failed to unsave job");
@@ -132,7 +133,10 @@ export default function SavedJobsPage() {
                             <p className="text-muted-foreground text-sm">{job.company_name}</p>
                           </div>
                         </div>
-                        <Dialog>
+                        <Dialog
+                          open={deleteConfirmOpen?.id === savedJob.id}
+                          onOpenChange={(open) => !deletingId && (open ? setDeleteConfirmOpen(savedJob) : setDeleteConfirmOpen(null))}
+                        >
                           <DialogTrigger asChild>
                             <Button
                               variant="ghost"
@@ -143,23 +147,45 @@ export default function SavedJobsPage() {
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Remove saved job?</DialogTitle>
-                              <DialogDescription>
-                                Are you sure you want to remove this job from your saved list? You can always save it again later.
+                          <DialogContent
+                            className="sm:max-w-md border-border/80 shadow-xl"
+                            onPointerDownOutside={(e) => deletingId && e.preventDefault()}
+                            onEscapeKeyDown={(e) => deletingId && e.preventDefault()}
+                          >
+                            <DialogHeader className="space-y-4 sm:text-left">
+                              <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-500/10">
+                                  <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
+                                </div>
+                                <DialogTitle className="text-xl">Remove saved job?</DialogTitle>
+                              </div>
+                              <DialogDescription className="text-base text-muted-foreground">
+                                Are you sure you want to remove <span className="font-medium text-foreground">&quot;{job.title}&quot;</span> from your saved list? You can save it again later from the job page.
                               </DialogDescription>
                             </DialogHeader>
-                            <DialogFooter>
-                              <DialogClose asChild>
-                                <Button variant="outline">Cancel</Button>
-                              </DialogClose>
-                              <DialogClose
-                                onClick={() => handleUnsave(savedJob.id, job.id)}
-                                className="bg-red-600 hover:bg-red-700 text-white"
+                            <DialogFooter className="gap-2 sm:gap-0 pt-2">
+                              <Button
+                                variant="outline"
+                                disabled={!!deletingId}
+                                onClick={() => setDeleteConfirmOpen(null)}
                               >
-                                Remove
-                              </DialogClose>
+                                Cancel
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                className="bg-red-600 hover:bg-red-700 text-white min-w-[100px]"
+                                disabled={!!deletingId}
+                                onClick={() => deleteConfirmOpen?.id === savedJob.id && handleUnsave(savedJob.id, job.id)}
+                              >
+                                {deletingId === savedJob.id ? (
+                                  <>
+                                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                    Removing...
+                                  </>
+                                ) : (
+                                  "Remove"
+                                )}
+                              </Button>
                             </DialogFooter>
                           </DialogContent>
                         </Dialog>
