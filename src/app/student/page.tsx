@@ -7,14 +7,13 @@ export default function StudentPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Redirect to student dashboard
-    router.replace("/student/dashboard");
+    router.replace("/jobs");
   }, [router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center">
-        <p className="text-muted-foreground">Redirecting to dashboard...</p>
+        <p className="text-muted-foreground">Redirecting...</p>
       </div>
     </div>
   );

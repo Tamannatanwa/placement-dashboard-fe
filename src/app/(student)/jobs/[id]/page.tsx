@@ -52,7 +52,7 @@ export default function JobDetailPage() {
   // Clean up common garbage characters around apply links so they don't break
   // e.g. `"https://example.com/**"` -> `https://example.com/`
   const sanitizeApplyLink = (raw?: string | null): string | null => {
-    if (!raw) return null;
+    if (!raw || typeof raw !== "string") return null;
 
     let url = raw.trim();
     if (!url) return null;
@@ -69,11 +69,20 @@ export default function JobDetailPage() {
     return url || null;
   };
 
-  const handleApply = () => {
-    const sanitized = sanitizeApplyLink(job?.source_url);
+  // Prefer source_url; fallback to source if it looks like a URL (backend may use either)
+  const getApplyUrl = (): string | null => {
+    const fromSourceUrl = sanitizeApplyLink(job?.source_url);
+    if (fromSourceUrl) return fromSourceUrl;
+    const fromSource = sanitizeApplyLink((job as any)?.source);
+    if (fromSource && /^https?:\/\//i.test(fromSource)) return fromSource;
+    return null;
+  };
 
-    if (sanitized) {
-      window.open(sanitized, "_blank");
+  const handleApply = () => {
+    const applyUrl = getApplyUrl();
+
+    if (applyUrl) {
+      window.open(applyUrl, "_blank");
     } else {
       toast.info("Application link not available");
     }
@@ -131,7 +140,7 @@ export default function JobDetailPage() {
     return type.charAt(0).toUpperCase() + type.slice(1);
   };
 
-  const sanitizedSourceUrl = sanitizeApplyLink(job.source_url);
+  const sanitizedSourceUrl = getApplyUrl();
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -209,24 +218,30 @@ export default function JobDetailPage() {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-3">
-            <Button
-              onClick={() => handleApply()}
-              className="bg-cyan-600 hover:bg-cyan-700 dark:bg-cyan-500 dark:hover:bg-cyan-600 text-white"
-              size="lg"
-            >
-              Apply Now
-              <ExternalLink className="h-4 w-4 ml-2" />
-            </Button>
-            {sanitizedSourceUrl && (
-              <Button
-                variant="outline"
-                onClick={() => window.open(sanitizedSourceUrl, "_blank")}
-                size="lg"
-              >
-                View Original Posting
-                <ExternalLink className="h-4 w-4 ml-2" />
-              </Button>
+          <div className="flex flex-wrap items-center gap-3">
+            {sanitizedSourceUrl ? (
+              <>
+                <Button
+                  onClick={() => handleApply()}
+                  className="bg-cyan-600 hover:bg-cyan-700 dark:bg-cyan-500 dark:hover:bg-cyan-600 text-white"
+                  size="lg"
+                >
+                  Apply Now
+                  <ExternalLink className="h-4 w-4 ml-2" />
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => window.open(sanitizedSourceUrl, "_blank")}
+                  size="lg"
+                >
+                  View Original Posting
+                  <ExternalLink className="h-4 w-4 ml-2" />
+                </Button>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Application link not available for this job. The employer may not have provided one.
+              </p>
             )}
           </div>
         </div>

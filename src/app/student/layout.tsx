@@ -4,12 +4,10 @@ import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  LayoutDashboard,
   Briefcase,
   Bookmark,
   UserCircle,
   LogOut,
-  Settings,
   Bell,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,10 +27,9 @@ import { ClientOnly } from "@/components/ui/ClientOnly";
 import { PrivateRoute } from "@/components/auth/PrivateRoute";
 
 const navigation = [
-  { name: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
   { name: "Jobs", href: "/jobs", icon: Briefcase },
   { name: "Saved Jobs", href: "/jobs/saved", icon: Bookmark },
-  { name: "Profile", href: "/profile/wizard", icon: UserCircle },
+  { name: "Profile", href: "/profile/view", icon: UserCircle },
 ];
 
 export default function StudentLayout({
@@ -74,7 +71,7 @@ export default function StudentLayout({
         <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="flex items-center justify-between px-4 py-4">
             {/* Logo */}
-            <Link href="/student/dashboard" className="flex items-center gap-2">
+            <Link href="/jobs" className="flex items-center gap-2">
               <Briefcase className="h-6 w-6 text-cyan-500 dark:text-cyan-400" />
               <span className="font-bold text-xl">PlaceHub</span>
             </Link>
@@ -138,11 +135,6 @@ export default function StudentLayout({
                         </p>
                       </div>
                     </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => router.push("/student/settings")}>
-                      <Settings className="mr-2 h-4 w-4" />
-                      <span>Settings</span>
-                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={handleLogout}

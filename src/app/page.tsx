@@ -29,12 +29,11 @@ export default function Home() {
         // User is logged in, redirect to their dashboard
         router.push(getDashboardRoute(role));
       } else {
-        // No role, redirect to student dashboard by default
-        router.push("/student/dashboard");
+        // No role, redirect to jobs by default
+        router.push("/jobs");
       }
     } else {
-      // Not logged in, still allow access to student dashboard
-      router.push("/student/dashboard");
+      router.push("/login");
     }
   };
   return (

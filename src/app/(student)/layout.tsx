@@ -8,7 +8,6 @@ import {
   Bookmark,
   UserCircle,
   LogOut,
-  Settings,
   Bell,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -136,11 +135,6 @@ export default function StudentLayout({
                         </p>
                       </div>
                     </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => router.push("/student/settings")}>
-                      <Settings className="mr-2 h-4 w-4" />
-                      <span>Settings</span>
-                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={handleLogout}

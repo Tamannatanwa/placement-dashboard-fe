@@ -384,7 +384,7 @@ export function ProfileWizard({
           setTimeout(() => {
             const role = userRole || "student";
             if (role === "student") {
-              router.push("/student/dashboard");
+              router.push("/jobs");
             } else if (role === "admin") {
               router.push("/admin/dashboard");
             } else {
