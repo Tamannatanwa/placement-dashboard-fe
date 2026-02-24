@@ -44,6 +44,7 @@ export default function JobsPage() {
   const [noMore, setNoMore] = useState(false);
   const [totalRecommended, setTotalRecommended] = useState(0);
   const [isLoadingMoreRecommended, setIsLoadingMoreRecommended] = useState(false);
+  const [dashboardTotalJobs, setDashboardTotalJobs] = useState<number | null>(null);
 
   useEffect(() => {
     loadJobs();
@@ -56,6 +57,18 @@ export default function JobsPage() {
 
   useEffect(() => {
     loadProfileCompleteness();
+  }, []);
+
+  useEffect(() => {
+    const loadDashboard = async () => {
+      try {
+        const dashboard = await studentsApi.getDashboard();
+        if (dashboard.stats?.total_jobs != null) setDashboardTotalJobs(dashboard.stats.total_jobs);
+      } catch {
+        // Silently fail - All Jobs count will fall back to jobs API total
+      }
+    };
+    loadDashboard();
   }, []);
 
   const loadProfileCompleteness = async () => {
@@ -390,7 +403,7 @@ export default function JobsPage() {
                 <div>
                   <h2 className="text-lg font-semibold">All Jobs</h2>
                   <p className="text-sm text-muted-foreground mt-0.5">
-                    {filteredJobs.length} results
+                    {jobs.length} of {dashboardTotalJobs ?? totalJobs} jobs
                   </p>
                 </div>
                 <Select

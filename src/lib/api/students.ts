@@ -4,6 +4,7 @@ import { StudentProfile } from "@/types/student-profile";
 
 // Dashboard stats structure (can be extended based on actual API response)
 export interface DashboardStats {
+  total_jobs?: number;
   [key: string]: any;
 }
 
