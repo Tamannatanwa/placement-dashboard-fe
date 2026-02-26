@@ -20,46 +20,61 @@ export function Footer() {
             <h3 className="font-semibold">Product</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                <Link href="#features" className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">
+                <Link
+                  href="#features"
+                  className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
+                >
                   Features
                 </Link>
               </li>
               <li>
-                <Link href="#how-it-works" className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">
-                  How it Works
+                <Link
+                  href="/jobs"
+                  className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
+                >
+                  Browse Jobs
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/jobs/saved"
+                  className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
+                >
+                  Saved Jobs
                 </Link>
               </li>
             </ul>
           </div>
 
           <div className="space-y-3">
-            <h3 className="font-semibold">Company</h3>
+            <h3 className="font-semibold">For Students</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                <Link href="/about" className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">
-                  About
+                <Link
+                  href="/profile/view"
+                  className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
+                >
+                  Profile
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">
-                  Contact
+                <Link
+                  href="/profile/wizard"
+                  className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
+                >
+                  Complete Profile
                 </Link>
               </li>
             </ul>
           </div>
 
           <div className="space-y-3">
-            <h3 className="font-semibold">Legal</h3>
+            <h3 className="font-semibold">For Placement Team</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                <Link href="/privacy" className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="/terms" className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">
-                  Terms of Service
-                </Link>
+                <span className="text-muted-foreground">
+                  Admin dashboards and resume review tools are available to authorized placement admins.
+                </span>
               </li>
             </ul>
           </div>

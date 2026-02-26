@@ -130,14 +130,14 @@ export default function Home() {
         <div className="container mx-auto px-4 md:px-6">
           <div className="text-center space-y-4 mb-16">
             <div className="text-sm uppercase tracking-wider text-cyan-600 dark:text-cyan-400 font-semibold">
-              Features
+              What&apos;s inside the portal
             </div>
             <h2 className="text-4xl md:text-5xl font-bold">
-              Everything You Need to Land Your{" "}
-              <span className="text-cyan-600 dark:text-cyan-400">Dream Job</span>
+              Practical tools to help with{" "}
+              <span className="text-cyan-600 dark:text-cyan-400">your placements</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Our platform combines cutting-edge technology with human expertise to maximize your chances of success.
+              Everything below already exists in the app today and is focused on helping you discover, shortlist, and apply to real openings.
             </p>
           </div>
           
@@ -146,9 +146,9 @@ export default function Home() {
               <div className="h-12 w-12 rounded-lg bg-cyan-500/10 dark:bg-cyan-400/10 flex items-center justify-center border border-cyan-500/20 dark:border-cyan-400/20">
                 <Zap className="h-6 w-6 text-cyan-600 dark:text-cyan-400" />
               </div>
-              <h3 className="text-xl font-semibold">Real-Time Updates</h3>
+              <h3 className="text-xl font-semibold">Curated Job Feed</h3>
               <p className="text-muted-foreground">
-                Jobs aggregated from Telegram channels and top platforms, updated every few minutes.
+                Jobs pulled from selected Telegram channels and job platforms into one clean list, updated regularly.
               </p>
             </div>
 
@@ -156,9 +156,9 @@ export default function Home() {
               <div className="h-12 w-12 rounded-lg bg-cyan-500/10 dark:bg-cyan-400/10 flex items-center justify-center border border-cyan-500/20 dark:border-cyan-400/20">
                 <Bell className="h-6 w-6 text-cyan-600 dark:text-cyan-400" />
               </div>
-              <h3 className="text-xl font-semibold">Instant Alerts</h3>
+              <h3 className="text-xl font-semibold">Recommended Jobs</h3>
               <p className="text-muted-foreground">
-                Get notified immediately when a job matching your profile is posted.
+                We recommend jobs based on your profile and preferences so you see the most relevant roles first.
               </p>
             </div>
 
@@ -166,9 +166,9 @@ export default function Home() {
               <div className="h-12 w-12 rounded-lg bg-cyan-500/10 dark:bg-cyan-400/10 flex items-center justify-center border border-cyan-500/20 dark:border-cyan-400/20">
                 <Shield className="h-6 w-6 text-cyan-600 dark:text-cyan-400" />
               </div>
-              <h3 className="text-xl font-semibold">Verified Companies</h3>
+              <h3 className="text-xl font-semibold">Saved Jobs in One Place</h3>
               <p className="text-muted-foreground">
-                Every company is verified to ensure you&apos;re applying to legitimate opportunities.
+                Shortlist interesting roles and access them later from your Saved Jobs page.
               </p>
             </div>
 
@@ -176,9 +176,9 @@ export default function Home() {
               <div className="h-12 w-12 rounded-lg bg-cyan-500/10 dark:bg-cyan-400/10 flex items-center justify-center border border-cyan-500/20 dark:border-cyan-400/20">
                 <TrendingUp className="h-6 w-6 text-cyan-600 dark:text-cyan-400" />
               </div>
-              <h3 className="text-xl font-semibold">Application Tracking</h3>
+              <h3 className="text-xl font-semibold">Smart Search & Filters</h3>
               <p className="text-muted-foreground">
-                Track all your applications in one place with status updates and analytics.
+                Filter by location, work type, experience level, and more to quickly narrow down the list of jobs.
               </p>
             </div>
 
@@ -186,9 +186,9 @@ export default function Home() {
               <div className="h-12 w-12 rounded-lg bg-cyan-500/10 dark:bg-cyan-400/10 flex items-center justify-center border border-cyan-500/20 dark:border-cyan-400/20">
                 <UserCircle className="h-6 w-6 text-cyan-600 dark:text-cyan-400" />
               </div>
-              <h3 className="text-xl font-semibold">Placement Support</h3>
+              <h3 className="text-xl font-semibold">Profile-Based Experience</h3>
               <p className="text-muted-foreground">
-                Dedicated placement team to guide you through the interview process.
+                A guided profile setup helps capture your skills, education, and preferences so recommendations improve over time.
               </p>
             </div>
 
@@ -196,9 +196,9 @@ export default function Home() {
               <div className="h-12 w-12 rounded-lg bg-cyan-500/10 dark:bg-cyan-400/10 flex items-center justify-center border border-cyan-500/20 dark:border-cyan-400/20">
                 <Sparkles className="h-6 w-6 text-cyan-600 dark:text-cyan-400" />
               </div>
-              <h3 className="text-xl font-semibold">AI-Powered Matching</h3>
+              <h3 className="text-xl font-semibold">Placement Team Tools</h3>
               <p className="text-muted-foreground">
-                Our intelligent algorithm matches you with jobs that align with your skills and career goals.
+                Placement admins get dashboards and utilities to monitor postings, review resumes, and manage student access on the same portal.
               </p>
             </div>
           </div>
