@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Briefcase,
   Bookmark,
@@ -72,8 +73,18 @@ export default function StudentLayout({
           <div className="flex items-center justify-between px-4 py-4">
             {/* Logo */}
             <Link href="/jobs" className="flex items-center gap-2">
-              <Briefcase className="h-6 w-6 text-cyan-500 dark:text-cyan-400" />
-              <span className="font-bold text-xl">PlaceHub</span>
+              <Image
+                src="/navgurukul-logo.png"
+                alt="NavGurukul"
+                width={32}
+                height={32}
+                className="h-8 w-auto"
+                priority
+              />
+              <div className="hidden sm:flex flex-col leading-tight">
+                <span className="text-sm font-semibold">NavGurukul</span>
+                <span className="text-sm font-bold">Placement automation</span>
+              </div>
             </Link>
 
             {/* Navigation Tabs - Center */}

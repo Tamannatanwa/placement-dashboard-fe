@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Briefcase, LogOut, User, Settings } from "lucide-react";
+import { LogOut, User, Settings } from "lucide-react";
 import { isAuthenticated, getUserInfo, getUserRole } from "@/lib/utils/auth";
 import { authApi } from "@/lib/api/auth";
 import { toast } from "sonner";
@@ -60,8 +61,18 @@ export function Navbar() {
     <nav className="fixed top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
         <Link href="/" className="flex items-center gap-2 font-bold text-xl">
-          <Briefcase className="h-6 w-6 text-cyan-500 dark:text-cyan-400" />
-          <span>PlaceHub</span>
+          <Image
+            src="/navgurukul-logo.png"
+            alt="NavGurukul"
+            width={32}
+            height={32}
+            className="h-8 w-auto"
+            priority
+          />
+          <div className="hidden sm:flex flex-col leading-tight">
+            <span className="text-sm font-semibold">NavGurukul</span>
+            <span className="text-sm font-bold">Placement automation</span>
+          </div>
         </Link>
         
         <div className="hidden md:flex items-center gap-6">

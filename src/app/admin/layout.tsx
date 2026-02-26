@@ -95,7 +95,7 @@ export default function AdminLayout({
           <div className="flex items-center justify-between p-6 border-b">
             <Link href="/admin/dashboard" className="flex items-center gap-2">
               <Shield className="h-6 w-6 text-cyan-500 dark:text-cyan-400" />
-              <span className="font-bold text-xl">PlaceHub Admin</span>
+              <span className="font-bold text-xl">Placement automation Admin</span>
             </Link>
             <Button
               variant="ghost"
