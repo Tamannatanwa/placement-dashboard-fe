@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Briefcase } from "lucide-react";
+import Image from "next/image";
 
 export function Footer() {
   return (
@@ -8,11 +8,20 @@ export function Footer() {
         <div className="grid gap-8 md:grid-cols-4">
           <div className="space-y-3">
             <Link href="/" className="flex items-center gap-2 font-bold text-lg">
-              <Briefcase className="h-5 w-5 text-cyan-500 dark:text-cyan-400" />
-              <span>PlaceHub</span>
+              <Image
+                src="/navgurukul-logo.png"
+                alt="NavGurukul"
+                width={32}
+                height={32}
+                className="h-8 w-auto"
+              />
+              <div className="hidden sm:flex flex-col leading-tight">
+                <span className="text-sm font-semibold">NavGurukul</span>
+                <span className="text-sm font-bold">Placement automation</span>
+              </div>
             </Link>
             <p className="text-sm text-muted-foreground">
-              Your dream job, just a click away. Powered by AI & Real-time Data.
+              Placement portal built for NavGurukul learners and alumni.
             </p>
           </div>
 
@@ -81,7 +90,7 @@ export function Footer() {
         </div>
 
         <div className="mt-8 border-t pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} PlaceHub. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Placement automation. All rights reserved.</p>
         </div>
       </div>
     </footer>

@@ -229,14 +229,14 @@ export default function JobDetailPage() {
                   Apply Now
                   <ExternalLink className="h-4 w-4 ml-2" />
                 </Button>
-                <Button
+                {/* <Button
                   variant="outline"
                   onClick={() => window.open(sanitizedSourceUrl, "_blank")}
                   size="lg"
                 >
                   View Original Posting
                   <ExternalLink className="h-4 w-4 ml-2" />
-                </Button>
+                </Button> */}
               </>
             ) : (
               <p className="text-sm text-muted-foreground">

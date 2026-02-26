@@ -15,8 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PlaceHub - Your Dream Job, Just a Click Away",
-  description: "Connect with top companies, track your applications in real-time, and land your perfect job with AI-powered matching.",
+  title: "Placement automation - NavGurukul Placement Portal",
+  description:
+    "Placement automation is NavGurukul's placement portal to discover opportunities, track applications, and manage placements for learners and alumni.",
 };
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
