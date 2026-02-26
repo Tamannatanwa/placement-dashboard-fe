@@ -78,6 +78,41 @@ export default function JobDetailPage() {
     return null;
   };
 
+  const cleanJobDescription = (raw?: string | null): string | null => {
+    if (!raw || typeof raw !== "string") return null;
+
+    const lines = raw.split(/\r?\n/);
+
+    const filteredLines = lines.filter((line) => {
+      const trimmed = line.trim();
+      if (!trimmed) return false;
+
+      const lower = trimmed.toLowerCase();
+
+      if (
+        lower.includes("apply now") ||
+        lower.includes("apply here") ||
+        lower.includes("click here") ||
+        lower.includes("follow on") ||
+        lower.includes("register here")
+      ) {
+        return false;
+      }
+
+      if (/^\*{2,}$/.test(trimmed)) return false;
+
+      if (/https?:\/\//i.test(trimmed)) {
+        const withoutUrls = trimmed.replace(/https?:\/\/\S+/gi, "").trim();
+        if (!withoutUrls) return false;
+      }
+
+      return true;
+    });
+
+    const result = filteredLines.join("\n").trim();
+    return result || null;
+  };
+
   const handleApply = () => {
     const applyUrl = getApplyUrl();
 
@@ -141,9 +176,10 @@ export default function JobDetailPage() {
   };
 
   const sanitizedSourceUrl = getApplyUrl();
+  const cleanedDescription = cleanJobDescription(job.description);
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6 py-4">
         {/* Back Button */}
         <Button
           variant="ghost"
@@ -247,99 +283,102 @@ export default function JobDetailPage() {
         </div>
 
         {/* Job Details */}
-        <div className="space-y-6">
-          {/* Description */}
-          {job.description && (
-            <div className="bg-card border rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Job Description</h2>
-              <div className="prose prose-sm dark:prose-invert max-w-none">
-                <p className="whitespace-pre-wrap text-muted-foreground">{job.description}</p>
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1.4fr)]">
+          <div className="space-y-6">
+            {/* Description */}
+            {cleanedDescription && (
+              <div className="bg-card border rounded-lg p-6">
+                <h2 className="text-xl font-semibold mb-4">Job Description</h2>
+                <div className="prose prose-sm dark:prose-invert max-w-none">
+                  <p className="whitespace-pre-wrap text-muted-foreground">{cleanedDescription}</p>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Skills Required */}
-          {job.skills_required && job.skills_required.length > 0 && (
-            <div className="bg-card border rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Skills Required</h2>
-              <div className="flex flex-wrap gap-2">
-                {job.skills_required.map((skill, index) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1 rounded-md bg-muted text-muted-foreground text-sm"
-                  >
-                    {skill}
-                  </span>
-                ))}
+            {/* Skills Required */}
+            {job.skills_required && job.skills_required.length > 0 && (
+              <div className="bg-card border rounded-lg p-6">
+                <h2 className="text-xl font-semibold mb-4">Skills Required</h2>
+                <div className="flex flex-wrap gap-2">
+                  {job.skills_required.map((skill, index) => (
+                    <span
+                      key={index}
+                      className="px-3 py-1 rounded-md bg-muted text-muted-foreground text-sm"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
-
-          {/* Experience & Salary Details */}
-          <div className="bg-card border rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Job Details</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {job.experience_min !== undefined && job.experience_max !== undefined && (
-                <div>
-                  <div className="text-sm text-muted-foreground mb-1">Experience Required</div>
-                  <div className="font-medium">
-                    {job.experience_min} - {job.experience_max} years
-                  </div>
-                </div>
-              )}
-              {job.salary_min && job.salary_max && (
-                <div>
-                  <div className="text-sm text-muted-foreground mb-1">Salary Range</div>
-                  <div className="font-medium">{formatSalary()}</div>
-                </div>
-              )}
-              {job.location && (
-                <div>
-                  <div className="text-sm text-muted-foreground mb-1">Location</div>
-                  <div className="font-medium">{job.location}</div>
-                </div>
-              )}
-              {job.employment_type && (
-                <div>
-                  <div className="text-sm text-muted-foreground mb-1">Employment Type</div>
-                  <div className="font-medium">{getEmploymentType()}</div>
-                </div>
-              )}
-            </div>
+            )}
           </div>
 
-          {/* Company Info */}
-          {job.company && (
+          <div className="space-y-6">
+            {/* Experience & Salary Details */}
             <div className="bg-card border rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">About Company</h2>
-              <div className="space-y-2">
-                <div>
-                  <div className="text-sm text-muted-foreground mb-1">Company Name</div>
-                  <div className="font-medium">{job.company.name}</div>
-                </div>
-                {job.company.domain && (
+              <h2 className="text-xl font-semibold mb-4">Job Details</h2>
+              <div className="grid grid-cols-1 gap-4">
+                {job.experience_min !== undefined && job.experience_max !== undefined && (
                   <div>
-                    <div className="text-sm text-muted-foreground mb-1">Domain</div>
-                    <div className="font-medium">{job.company.domain}</div>
+                    <div className="text-sm text-muted-foreground mb-1">Experience Required</div>
+                    <div className="font-medium">
+                      {job.experience_min} - {job.experience_max} years
+                    </div>
                   </div>
                 )}
-                {job.company.website && (
+                {job.salary_min && job.salary_max && (
                   <div>
-                    <div className="text-sm text-muted-foreground mb-1">Website</div>
-                    <a
-                      href={job.company.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-medium text-cyan-600 dark:text-cyan-400 hover:underline"
-                    >
-                      {job.company.website}
-                    </a>
+                    <div className="text-sm text-muted-foreground mb-1">Salary Range</div>
+                    <div className="font-medium">{formatSalary()}</div>
+                  </div>
+                )}
+                {job.location && (
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Location</div>
+                    <div className="font-medium">{job.location}</div>
+                  </div>
+                )}
+                {job.employment_type && (
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Employment Type</div>
+                    <div className="font-medium">{getEmploymentType()}</div>
                   </div>
                 )}
               </div>
             </div>
-          )}
 
+            {/* Company Info */}
+            {job.company && (
+              <div className="bg-card border rounded-lg p-6">
+                <h2 className="text-xl font-semibold mb-4">About Company</h2>
+                <div className="space-y-2">
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Company Name</div>
+                    <div className="font-medium">{job.company.name}</div>
+                  </div>
+                  {job.company.domain && (
+                    <div>
+                      <div className="text-sm text-muted-foreground mb-1">Domain</div>
+                      <div className="font-medium">{job.company.domain}</div>
+                    </div>
+                  )}
+                  {job.company.website && (
+                    <div>
+                      <div className="text-sm text-muted-foreground mb-1">Website</div>
+                      <a
+                        href={job.company.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-medium text-cyan-600 dark:text-cyan-400 hover:underline"
+                      >
+                        {job.company.website}
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
     </div>
   );
