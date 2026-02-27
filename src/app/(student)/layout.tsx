@@ -10,6 +10,8 @@ import {
   UserCircle,
   LogOut,
   Bell,
+  Menu,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -42,6 +44,24 @@ export default function StudentLayout({
   const router = useRouter();
   const [userInfo, setUserInfo] = useState<{ id: string; email: string; role: string } | null>(null);
   const [notificationsUnread, setNotificationsUnread] = useState(0);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  const isNavItemActive = (href: string) => {
+    if (!pathname) return false;
+
+    if (href === "/jobs") {
+      return (
+        pathname === "/jobs" ||
+        (pathname.startsWith("/jobs/") && !pathname.startsWith("/jobs/saved"))
+      );
+    }
+
+    if (href === "/jobs/saved") {
+      return pathname === "/jobs/saved" || pathname.startsWith("/jobs/saved/");
+    }
+
+    return pathname === href || pathname.startsWith(href + "/");
+  };
 
   useEffect(() => {
     const user = getUserInfo();
@@ -65,12 +85,17 @@ export default function StudentLayout({
   const userName = userInfo?.email?.split("@")[0] || "Student";
   const userInitials = userName.split(' ').map(n => n[0]).join('').toUpperCase() || "S";
 
+  useEffect(() => {
+    // Close mobile nav when route changes
+    setMobileNavOpen(false);
+  }, [pathname]);
+
   return (
     <PrivateRoute allowedRoles={["student"]}>
       <div className="min-h-screen bg-background">
         {/* Top bar with navigation tabs */}
         <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="flex items-center justify-between px-4 py-4">
+          <div className="mx-auto flex max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-12 py-4">
             {/* Logo */}
             <Link href="/jobs" className="flex items-center gap-2">
               <Image
@@ -87,10 +112,10 @@ export default function StudentLayout({
               </div>
             </Link>
 
-            {/* Navigation Tabs - Center */}
-            <nav className="flex-1 flex items-center justify-center gap-1">
+            {/* Navigation Tabs - Center (desktop) */}
+            <nav className="hidden md:flex flex-1 items-center justify-center gap-1">
               {navigation.map((item) => {
-                const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
+                const isActive = isNavItemActive(item.href);
                 return (
                   <Link
                     key={item.name}
@@ -109,7 +134,7 @@ export default function StudentLayout({
             </nav>
 
             {/* Right side actions */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="h-5 w-5" />
                 {notificationsUnread > 0 && (
@@ -157,12 +182,55 @@ export default function StudentLayout({
                   </DropdownMenuContent>
                 </DropdownMenu>
               </ClientOnly>
+              {/* Mobile hamburger menu */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden"
+                onClick={() => setMobileNavOpen((open) => !open)}
+                aria-label="Toggle navigation menu"
+              >
+                {mobileNavOpen ? (
+                  <X className="h-5 w-5" />
+                ) : (
+                  <Menu className="h-5 w-5" />
+                )}
+              </Button>
             </div>
           </div>
         </header>
 
+        {/* Mobile navigation (below header) */}
+        {mobileNavOpen && (
+          <nav className="border-b bg-background md:hidden">
+            <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-12 py-2 space-y-1">
+              {navigation.map((item) => {
+                const isActive = isNavItemActive(item.href);
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
+                      isActive
+                        ? "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 font-medium"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    }`}
+                  >
+                    <item.icon className="h-4 w-4" />
+                    <span>{item.name}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </nav>
+        )}
+
         {/* Page content */}
-        <main className="p-4 lg:p-8">{children}</main>
+        <main className="px-4 sm:px-6 lg:px-12 py-4 lg:py-8">
+          <div className="mx-auto w-full max-w-6xl">
+            {children}
+          </div>
+        </main>
       </div>
     </PrivateRoute>
   );

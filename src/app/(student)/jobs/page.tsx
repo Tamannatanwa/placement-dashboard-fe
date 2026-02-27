@@ -390,7 +390,7 @@ export default function JobsPage() {
                 </div>
               ) : (
                 <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 gap-6">
                     {filteredRecommendedJobs.map((job) => (
                       <JobCard
                         key={job.id}
@@ -461,7 +461,7 @@ export default function JobsPage() {
                 </div>
               ) : (
                 <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 gap-6">
                     {filteredJobs.map((job) => (
                       <JobCard
                         key={job.id}

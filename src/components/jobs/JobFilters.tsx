@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { JobFilters as JobFiltersType } from "@/types/job";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ChevronDown, ChevronUp, X } from "lucide-react";
 
 interface JobFiltersProps {
@@ -80,22 +80,26 @@ export function JobFilters({ filters, onFiltersChange, onClear }: JobFiltersProp
     );
   };
 
-  const FilterCheckbox = ({
+  const FilterRadioOption = ({
     label,
     value,
-    checked,
-    onChange,
+    groupName,
   }: {
     label: string;
     value: string;
-    checked: boolean;
-    onChange: () => void;
+    groupName: string;
   }) => {
+    const id = `${groupName}-${value}`;
     return (
-      <label className="flex items-center gap-2 cursor-pointer hover:bg-muted/50 p-2 rounded-md -mx-2">
-        <Checkbox checked={checked} onCheckedChange={onChange} />
-        <span className="text-sm text-foreground flex-1">{label}</span>
-      </label>
+      <div className="flex items-center gap-2 cursor-pointer hover:bg-muted/50 p-2 rounded-md -mx-2">
+        <RadioGroupItem value={value} id={id} />
+        <label
+          htmlFor={id}
+          className="text-sm text-foreground flex-1 cursor-pointer"
+        >
+          {label}
+        </label>
+      </div>
     );
   };
 
@@ -118,135 +122,137 @@ export function JobFilters({ filters, onFiltersChange, onClear }: JobFiltersProp
 
       <div className="space-y-1">
         <FilterSection title="Employment Type" sectionKey="employmentType">
-          <FilterCheckbox
-            label="Full Time"
-            value="fulltime"
-            checked={filters.employment_type === "fulltime"}
-            onChange={() => toggleCheckboxFilter("employment_type", "fulltime")}
-          />
-          <FilterCheckbox
-            label="Part Time"
-            value="parttime"
-            checked={filters.employment_type === "parttime"}
-            onChange={() => toggleCheckboxFilter("employment_type", "parttime")}
-          />
-          <FilterCheckbox
-            label="Contract"
-            value="contract"
-            checked={filters.employment_type === "contract"}
-            onChange={() => toggleCheckboxFilter("employment_type", "contract")}
-          />
-          <FilterCheckbox
-            label="Internship"
-            value="internship"
-            checked={filters.employment_type === "internship"}
-            onChange={() => toggleCheckboxFilter("employment_type", "internship")}
-          />
+          <RadioGroup
+            value={filters.employment_type ?? ""}
+            onValueChange={(val) => updateFilter("employment_type", val)}
+          >
+            <FilterRadioOption
+              label="Full Time"
+              value="fulltime"
+              groupName="employment_type"
+            />
+            <FilterRadioOption
+              label="Part Time"
+              value="parttime"
+              groupName="employment_type"
+            />
+            <FilterRadioOption
+              label="Contract"
+              value="contract"
+              groupName="employment_type"
+            />
+            <FilterRadioOption
+              label="Internship"
+              value="internship"
+              groupName="employment_type"
+            />
+          </RadioGroup>
         </FilterSection>
 
         <FilterSection title="Work Type" sectionKey="workType">
-          <FilterCheckbox
-            label="Remote"
-            value="remote"
-            checked={filters.work_type === "remote"}
-            onChange={() => toggleCheckboxFilter("work_type", "remote")}
-          />
-          <FilterCheckbox
-            label="On-Site"
-            value="on-site"
-            checked={filters.work_type === "on-site"}
-            onChange={() => toggleCheckboxFilter("work_type", "on-site")}
-          />
-          <FilterCheckbox
-            label="Hybrid"
-            value="hybrid"
-            checked={filters.work_type === "hybrid"}
-            onChange={() => toggleCheckboxFilter("work_type", "hybrid")}
-          />
+          <RadioGroup
+            value={filters.work_type ?? ""}
+            onValueChange={(val) => updateFilter("work_type", val)}
+          >
+            <FilterRadioOption
+              label="Remote"
+              value="remote"
+              groupName="work_type"
+            />
+            <FilterRadioOption
+              label="On-Site"
+              value="on-site"
+              groupName="work_type"
+            />
+            <FilterRadioOption
+              label="Hybrid"
+              value="hybrid"
+              groupName="work_type"
+            />
+          </RadioGroup>
         </FilterSection>
 
         <FilterSection title="Location" sectionKey="location">
-          <FilterCheckbox
-            label="Remote"
-            value="Remote"
-            checked={filters.location === "Remote"}
-            onChange={() => toggleCheckboxFilter("location", "Remote")}
-          />
-          <FilterCheckbox
-            label="Pan India"
-            value="Pan India"
-            checked={filters.location === "Pan India"}
-            onChange={() => toggleCheckboxFilter("location", "Pan India")}
-          />
-          <FilterCheckbox
-            label="International"
-            value="International"
-            checked={filters.location === "International"}
-            onChange={() => toggleCheckboxFilter("location", "International")}
-          />
-          <FilterCheckbox
-            label="Bangalore"
-            value="Bangalore"
-            checked={filters.location === "Bangalore"}
-            onChange={() => toggleCheckboxFilter("location", "Bangalore")}
-          />
-          <FilterCheckbox
-            label="Pune"
-            value="Pune"
-            checked={filters.location === "Pune"}
-            onChange={() => toggleCheckboxFilter("location", "Pune")}
-          />
-          <FilterCheckbox
-            label="Mumbai"
-            value="Mumbai"
-            checked={filters.location === "Mumbai"}
-            onChange={() => toggleCheckboxFilter("location", "Mumbai")}
-          />
-          <FilterCheckbox
-            label="Hyderabad"
-            value="Hyderabad"
-            checked={filters.location === "Hyderabad"}
-            onChange={() => toggleCheckboxFilter("location", "Hyderabad")}
-          />
-          <FilterCheckbox
-            label="Delhi"
-            value="Delhi"
-            checked={filters.location === "Delhi"}
-            onChange={() => toggleCheckboxFilter("location", "Delhi")}
-          />
-          <FilterCheckbox
-            label="Chennai"
-            value="Chennai"
-            checked={filters.location === "Chennai"}
-            onChange={() => toggleCheckboxFilter("location", "Chennai")}
-          />
+          <RadioGroup
+            value={filters.location ?? ""}
+            onValueChange={(val) => updateFilter("location", val)}
+          >
+            <FilterRadioOption
+              label="Remote"
+              value="Remote"
+              groupName="location"
+            />
+            <FilterRadioOption
+              label="Pan India"
+              value="Pan India"
+              groupName="location"
+            />
+            <FilterRadioOption
+              label="International"
+              value="International"
+              groupName="location"
+            />
+            <FilterRadioOption
+              label="Bangalore"
+              value="Bangalore"
+              groupName="location"
+            />
+            <FilterRadioOption
+              label="Pune"
+              value="Pune"
+              groupName="location"
+            />
+            <FilterRadioOption
+              label="Mumbai"
+              value="Mumbai"
+              groupName="location"
+            />
+            <FilterRadioOption
+              label="Hyderabad"
+              value="Hyderabad"
+              groupName="location"
+            />
+            <FilterRadioOption
+              label="Delhi"
+              value="Delhi"
+              groupName="location"
+            />
+            <FilterRadioOption
+              label="Chennai"
+              value="Chennai"
+              groupName="location"
+            />
+          </RadioGroup>
         </FilterSection>
 
         <FilterSection title="Experience Level" sectionKey="experience">
-          <FilterCheckbox
-            label="Fresher"
-            value="fresher"
-            checked={filters.is_fresher === true}
-            onChange={() => {
-              if (filters.is_fresher === true) {
+          <RadioGroup
+            value={
+              filters.is_fresher === true
+                ? "fresher"
+                : filters.is_fresher === false
+                ? "experienced"
+                : ""
+            }
+            onValueChange={(val) => {
+              if (!val) {
                 updateFilter("is_fresher", undefined);
-              } else {
-                updateFilter("is_fresher", true);
+                return;
               }
+              updateFilter("is_fresher", val === "fresher");
             }}
-          />
-          <FilterCheckbox
-            label="Experienced"
-            value="experienced"
-            checked={filters.is_fresher === false}
-            onChange={() => {
-              if (filters.is_fresher === false) {
-                updateFilter("is_fresher", undefined);
-              } else {
-                updateFilter("is_fresher", false);
-              }
-            }}
-          />
+          >
+            <FilterRadioOption
+              label="Fresher"
+              value="fresher"
+              groupName="experience"
+            />
+            <FilterRadioOption
+              label="Experienced"
+              value="experienced"
+              groupName="experience"
+            />
+          </RadioGroup>
         </FilterSection>
       </div>
     </div>
