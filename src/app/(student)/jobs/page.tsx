@@ -266,56 +266,56 @@ export default function JobsPage() {
 
   return (
     <div className="space-y-3">
-      {/* <h1 className="text-xl font-bold">Jobs</h1> */}
-
-      {/* Full-width profile completion banner */}
-      {profileCompleteness !== null && profileCompleteness < 100 && (
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-500/20">
-              <Zap className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-            </div>
-            <div className="min-w-0">
-              <p className="font-medium text-foreground">Complete your profile for better matches</p>
-              <p className="text-sm text-muted-foreground mt-0.5">
-                Add your skills, experience & preferences to unlock 3x more relevant jobs{" "}
-                <span className="font-semibold text-amber-700 dark:text-amber-400">
-                  ({profileCompleteness}% complete)
-                </span>
-              </p>
-            </div>
-          </div>
-          <Link
-            href="/profile/view"
-            className="shrink-0 inline-flex items-center justify-center rounded-md bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-600"
-          >
-            Complete Profile
-          </Link>
-        </div>
-      )}
-
-      {/* Sidebar (search + filters) + Main (tabs, chips, results) */}
+      {/* Sidebar (profile completion + search + filters) + Main (tabs, chips, results) */}
       <div className="flex flex-col gap-3 lg:flex-row lg:gap-4">
-        {/* Sidebar: search at top, then filters */}
-        <aside className="lg:w-56 flex-shrink-0">
-          <div className="bg-card border rounded-lg p-3 sticky top-4 space-y-3">
-            <JobSearch
-              onSearch={handleSearch}
-              placeholder="Title, company, or skills..."
-            />
-            <JobFilters
-              filters={filters}
-              onFiltersChange={setFilters}
-              onClear={() => {
-                setFilters({
-                  page: 1,
-                  size: 20,
-                  sort_by: "created_at",
-                  sort_order: "desc",
-                });
-                setSearchQuery("");
-              }}
-            />
+        {/* Sidebar: profile completion, search, then filters */}
+        <aside className="lg:w-64 flex-shrink-0">
+          <div className="sticky top-4 space-y-3">
+            {profileCompleteness !== null && profileCompleteness < 100 && (
+              <div className="flex flex-col gap-3 rounded-lg border border-amber-500/40 bg-amber-500/5 px-3 py-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-500/20">
+                    <Zap className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground">
+                      Complete your profile for better matches
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Add your skills, experience & preferences{" "}
+                      <span className="font-semibold text-amber-700 dark:text-amber-400">
+                        ({profileCompleteness}% complete)
+                      </span>
+                    </p>
+                  </div>
+                </div>
+                <Link
+                  href="/profile/view"
+                  className="inline-flex items-center justify-center rounded-md bg-amber-600 px-3 py-2 text-xs font-medium text-white hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-600"
+                >
+                  Complete Profile
+                </Link>
+              </div>
+            )}
+            <div className="bg-card border rounded-lg p-3 space-y-3">
+              <JobSearch
+                onSearch={handleSearch}
+                placeholder="Title, company, or skills..."
+              />
+              <JobFilters
+                filters={filters}
+                onFiltersChange={setFilters}
+                onClear={() => {
+                  setFilters({
+                    page: 1,
+                    size: 20,
+                    sort_by: "created_at",
+                    sort_order: "desc",
+                  });
+                  setSearchQuery("");
+                }}
+              />
+            </div>
           </div>
         </aside>
 
@@ -390,7 +390,7 @@ export default function JobsPage() {
                 </div>
               ) : (
                 <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 gap-6">
                     {filteredRecommendedJobs.map((job) => (
                       <JobCard
                         key={job.id}
@@ -461,7 +461,7 @@ export default function JobsPage() {
                 </div>
               ) : (
                 <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 gap-6">
                     {filteredJobs.map((job) => (
                       <JobCard
                         key={job.id}
