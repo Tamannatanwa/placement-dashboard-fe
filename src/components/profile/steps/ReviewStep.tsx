@@ -10,6 +10,26 @@ interface ReviewStepProps extends StepContentProps {
 }
 
 export function ReviewStep({ formData, onEditStep }: ReviewStepProps) {
+  // Normalize highest qualification for consistent display
+  const highestQualificationDisplay = (() => {
+    const raw =
+      (formData.highest_qualification as string | undefined) ||
+      ((formData as any).degree as string | undefined);
+    if (!raw) return undefined;
+    const trimmed = raw.trim();
+    if (!trimmed) return undefined;
+    const qual = trimmed.toLowerCase();
+    const map: Record<string, string> = {
+      "10th": "10th",
+      "12th": "12th",
+      diploma: "Diploma",
+      graduation: "Graduation",
+      "post-graduation": "Post-Graduation",
+      phd: "PhD",
+    };
+    return map[qual] || trimmed;
+  })();
+
   // Format array fields for display
   const jobTypeDisplay = formData.job_type && formData.job_type.length > 0 
     ? formData.job_type.join(", ") 
@@ -42,7 +62,7 @@ export function ReviewStep({ formData, onEditStep }: ReviewStepProps) {
       title: "Academic Information",
       stepIndex: 1,
       fields: [
-        { label: "Highest Qualification", value: formData.highest_qualification && formData.highest_qualification.trim() ? formData.highest_qualification.trim() : undefined },
+        { label: "Highest Qualification", value: highestQualificationDisplay },
         { label: "College / University Name", value: formData.college_name },
         { label: "Course", value: formData.course },
         { label: "Branch", value: formData.branch },

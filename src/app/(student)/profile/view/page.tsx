@@ -25,6 +25,21 @@ import {
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
 
+// Format backend qualification value (stored in lowercase) to user-friendly label
+const formatQualification = (value?: string) => {
+  if (!value) return undefined;
+  const qual = value.toLowerCase();
+  const map: Record<string, string> = {
+    "10th": "10th",
+    "12th": "12th",
+    "diploma": "Diploma",
+    "graduation": "Graduation",
+    "post-graduation": "Post-Graduation",
+    "phd": "PhD",
+  };
+  return map[qual] || value;
+};
+
 export default function StudentProfileViewPage() {
   const router = useRouter();
   const [profile, setProfile] = useState<StudentProfile | null>(null);
@@ -224,8 +239,10 @@ export default function StudentProfileViewPage() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-muted-foreground">Degree</p>
-                <p className="font-medium">{profile.degree || 'Not set'}</p>
+                <p className="text-sm text-muted-foreground">Highest Qualification</p>
+                <p className="font-medium">
+                  {formatQualification(profile.highest_qualification) || "Not set"}
+                </p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Branch</p>
