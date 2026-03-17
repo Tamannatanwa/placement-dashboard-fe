@@ -59,7 +59,13 @@ export const personalInfoSchema = z.object({
     ),
   date_of_birth: z.string().optional(),
   gender: z.string().optional(),
-  current_address: z.string().optional(),
+  highest_qualification: z.string().optional(),
+  course: z.string().optional(),
+  passing_year: z.number()
+    .optional()
+    .refine((val) => val === undefined || Number.isInteger(val), "Passing year must be a whole number")
+    .refine((val) => val === undefined || val >= 2000, "Passing year must be 2000 or later")
+    .refine((val) => val === undefined || val <= 2030, "Passing year must be 2030 or earlier"),
 });
 
 // Academic Information Step Schema
@@ -95,7 +101,7 @@ export const additionalInfoSchema = z.object({
   languages: z.array(languageProficiencySchema).optional(),
   job_type: z.array(z.string()).optional(),
   work_mode: z.array(z.string()).optional(),
-  preferred_job_role: z.array(z.string()).optional(),
+  preferred_job_role: z.array(z.string()).max(3, "You can select up to 3 preferred job roles").optional(),
   preferred_location: z.array(z.string()).optional(),
   expected_salary: z.number()
     .optional()

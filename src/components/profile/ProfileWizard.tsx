@@ -6,12 +6,10 @@ import { toast } from "sonner";
 import { StepIndicator } from "./StepIndicator";
 import { StepNavigation } from "./StepNavigation";
 import { PersonalInfoStep, PersonalInfoStepHandle } from "./steps/PersonalInfoStep";
-import { AcademicInfoStep, AcademicInfoStepHandle } from "./steps/AcademicInfoStep";
 import { AdditionalInfoStep, AdditionalInfoStepHandle } from "./steps/AdditionalInfoStep";
 import { ReviewStep } from "./steps/ReviewStep";
 import {
   personalInfoSchema,
-  academicInfoSchema,
   additionalInfoSchema,
   completeProfileSchema,
 } from "@/lib/validations/profile";
@@ -34,12 +32,6 @@ const STEPS = [
     title: "Personal",
     description: "Basic information",
     validationSchema: personalInfoSchema,
-  },
-  {
-    id: "academic",
-    title: "Academic",
-    description: "Education details",
-    validationSchema: academicInfoSchema,
   },
   {
     id: "additional",
@@ -70,7 +62,6 @@ export function ProfileWizard({
   
   // Refs for step validation
   const personalInfoRef = useRef<PersonalInfoStepHandle>(null);
-  const academicInfoRef = useRef<AcademicInfoStepHandle>(null);
   const additionalInfoRef = useRef<AdditionalInfoStepHandle>(null);
 
   // Load existing profile data only when component mounts (when user clicks profile tab)
@@ -186,13 +177,10 @@ export function ProfileWizard({
       const isValid = await personalInfoRef.current.validate();
       // Always allow navigation, just save what's there
       return true;
-    } else if (currentStep === 1 && academicInfoRef.current) {
-      const isValid = await academicInfoRef.current.validate();
-      return true;
-    } else if (currentStep === 2 && additionalInfoRef.current) {
+    } else if (currentStep === 1 && additionalInfoRef.current) {
       const isValid = await additionalInfoRef.current.validate();
       return true;
-    } else if (currentStep === 3) {
+    } else if (currentStep === 2) {
       // Review step - allow submission with partial data
       // Only validate format if fields are filled
       try {
@@ -485,20 +473,13 @@ export function ProfileWizard({
             />
           )}
           {currentStep === 1 && (
-            <AcademicInfoStep
-              ref={academicInfoRef}
-              formData={formData}
-              onUpdate={handleUpdate}
-            />
-          )}
-          {currentStep === 2 && (
             <AdditionalInfoStep
               ref={additionalInfoRef}
               formData={formData}
               onUpdate={handleUpdate}
             />
           )}
-          {currentStep === 3 && (
+          {currentStep === 2 && (
             <ReviewStep
               formData={formData}
               onUpdate={handleUpdate}

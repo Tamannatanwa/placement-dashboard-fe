@@ -26,6 +26,7 @@ import { StepContentProps } from "@/types/profile";
 import { User } from "lucide-react";
 
 const GENDER_OPTIONS = ["Male", "Female", "Other", "Prefer not to say"];
+const QUALIFICATION_OPTIONS = ["10th", "12th", "Diploma", "Graduation", "Post-Graduation", "PhD"];
 
 export interface PersonalInfoStepHandle {
   validate: () => Promise<boolean>;
@@ -41,7 +42,9 @@ export const PersonalInfoStep = forwardRef<PersonalInfoStepHandle, StepContentPr
         phone: formData.phone || "",
         date_of_birth: formData.date_of_birth || "",
         gender: formData.gender || "",
-        current_address: formData.current_address || "",
+        highest_qualification: formData.highest_qualification || "",
+        course: formData.course || "",
+        passing_year: formData.passing_year ?? undefined,
       },
       mode: "onChange",
     });
@@ -54,7 +57,9 @@ export const PersonalInfoStep = forwardRef<PersonalInfoStepHandle, StepContentPr
         phone: formData.phone || "",
         date_of_birth: formData.date_of_birth || "",
         gender: formData.gender || "",
-        current_address: formData.current_address || "",
+        highest_qualification: formData.highest_qualification || "",
+        course: formData.course || "",
+        passing_year: formData.passing_year ?? undefined,
       });
     }, [
       formData.first_name,
@@ -62,7 +67,9 @@ export const PersonalInfoStep = forwardRef<PersonalInfoStepHandle, StepContentPr
       formData.phone,
       formData.date_of_birth,
       formData.gender,
-      formData.current_address,
+      formData.highest_qualification,
+      formData.course,
+      formData.passing_year,
       form,
     ]);
 
@@ -217,25 +224,82 @@ export const PersonalInfoStep = forwardRef<PersonalInfoStepHandle, StepContentPr
                 )}
               />
 
-              {/* Current Address */}
+              {/* Highest Qualification */}
               <FormField
                 control={form.control}
-                name="current_address"
+                name="highest_qualification"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Current Address</FormLabel>
-                    <FormControl>
-                      <textarea
-                        {...field}
-                        placeholder="123 Main Street, City, State, Country - PIN Code"
-                        className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        rows={3}
-                      />
-                    </FormControl>
+                    <FormLabel>Highest Qualification</FormLabel>
+                    <Select
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        handleChange();
+                      }}
+                      value={field.value || undefined}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="h-11">
+                          <SelectValue placeholder="Select qualification" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {QUALIFICATION_OPTIONS.map((qual) => (
+                          <SelectItem key={qual} value={qual}>
+                            {qual}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
+              {/* Course & Passing Year */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="course"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Course</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g., Bachelor of Technology"
+                          {...field}
+                          className="h-11"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="passing_year"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Passing Year</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="2024"
+                          {...field}
+                          onChange={(e) => {
+                            const value = e.target.value ? parseInt(e.target.value, 10) : undefined;
+                            field.onChange(value);
+                            handleChange();
+                          }}
+                          className="h-11"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </form>
           </Form>
         </CardContent>
