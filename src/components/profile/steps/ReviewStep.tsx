@@ -55,25 +55,14 @@ export function ReviewStep({ formData, onEditStep }: ReviewStepProps) {
         { label: "Email", value: formData.email },
         { label: "Date of Birth", value: formData.date_of_birth },
         { label: "Gender", value: formData.gender },
-        { label: "Current Address", value: formData.current_address },
-      ],
-    },
-    {
-      title: "Academic Information",
-      stepIndex: 1,
-      fields: [
         { label: "Highest Qualification", value: highestQualificationDisplay },
-        { label: "College / University Name", value: formData.college_name },
         { label: "Course", value: formData.course },
-        { label: "Branch", value: formData.branch },
         { label: "Passing Year", value: formData.passing_year?.toString() },
-        { label: "Percentage", value: formData.percentage?.toString() },
-        { label: "CGPA", value: formData.cgpa?.toString() },
       ],
     },
     {
       title: "Additional Information",
-      stepIndex: 2,
+      stepIndex: 1,
       fields: [
         {
           label: "Technical Skills",
@@ -91,29 +80,14 @@ export function ReviewStep({ formData, onEditStep }: ReviewStepProps) {
         },
         { label: "Experience Type", value: formData.experience_type },
         {
-          label: "Internship Details",
+          label: "Languages",
           value:
-            formData.internship_details && formData.internship_details.length > 0
-              ? formData.internship_details
-                  .map((internship) => {
+            formData.languages && formData.languages.length > 0
+              ? formData.languages
+                  .map((lang) => {
                     const parts = [];
-                    if (internship.company_name) parts.push(internship.company_name);
-                    if (internship.duration) parts.push(internship.duration);
-                    if (internship.role) parts.push(internship.role);
-                    return parts.join(" - ");
-                  })
-                  .join(" | ")
-              : undefined,
-        },
-        {
-          label: "Projects",
-          value:
-            formData.projects && formData.projects.length > 0
-              ? formData.projects
-                  .map((project) => {
-                    const parts = [];
-                    if (project.title) parts.push(project.title);
-                    if (project.description) parts.push(project.description);
+                    if (lang.language) parts.push(lang.language);
+                    if (lang.proficiency_level) parts.push(lang.proficiency_level);
                     return parts.join(" - ");
                   })
                   .join(" | ")

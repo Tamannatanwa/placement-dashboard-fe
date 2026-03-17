@@ -11,41 +11,41 @@ import {
   User, 
   Mail, 
   Phone, 
-  GraduationCap, 
   Briefcase, 
-  FileText, 
   Link as LinkIcon,
-  Edit,
-  Upload,
-  X,
-  Loader2,
   CheckCircle2,
   AlertCircle
 } from "lucide-react";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
 
-// Format backend qualification value (stored in lowercase) to user-friendly label
 const formatQualification = (value?: string) => {
-  if (!value) return undefined;
+  if (!value) return "Not set";
   const qual = value.toLowerCase();
   const map: Record<string, string> = {
     "10th": "10th",
     "12th": "12th",
-    "diploma": "Diploma",
-    "graduation": "Graduation",
+    diploma: "Diploma",
+    graduation: "Graduation",
     "post-graduation": "Post-Graduation",
-    "phd": "PhD",
+    phd: "PhD",
   };
   return map[qual] || value;
+};
+
+const formatList = (list?: string[]) => (list && list.length > 0 ? list.join(", ") : "Not set");
+
+const formatDate = (value?: string) => {
+  if (!value) return "Not set";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString();
 };
 
 export default function StudentProfileViewPage() {
   const router = useRouter();
   const [profile, setProfile] = useState<StudentProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isUploadingResume, setIsUploadingResume] = useState(false);
-  const [isDeletingResume, setIsDeletingResume] = useState(false);
 
   useEffect(() => {
     loadProfile();
@@ -55,57 +55,11 @@ export default function StudentProfileViewPage() {
     try {
       const data = await studentsApi.getMyProfile();
       setProfile(data);
-    } catch (error: any) {
+    } catch (error) {
       toast.error("Failed to load profile");
       console.error(error);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleResumeUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    // Validate file type
-    if (!file.name.toLowerCase().endsWith('.pdf')) {
-      toast.error("Only PDF files are allowed");
-      return;
-    }
-
-    // Validate file size (5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("File size must be less than 5MB");
-      return;
-    }
-
-    setIsUploadingResume(true);
-    try {
-      // Use separate resume API
-      await studentsApi.uploadResume(file);
-      await loadProfile(); // Reload profile to get updated resume_url
-      toast.success("Resume uploaded successfully!");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to upload resume");
-    } finally {
-      setIsUploadingResume(false);
-      event.target.value = '';
-    }
-  };
-
-  const handleResumeDelete = async () => {
-    if (!profile?.resume_url) return;
-
-    setIsDeletingResume(true);
-    try {
-      // Use separate resume API
-      await studentsApi.deleteResume();
-      await loadProfile(); // Reload profile
-      toast.success("Resume deleted successfully!");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to delete resume");
-    } finally {
-      setIsDeletingResume(false);
     }
   };
 
@@ -137,9 +91,11 @@ export default function StudentProfileViewPage() {
     );
   }
 
-  const resumeFileName = profile.resume_url 
-    ? profile.resume_url.split('/').pop() || 'resume.pdf'
-    : null;
+  const jobType = profile.preference?.job_type ?? profile.job_type;
+  const workMode = profile.preference?.work_mode ?? profile.work_mode;
+  const preferredJobRole = profile.preference?.preferred_job_role ?? profile.preferred_job_role;
+  const preferredLocation = profile.preference?.preferred_location ?? profile.preferred_location;
+  const expectedSalary = profile.preference?.expected_salary ?? profile.expected_salary;
 
   return (
     <div className="min-h-screen bg-background">
@@ -161,7 +117,7 @@ export default function StudentProfileViewPage() {
               </div>
               <CardDescription>
                 {profile.profile_completeness === 100
-                  ? "Congratulations! Your profile is complete."
+                  ? "To get better and more relevant job recommendations, please fill in your technical skills as well as your soft skills while creating your profile."
                   : profile.profile_completeness >= 85
                   ? "Your profile is looking great! Add skills to reach 100%"
                   : "Complete your profile to get better job recommendations"}
@@ -224,206 +180,182 @@ export default function StudentProfileViewPage() {
                   <p className="font-medium">{profile.phone || 'Not set'}</p>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Academic Information */}
-        <Card className="mb-6">
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <GraduationCap className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
-              <CardTitle>Academic Information</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-muted-foreground">Highest Qualification</p>
-                <p className="font-medium">
-                  {formatQualification(profile.highest_qualification) || "Not set"}
-                </p>
+                <p className="text-sm text-muted-foreground">Date of Birth</p>
+                <p className="font-medium">{formatDate(profile.date_of_birth)}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Branch</p>
-                <p className="font-medium">{profile.branch || 'Not set'}</p>
+                <p className="text-sm text-muted-foreground">Gender</p>
+                <p className="font-medium">{profile.gender || 'Not set'}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Highest Qualification</p>
+                <p className="font-medium">{formatQualification(profile.highest_qualification || profile.degree)}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Course</p>
+                <p className="font-medium">{profile.course || 'Not set'}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Passing Year</p>
                 <p className="font-medium">{profile.passing_year || 'Not set'}</p>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">CGPA</p>
-                <p className="font-medium">{profile.cgpa || 'Not set'}</p>
-              </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Resume Section */}
-        {/* <Card className="mb-6">
+        {/* Additional Information */}
+        <Card className="mb-6">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
-              <CardTitle>Resume</CardTitle>
+              <Briefcase className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
+              <CardTitle>Additional Information</CardTitle>
             </div>
-            <CardDescription>
-              Upload your resume in PDF format (max 5MB)
-            </CardDescription>
           </CardHeader>
-          <CardContent>
-            {profile.resume_url ? (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/50">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <FileText className="h-5 w-5 text-cyan-600 dark:text-cyan-400 flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{resumeFileName}</p>
-                      <p className="text-xs text-muted-foreground truncate">{profile.resume_url}</p>
-                    </div>
-                    <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400 flex-shrink-0" />
-                  </div>
-                  <div className="flex items-center gap-2 ml-4">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => window.open(profile.resume_url, '_blank')}
-                    >
-                      View
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleResumeDelete}
-                      disabled={isDeletingResume}
-                    >
-                      {isDeletingResume ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <X className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
+          <CardContent className="space-y-6">
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">Technical Skills</p>
+              {profile.technical_skills && profile.technical_skills.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {profile.technical_skills.map((skill, index) => (
+                    <Badge key={`tech-${index}`} variant="secondary">{skill}</Badge>
+                  ))}
                 </div>
-                <div className="text-xs text-muted-foreground">
-                  You can replace your resume by uploading a new one below
-                </div>
-              </div>
-            ) : (
-              <div className="border-2 border-dashed rounded-lg p-6 text-center">
-                <input
-                  type="file"
-                  accept=".pdf"
-                  onChange={handleResumeUpload}
-                  disabled={isUploadingResume}
-                  className="hidden"
-                  id="resume-upload-view"
-                />
-                <label
-                  htmlFor="resume-upload-view"
-                  className="cursor-pointer flex flex-col items-center gap-2"
-                >
-                  {isUploadingResume ? (
-                    <>
-                      <Loader2 className="h-8 w-8 text-cyan-600 dark:text-cyan-400 animate-spin" />
-                      <span className="text-sm text-muted-foreground">Uploading...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="h-8 w-8 text-cyan-600 dark:text-cyan-400" />
-                      <div>
-                        <p className="text-sm font-medium">Click to upload resume</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          PDF only, max 5MB
-                        </p>
-                      </div>
-                    </>
-                  )}
-                </label>
-              </div>
-            )}
-            {profile.resume_url && (
-              <div className="mt-4">
-                <input
-                  type="file"
-                  accept=".pdf"
-                  onChange={handleResumeUpload}
-                  disabled={isUploadingResume}
-                  className="hidden"
-                  id="resume-replace"
-                />
-                <label htmlFor="resume-replace">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    asChild
-                    disabled={isUploadingResume}
-                  >
-                    <span>
-                      {isUploadingResume ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Uploading...
-                        </>
-                      ) : (
-                        <>
-                          <Upload className="h-4 w-4 mr-2" />
-                          Replace Resume
-                        </>
-                      )}
-                    </span>
-                  </Button>
-                </label>
-              </div>
-            )}
-          </CardContent>
-        </Card> */}
+              ) : (
+                <p className="font-medium">Not set</p>
+              )}
+            </div>
 
-        {/* Additional Information */}
-        {(profile as any).portfolio_url || (profile as any).skills ? (
-          <Card className="mb-6">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Briefcase className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
-                <CardTitle>Additional Information</CardTitle>
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">Soft Skills</p>
+              {profile.soft_skills && profile.soft_skills.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {profile.soft_skills.map((skill, index) => (
+                    <Badge key={`soft-${index}`} variant="secondary">{skill}</Badge>
+                  ))}
+                </div>
+              ) : (
+                <p className="font-medium">Not set</p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Experience Type</p>
+                <p className="font-medium">{profile.experience_type || "Not set"}</p>
               </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {(profile as any).portfolio_url && (
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Portfolio / GitHub</p>
+              <div>
+                <p className="text-sm text-muted-foreground">Job Type</p>
+                <p className="font-medium">{formatList(jobType)}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Work Mode</p>
+                <p className="font-medium">{formatList(workMode)}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Preferred Job Role</p>
+                <p className="font-medium">{formatList(preferredJobRole)}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Preferred Location</p>
+                <p className="font-medium">{formatList(preferredLocation)}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Expected Salary</p>
+                <p className="font-medium">{expectedSalary ? `₹${expectedSalary.toLocaleString()}` : "Not set"}</p>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm text-muted-foreground mb-1">Languages</p>
+              <p className="font-medium">
+                {profile.languages && profile.languages.length > 0
+                  ? profile.languages
+                      .map((lang) => [lang.language, lang.proficiency_level].filter(Boolean).join(" - "))
+                      .join(" | ")
+                  : "Not set"}
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">GitHub Profile</p>
+                {profile.github_profile ? (
                   <div className="flex items-center gap-2">
                     <LinkIcon className="h-4 w-4 text-muted-foreground" />
                     <a
-                      href={(profile as any).portfolio_url}
+                      href={profile.github_profile}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-cyan-600 dark:text-cyan-400 hover:underline"
                     >
-                      {(profile as any).portfolio_url}
+                      {profile.github_profile}
                     </a>
                   </div>
-                </div>
-              )}
-              {(profile as any).skills && (
-                <div>
-                  <p className="text-sm text-muted-foreground mb-2">Skills</p>
-                  <div className="flex flex-wrap gap-2">
-                    {String((profile as any).skills)
-                      .split(',')
-                      .map((skill) => skill.trim())
-                      .filter(Boolean)
-                      .map((skill, index) => (
-                        <Badge key={index} variant="secondary">
-                          {skill}
-                        </Badge>
-                      ))}
+                ) : (
+                  <p className="font-medium">Not set</p>
+                )}
+              </div>
+
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">LinkedIn Profile</p>
+                {profile.linkedin_profile ? (
+                  <div className="flex items-center gap-2">
+                    <LinkIcon className="h-4 w-4 text-muted-foreground" />
+                    <a
+                      href={profile.linkedin_profile}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-cyan-600 dark:text-cyan-400 hover:underline"
+                    >
+                      {profile.linkedin_profile}
+                    </a>
                   </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ) : null}
+                ) : (
+                  <p className="font-medium">Not set</p>
+                )}
+              </div>
+
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Portfolio / Personal Website</p>
+                {profile.portfolio_url ? (
+                  <div className="flex items-center gap-2">
+                    <LinkIcon className="h-4 w-4 text-muted-foreground" />
+                    <a
+                      href={profile.portfolio_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-cyan-600 dark:text-cyan-400 hover:underline"
+                    >
+                      {profile.portfolio_url}
+                    </a>
+                  </div>
+                ) : (
+                  <p className="font-medium">Not set</p>
+                )}
+              </div>
+
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Resume URL</p>
+                {profile.resume_url ? (
+                  <div className="flex items-center gap-2">
+                    <LinkIcon className="h-4 w-4 text-muted-foreground" />
+                    <a
+                      href={profile.resume_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-cyan-600 dark:text-cyan-400 hover:underline"
+                    >
+                      {profile.resume_url}
+                    </a>
+                  </div>
+                ) : (
+                  <p className="font-medium">Not set</p>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

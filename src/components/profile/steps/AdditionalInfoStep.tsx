@@ -27,13 +27,13 @@ import { StepContentProps } from "@/types/profile";
 import { FileText, Link as LinkIcon, Upload, X, CheckCircle2, Loader2, Plus, Trash2 } from "lucide-react";
 import { studentsApi } from "@/lib/api/students";
 import { toast } from "sonner";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 
 const EXPERIENCE_TYPES = ["Fresher", "Experienced"];
 const JOB_TYPES = ["Internship", "Full-Time", "Part-Time"];
 const WORK_MODES = ["Remote", "Hybrid", "Office"];
 const PROFICIENCY_LEVELS = ["beginner", "proficient", "fluent", "native"];
+const MAX_PREFERRED_JOB_ROLES = 3;
 
 export interface AdditionalInfoStepHandle {
   validate: () => Promise<boolean>;
@@ -55,8 +55,6 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
         technical_skills: formData.technical_skills || [],
         soft_skills: formData.soft_skills || [],
         experience_type: formData.experience_type || undefined,
-        internship_details: formData.internship_details || [],
-        projects: formData.projects || [],
         languages: formData.languages || [],
         job_type: formData.job_type || [],
         work_mode: formData.work_mode || [],
@@ -81,8 +79,6 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
         experience_type: (formData.experience_type === "fresher" || formData.experience_type === "experienced") 
           ? formData.experience_type 
           : undefined,
-        internship_details: Array.isArray(formData.internship_details) ? formData.internship_details : [],
-        projects: Array.isArray(formData.projects) ? formData.projects : [],
         languages: Array.isArray(formData.languages) ? formData.languages : [],
         job_type: Array.isArray(formData.job_type) ? formData.job_type : [],
         work_mode: Array.isArray(formData.work_mode) ? formData.work_mode : [],
@@ -118,6 +114,8 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
       return {
         ...values,
         experience_type: values.experience_type === "" ? undefined : values.experience_type,
+        internship_details: [],
+        projects: [],
         languages: values.languages?.map((lang: any) => ({
           ...lang,
           proficiency_level: lang.proficiency_level === "" ? undefined : lang.proficiency_level,
@@ -220,37 +218,6 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
       }
     };
 
-    // Array field handlers
-    const addInternship = () => {
-      const current = form.getValues("internship_details") || [];
-      form.setValue("internship_details", [
-        ...current,
-        { company_name: "", duration: "", role: "", description: "" },
-      ]);
-      handleChange();
-    };
-
-    const removeInternship = (index: number) => {
-      const current = form.getValues("internship_details") || [];
-      form.setValue("internship_details", current.filter((_, i) => i !== index));
-      handleChange();
-    };
-
-    const addProject = () => {
-      const current = form.getValues("projects") || [];
-      form.setValue("projects", [
-        ...current,
-        { title: "", description: "", technologies: [], github_url: "", live_url: "" },
-      ]);
-      handleChange();
-    };
-
-    const removeProject = (index: number) => {
-      const current = form.getValues("projects") || [];
-      form.setValue("projects", current.filter((_, i) => i !== index));
-      handleChange();
-    };
-
     const addLanguage = () => {
       const current = form.getValues("languages") || [];
       form.setValue("languages", [...current, { language: "", proficiency_level: "beginner" }]);
@@ -266,6 +233,10 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
     const addJobRole = () => {
       if (jobRoleInput.trim()) {
         const current = form.getValues("preferred_job_role") || [];
+        if (current.length >= MAX_PREFERRED_JOB_ROLES) {
+          toast.error("You can add only up to 3 preferred job roles");
+          return;
+        }
         if (!current.includes(jobRoleInput.trim())) {
           form.setValue("preferred_job_role", [...current, jobRoleInput.trim()]);
           setJobRoleInput("");
@@ -392,7 +363,7 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
 
               {/* Experience Section */}
               <div className="space-y-4 pt-4 border-t">
-                <h3 className="text-lg font-semibold">Experience (if any) (optional)</h3>
+                <h3 className="text-lg font-semibold">Select your experience based on the current role. If your previous experience is in a different (non-related) field, please choose “Fresher”</h3>
                 
                 <FormField
                   control={form.control}
@@ -425,147 +396,6 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
                   )}
                 />
 
-                {/* Internship Details */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <FormLabel>Internship Details (Company Name, Duration)</FormLabel>
-                    <Button type="button" onClick={addInternship} size="sm" variant="outline">
-                      <Plus className="h-4 w-4 mr-1" />
-                      Add Internship
-                    </Button>
-                  </div>
-                  {form.watch("internship_details")?.map((internship, index) => (
-                    <Card key={index} className="mb-4 p-4">
-                      <div className="flex justify-between items-start mb-4">
-                        <h4 className="font-medium">Internship {index + 1}</h4>
-                        <Button
-                          type="button"
-                          onClick={() => removeInternship(index)}
-                          size="sm"
-                          variant="ghost"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <Input
-                            placeholder="Company Name"
-                            value={internship.company_name || ""}
-                            onChange={(e) => {
-                              const current = form.getValues("internship_details") || [];
-                              current[index].company_name = e.target.value;
-                              form.setValue("internship_details", current);
-                              handleChange();
-                            }}
-                          />
-                          <Input
-                            placeholder="Duration (e.g., 3 months)"
-                            value={internship.duration || ""}
-                            onChange={(e) => {
-                              const current = form.getValues("internship_details") || [];
-                              current[index].duration = e.target.value;
-                              form.setValue("internship_details", current);
-                              handleChange();
-                            }}
-                          />
-                        </div>
-                        <Input
-                          placeholder="Role (optional)"
-                          value={internship.role || ""}
-                          onChange={(e) => {
-                            const current = form.getValues("internship_details") || [];
-                            current[index].role = e.target.value;
-                            form.setValue("internship_details", current);
-                            handleChange();
-                          }}
-                        />
-                        <Textarea
-                          placeholder="Description (optional)"
-                          value={internship.description || ""}
-                          onChange={(e) => {
-                            const current = form.getValues("internship_details") || [];
-                            current[index].description = e.target.value;
-                            form.setValue("internship_details", current);
-                            handleChange();
-                          }}
-                          rows={3}
-                        />
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-
-                {/* Projects */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <FormLabel>Project Title / Description</FormLabel>
-                    <Button type="button" onClick={addProject} size="sm" variant="outline">
-                      <Plus className="h-4 w-4 mr-1" />
-                      Add Project
-                    </Button>
-                  </div>
-                  {form.watch("projects")?.map((project, index) => (
-                    <Card key={index} className="mb-4 p-4">
-                      <div className="flex justify-between items-start mb-4">
-                        <h4 className="font-medium">Project {index + 1}</h4>
-                        <Button
-                          type="button"
-                          onClick={() => removeProject(index)}
-                          size="sm"
-                          variant="ghost"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      <div className="space-y-4">
-                        <Input
-                          placeholder="Project Title"
-                          value={project.title || ""}
-                          onChange={(e) => {
-                            const current = form.getValues("projects") || [];
-                            current[index].title = e.target.value;
-                            form.setValue("projects", current);
-                            handleChange();
-                          }}
-                        />
-                        <Textarea
-                          placeholder="Project Description"
-                          value={project.description || ""}
-                          onChange={(e) => {
-                            const current = form.getValues("projects") || [];
-                            current[index].description = e.target.value;
-                            form.setValue("projects", current);
-                            handleChange();
-                          }}
-                          rows={3}
-                        />
-                        <div className="grid grid-cols-2 gap-4">
-                          <Input
-                            placeholder="GitHub URL (optional)"
-                            value={project.github_url || ""}
-                            onChange={(e) => {
-                              const current = form.getValues("projects") || [];
-                              current[index].github_url = e.target.value;
-                              form.setValue("projects", current);
-                              handleChange();
-                            }}
-                          />
-                          <Input
-                            placeholder="Live URL (optional)"
-                            value={project.live_url || ""}
-                            onChange={(e) => {
-                              const current = form.getValues("projects") || [];
-                              current[index].live_url = e.target.value;
-                              form.setValue("projects", current);
-                              handleChange();
-                            }}
-                          />
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
               </div>
 
               {/* Languages Section */}
@@ -745,12 +575,19 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
                               addJobRole();
                             }
                           }}
+                          disabled={(field.value || []).length >= MAX_PREFERRED_JOB_ROLES}
                           className="h-11"
                         />
-                        <Button type="button" onClick={addJobRole} size="sm">
+                        <Button
+                          type="button"
+                          onClick={addJobRole}
+                          size="sm"
+                          disabled={(field.value || []).length >= MAX_PREFERRED_JOB_ROLES}
+                        >
                           <Plus className="h-4 w-4" />
                         </Button>
                       </div>
+                      <FormDescription>You can add up to 3 preferred job roles</FormDescription>
                       {field.value && field.value.length > 0 && (
                         <div className="flex flex-wrap gap-2 mt-2">
                           {field.value.map((role, idx) => (
