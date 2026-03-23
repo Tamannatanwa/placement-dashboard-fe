@@ -68,8 +68,12 @@ export const savedJobsApi = {
     if (folder) {
       params.append("folder", folder);
     }
+    const query = params.toString();
+    const url = query
+      ? `/api/v1/students/me/saved-jobs?${query}`
+      : "/api/v1/students/me/saved-jobs";
     const response = await api.get<SavedJobsResponse>(
-      `/api/v1/students/me/saved-jobs?${params.toString()}`
+      url
     );
     return response.data;
   },
