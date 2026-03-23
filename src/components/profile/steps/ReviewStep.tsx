@@ -49,8 +49,7 @@ export function ReviewStep({ formData, onEditStep }: ReviewStepProps) {
       title: "Personal Information",
       stepIndex: 0,
       fields: [
-        { label: "First Name", value: formData.first_name },
-        { label: "Last Name", value: formData.last_name },
+        { label: "Full Name", value: formData.full_name },
         { label: "Phone", value: formData.phone },
         { label: "Email", value: formData.email },
         { label: "Date of Birth", value: formData.date_of_birth },

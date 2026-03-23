@@ -45,12 +45,9 @@ const languageProficiencySchema = z.object({
 
 // Personal Information Step Schema
 export const personalInfoSchema = z.object({
-  first_name: z.string()
+  full_name: z.string()
     .optional()
-    .refine((val) => !val || val.trim().length === 0 || val.trim().length >= 2, "First name must be at least 2 characters"),
-  last_name: z.string()
-    .optional()
-    .refine((val) => !val || val.trim().length === 0 || val.trim().length >= 2, "Last name must be at least 2 characters"),
+    .refine((val) => !val || val.trim().length === 0 || val.trim().length >= 2, "Full name must be at least 2 characters"),
   phone: z.string()
     .optional()
     .refine(

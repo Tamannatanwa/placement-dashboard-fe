@@ -63,28 +63,21 @@ export const AcademicInfoStep = forwardRef<AcademicInfoStepHandle, StepContentPr
       mode: "onChange",
     });
 
-    // Sync form values when formData changes externally
+    // Sync form values only on initial load (not on every keystroke)
     useEffect(() => {
-      form.reset({
-        highest_qualification: normalizeQualification(formData.highest_qualification),
-        college_name: formData.college_name || "",
-        course: formData.course || "",
-        branch: formData.branch || "",
-        // Normalize potential `null` values coming from backend/state
-        passing_year: formData.passing_year ?? undefined,
-        percentage: formData.percentage ?? undefined,
-        cgpa: formData.cgpa ?? undefined,
-      });
-    }, [
-      formData.highest_qualification,
-      formData.college_name,
-      formData.course,
-      formData.branch,
-      formData.passing_year,
-      formData.percentage,
-      formData.cgpa,
-      form,
-    ]);
+      const currentValues = form.getValues();
+      if (!currentValues.college_name && formData.college_name) {
+        form.reset({
+          highest_qualification: normalizeQualification(formData.highest_qualification),
+          college_name: formData.college_name || "",
+          course: formData.course || "",
+          branch: formData.branch || "",
+          passing_year: formData.passing_year ?? undefined,
+          percentage: formData.percentage ?? undefined,
+          cgpa: formData.cgpa ?? undefined,
+        });
+      }
+    }, []); // Only run once on mount
 
     // Expose validation method to parent
     useImperativeHandle(ref, () => ({

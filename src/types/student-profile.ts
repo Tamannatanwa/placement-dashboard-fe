@@ -24,8 +24,6 @@ export interface LanguageProficiency {
 
 export interface StudentProfile {
   // Personal Details
-  first_name?: string;
-  last_name?: string;
   full_name?: string;
   phone?: string;
   email?: string;

@@ -24,8 +24,7 @@ export interface Student {
 // Student profile structure from API (for student's own profile)
 export interface StudentProfile {
   email: string;
-  first_name: string;
-  last_name: string;
+  full_name: string;
   phone: string;
   college_id: number;
   degree: string;

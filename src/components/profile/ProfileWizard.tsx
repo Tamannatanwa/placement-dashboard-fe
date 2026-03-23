@@ -83,8 +83,7 @@ export function ProfileWizard({
     try {
       const profile = await studentsApi.getMyProfile();
       setFormData({
-        first_name: profile.first_name || "",
-        last_name: profile.last_name || "",
+        full_name: profile.full_name || "",
         phone: profile.phone || "",
         email: profile.email || "",
         date_of_birth: profile.date_of_birth || "",
@@ -185,8 +184,7 @@ export function ProfileWizard({
       // Only validate format if fields are filled
       try {
         const dataToValidate = {
-          first_name: formData.first_name || undefined,
-          last_name: formData.last_name || undefined,
+          full_name: formData.full_name || undefined,
           phone: formData.phone || undefined,
           course: formData.course || undefined,
           current_module: formData.current_module || undefined,
@@ -278,8 +276,7 @@ export function ProfileWizard({
     try {
       // Validate format only for fields that have values
       const dataToValidate = {
-        first_name: formData.first_name || undefined,
-        last_name: formData.last_name || undefined,
+        full_name: formData.full_name || undefined,
         phone: formData.phone || undefined,
         date_of_birth: formData.date_of_birth || undefined,
         gender: formData.gender || undefined,
@@ -317,8 +314,7 @@ export function ProfileWizard({
         const updateData: any = {};
         
         // Personal Details - Only include if field exists in formData
-        if ('first_name' in formData) updateData.first_name = formData.first_name || null;
-        if ('last_name' in formData) updateData.last_name = formData.last_name || null;
+        if ('full_name' in formData) updateData.full_name = formData.full_name || null;
         if ('phone' in formData) updateData.phone = formData.phone || null;
         if ('date_of_birth' in formData) updateData.date_of_birth = formData.date_of_birth || null;
         if ('gender' in formData) updateData.gender = formData.gender || null;

@@ -10,8 +10,7 @@ const STORAGE_KEY = "student_profile_dummy";
 // Dummy profile data structure
 interface DummyProfileData {
   email: string;
-  first_name: string;
-  last_name: string;
+  full_name: string;
   phone: string;
   college_id: number;
   degree: string;
@@ -57,8 +56,7 @@ export function saveDummyProfile(data: Partial<DummyProfileData>): StudentProfil
   // Calculate profile completeness based on merged data
   const mergedData = { ...existing, ...data };
   const requiredFields = [
-    "first_name",
-    "last_name",
+    "full_name",
     "phone",
     "degree",
     "branch",
@@ -81,15 +79,13 @@ export function saveDummyProfile(data: Partial<DummyProfileData>): StudentProfil
   const profile: StudentProfile = {
     id: existing?.id || parseInt(userInfo.id || "1", 10),
     email: data.email || existing?.email || userInfo.email || "user@example.com",
-    first_name: data.first_name || existing?.first_name || "",
-    last_name: data.last_name || existing?.last_name || "",
+    full_name: data.full_name || existing?.full_name || "",
     phone: data.phone || existing?.phone || "",
     college_id: data.college_id ?? existing?.college_id ?? 0,
     degree: data.degree || existing?.degree || "",
     branch: data.branch || existing?.branch || "",
     passing_year: data.passing_year ?? existing?.passing_year ?? new Date().getFullYear(),
     cgpa: data.cgpa ?? existing?.cgpa ?? 0,
-    full_name: `${data.first_name || existing?.first_name || ""} ${data.last_name || existing?.last_name || ""}`.trim() || "Student",
     resume_url: data.resume_url || existing?.resume_url || "",
     is_active: existing?.is_active ?? true,
     created_at: existing?.created_at || now,
@@ -120,14 +116,6 @@ export function initDummyProfile(): StudentProfile {
   const defaultProfile: StudentProfile = {
     id: parseInt(userInfo.id || "1", 10),
     email: userInfo.email || "user@example.com",
-    first_name: "",
-    last_name: "",
-    phone: "",
-    college_id: 0,
-    degree: "",
-    branch: "",
-    passing_year: new Date().getFullYear(),
-    cgpa: 0,
     full_name: "Student",
     resume_url: "",
     is_active: true,

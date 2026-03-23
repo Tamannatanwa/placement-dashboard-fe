@@ -22,8 +22,7 @@ The component uses TypeScript interfaces to support multiple user roles:
 ```typescript
 // Base profile data structure
 interface BaseProfileFormData {
-  first_name: string;
-  last_name: string;
+  full_name: string;
   phone: string;
   // ... common fields
 }
@@ -72,8 +71,7 @@ export default function ProfilePage() {
 <ProfileWizard
   userRole="student"
   initialData={{
-    first_name: "John",
-    last_name: "Doe",
+    full_name: "John Doe",
     // ... other fields
   }}
 />

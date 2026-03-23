@@ -40,8 +40,7 @@ export interface TrackJobViewResponse {
 // Update profile request - Matches backend StudentProfileUpdate schema
 export interface UpdateProfileData {
   // Personal Details
-  first_name?: string | null;
-  last_name?: string | null;
+  full_name?: string | null;
   phone?: string | null;
   date_of_birth?: string | null;
   gender?: string | null;

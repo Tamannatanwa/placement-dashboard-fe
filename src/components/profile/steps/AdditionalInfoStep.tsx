@@ -70,44 +70,39 @@ export const AdditionalInfoStep = forwardRef<AdditionalInfoStepHandle, StepConte
       mode: "onChange",
     });
 
-    // Sync form values when formData changes externally
+    // Sync form values only on initial load (not on every keystroke)
     useEffect(() => {
-      // Ensure arrays are always arrays (not null/undefined)
-      const resetData = {
-        technical_skills: Array.isArray(formData.technical_skills) ? formData.technical_skills : [],
-        soft_skills: Array.isArray(formData.soft_skills) ? formData.soft_skills : [],
-        experience_type: (formData.experience_type === "fresher" || formData.experience_type === "experienced") 
-          ? formData.experience_type 
-          : undefined,
-        languages: Array.isArray(formData.languages) ? formData.languages : [],
-        job_type: Array.isArray(formData.job_type) ? formData.job_type : [],
-        work_mode: Array.isArray(formData.work_mode) ? formData.work_mode : [],
-        preferred_job_role: Array.isArray(formData.preferred_job_role) ? formData.preferred_job_role : [],
-        preferred_location: Array.isArray(formData.preferred_location) ? formData.preferred_location : [],
-        expected_salary: formData.expected_salary,
-        github_profile: formData.github_profile || "",
-        linkedin_profile: formData.linkedin_profile || "",
-        portfolio_url: formData.portfolio_url || "",
-        coding_platforms: formData.coding_platforms || {},
-        resume_url: formData.resume_url || "",
-      };
-      
-      // Debug: Log preference data
-      console.log("AdditionalInfoStep - Form reset with data:", {
-        preferred_job_role: resetData.preferred_job_role,
-        preferred_location: resetData.preferred_location,
-        job_type: resetData.job_type,
-        work_mode: resetData.work_mode,
-      });
-      
-      form.reset(resetData);
-      if (formData.resume_url) {
-        const urlParts = formData.resume_url.split('/');
-        setResumeFileName(urlParts[urlParts.length - 1] || 'resume.pdf');
-      } else {
-        setResumeFileName(null);
+      const currentValues = form.getValues();
+      if (!currentValues.technical_skills?.length && formData.technical_skills?.length) {
+        // Only reset if form is empty and we have data to load
+        const resetData = {
+          technical_skills: Array.isArray(formData.technical_skills) ? formData.technical_skills : [],
+          soft_skills: Array.isArray(formData.soft_skills) ? formData.soft_skills : [],
+          experience_type: (formData.experience_type === "fresher" || formData.experience_type === "experienced") 
+            ? formData.experience_type 
+            : undefined,
+          languages: Array.isArray(formData.languages) ? formData.languages : [],
+          job_type: Array.isArray(formData.job_type) ? formData.job_type : [],
+          work_mode: Array.isArray(formData.work_mode) ? formData.work_mode : [],
+          preferred_job_role: Array.isArray(formData.preferred_job_role) ? formData.preferred_job_role : [],
+          preferred_location: Array.isArray(formData.preferred_location) ? formData.preferred_location : [],
+          expected_salary: formData.expected_salary,
+          github_profile: formData.github_profile || "",
+          linkedin_profile: formData.linkedin_profile || "",
+          portfolio_url: formData.portfolio_url || "",
+          coding_platforms: formData.coding_platforms || {},
+          resume_url: formData.resume_url || "",
+        };
+        
+        form.reset(resetData);
+        if (formData.resume_url) {
+          const urlParts = formData.resume_url.split('/');
+          setResumeFileName(urlParts[urlParts.length - 1] || 'resume.pdf');
+        } else {
+          setResumeFileName(null);
+        }
       }
-    }, [formData, form]);
+    }, []); // Only run once on mount
 
     // Helper function to normalize form values (convert empty strings to undefined)
     const normalizeFormValues = (values: any) => {
