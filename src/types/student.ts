@@ -32,7 +32,6 @@ export interface StudentProfile {
   passing_year: number;
   cgpa: number;
   id: number;
-  full_name: string;
   resume_url: string;
   is_active: boolean;
   created_at: string;

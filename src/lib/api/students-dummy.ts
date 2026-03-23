@@ -116,6 +116,12 @@ export function initDummyProfile(): StudentProfile {
   const defaultProfile: StudentProfile = {
     id: parseInt(userInfo.id || "1", 10),
     email: userInfo.email || "user@example.com",
+    phone: "",
+    college_id: 0,
+    degree: "",
+    branch: "",
+    passing_year: new Date().getFullYear(),
+    cgpa: 0,
     full_name: "Student",
     resume_url: "",
     is_active: true,

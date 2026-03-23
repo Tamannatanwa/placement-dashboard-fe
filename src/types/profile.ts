@@ -65,7 +65,6 @@ export interface BaseProfileFormData {
   
   // Computed/Read-only fields (from API response)
   id?: string;
-  full_name?: string;
   is_active?: boolean;
   created_at?: string;
   updated_at?: string;
