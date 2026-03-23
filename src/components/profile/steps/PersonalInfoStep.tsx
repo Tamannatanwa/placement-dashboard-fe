@@ -37,8 +37,7 @@ export const PersonalInfoStep = forwardRef<PersonalInfoStepHandle, StepContentPr
     const form = useForm<PersonalInfoFormData>({
       resolver: zodResolver(personalInfoSchema),
       defaultValues: {
-        first_name: formData.first_name || "",
-        last_name: formData.last_name || "",
+        full_name: formData.full_name || "",
         phone: formData.phone || "",
         date_of_birth: formData.date_of_birth || "",
         gender: formData.gender || "",
@@ -49,29 +48,22 @@ export const PersonalInfoStep = forwardRef<PersonalInfoStepHandle, StepContentPr
       mode: "onChange",
     });
 
-    // Sync form values when formData changes externally
+    // Sync form values only on initial load or when modal reopens (not on every keystroke)
     useEffect(() => {
-      form.reset({
-        first_name: formData.first_name || "",
-        last_name: formData.last_name || "",
-        phone: formData.phone || "",
-        date_of_birth: formData.date_of_birth || "",
-        gender: formData.gender || "",
-        highest_qualification: formData.highest_qualification || "",
-        course: formData.course || "",
-        passing_year: formData.passing_year ?? undefined,
-      });
-    }, [
-      formData.first_name,
-      formData.last_name,
-      formData.phone,
-      formData.date_of_birth,
-      formData.gender,
-      formData.highest_qualification,
-      formData.course,
-      formData.passing_year,
-      form,
-    ]);
+      // Only reset if form is empty or if we're coming from a fresh load
+      const currentValues = form.getValues();
+      if (!currentValues.full_name && formData.full_name) {
+        form.reset({
+          full_name: formData.full_name || "",
+          phone: formData.phone || "",
+          date_of_birth: formData.date_of_birth || "",
+          gender: formData.gender || "",
+          highest_qualification: formData.highest_qualification || "",
+          course: formData.course || "",
+          passing_year: formData.passing_year ?? undefined,
+        });
+      }
+    }, []); // Only run once on mount
 
     // Expose validation method to parent
     useImperativeHandle(ref, () => ({
@@ -106,35 +98,19 @@ export const PersonalInfoStep = forwardRef<PersonalInfoStepHandle, StepContentPr
           <Form {...form}>
             <form onChange={handleChange} className="space-y-6">
               {/* Full Name */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="first_name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>First Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="John" {...field} className="h-11" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="last_name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Last Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Doe" {...field} className="h-11" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <FormField
+                control={form.control}
+                name="full_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Full Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="John Doe" {...field} className="h-11" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               {/* Mobile Number */}
               <FormField

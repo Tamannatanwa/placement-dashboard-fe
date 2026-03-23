@@ -4,8 +4,7 @@ import { StudentProfile } from "./student-profile";
 // Base profile form data structure - Matches new schema
 export interface BaseProfileFormData {
   // Personal Information
-  first_name?: string;
-  last_name?: string;
+  full_name?: string;
   phone?: string;
   email?: string; // Read-only for students
   date_of_birth?: string;
