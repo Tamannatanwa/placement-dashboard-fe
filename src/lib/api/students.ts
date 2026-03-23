@@ -82,6 +82,10 @@ export interface UpdateProfileData {
     language: string;
     proficiency_level: "beginner" | "proficient" | "fluent" | "native";
   }>;
+  spoken_languages?: Array<{
+    language: string;
+    proficiency_level: "beginner" | "proficient" | "fluent" | "native";
+  }>;
   
   // Job Preferences
   job_type?: string[];
@@ -95,7 +99,41 @@ export interface UpdateProfileData {
   linkedin_profile?: string | null;
   portfolio_url?: string | null;
   coding_platforms?: { [key: string]: string };
+  social_links?: {
+    github_profile?: string | null;
+    linkedin_profile?: string | null;
+    portfolio_url?: string | null;
+    coding_platforms?: { [key: string]: string };
+    [key: string]: any;
+  };
 }
+
+const normalizeStudentProfile = (profile: StudentProfile): StudentProfile => {
+  const spokenLanguages = Array.isArray(profile.spoken_languages)
+    ? profile.spoken_languages
+    : undefined;
+  const socialLinks =
+    profile.social_links && typeof profile.social_links === "object"
+      ? profile.social_links
+      : undefined;
+
+  return {
+    ...profile,
+    languages:
+      Array.isArray(profile.languages) && profile.languages.length > 0
+        ? profile.languages
+        : spokenLanguages,
+    github_profile: profile.github_profile || socialLinks?.github_profile,
+    linkedin_profile: profile.linkedin_profile || socialLinks?.linkedin_profile,
+    portfolio_url: profile.portfolio_url || socialLinks?.portfolio_url,
+    coding_platforms:
+      profile.coding_platforms ||
+      (socialLinks?.coding_platforms &&
+      typeof socialLinks.coding_platforms === "object"
+        ? socialLinks.coding_platforms
+        : undefined),
+  };
+};
 
 // Profile completeness response
 export interface ProfileCompletenessResponse {
@@ -191,7 +229,10 @@ export const studentsApi = {
   getDashboard: async (): Promise<DashboardResponse> => {
     const api = getApiInstance();
     const response = await api.get<DashboardResponse>("/api/v1/students/me/dashboard");
-    return response.data;
+    return {
+      ...response.data,
+      student: normalizeStudentProfile(response.data.student),
+    };
   },
 
   /**
@@ -227,7 +268,7 @@ export const studentsApi = {
   getMyProfile: async (): Promise<StudentProfile> => {
     const api = getApiInstance();
     const response = await api.get<StudentProfile>("/api/v1/students/me/profile");
-    return response.data;
+    return normalizeStudentProfile(response.data);
   },
 
   /**
@@ -236,8 +277,35 @@ export const studentsApi = {
    */
   updateMyProfile: async (data: UpdateProfileData): Promise<StudentProfile> => {
     const api = getApiInstance();
-    const response = await api.put<StudentProfile>("/api/v1/students/me/profile", data);
-    return response.data;
+    const payload: UpdateProfileData = { ...data };
+
+    if (!("spoken_languages" in payload) && "languages" in payload) {
+      payload.spoken_languages = payload.languages;
+    }
+
+    if (!("social_links" in payload)) {
+      const socialLinks: NonNullable<UpdateProfileData["social_links"]> = {};
+
+      if ("github_profile" in payload) {
+        socialLinks.github_profile = payload.github_profile ?? null;
+      }
+      if ("linkedin_profile" in payload) {
+        socialLinks.linkedin_profile = payload.linkedin_profile ?? null;
+      }
+      if ("portfolio_url" in payload) {
+        socialLinks.portfolio_url = payload.portfolio_url ?? null;
+      }
+      if ("coding_platforms" in payload) {
+        socialLinks.coding_platforms = payload.coding_platforms ?? {};
+      }
+
+      if (Object.keys(socialLinks).length > 0) {
+        payload.social_links = socialLinks;
+      }
+    }
+
+    const response = await api.put<StudentProfile>("/api/v1/students/me/profile", payload);
+    return normalizeStudentProfile(response.data);
   },
 
   /**

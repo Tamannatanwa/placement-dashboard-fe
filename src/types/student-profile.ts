@@ -60,6 +60,7 @@ export interface StudentProfile {
   
   // Languages
   languages?: LanguageProficiency[];
+  spoken_languages?: LanguageProficiency[];
   
   // Job Preferences (nested object - preferred)
   preference?: {
@@ -83,6 +84,13 @@ export interface StudentProfile {
   linkedin_profile?: string;
   portfolio_url?: string;
   coding_platforms?: { [key: string]: string };
+  social_links?: {
+    github_profile?: string;
+    linkedin_profile?: string;
+    portfolio_url?: string;
+    coding_platforms?: { [key: string]: string };
+    [key: string]: any;
+  };
   
   // Resume
   resume_url?: string;
